@@ -827,6 +827,9 @@ Ast_Type *Par_SpecType(Par_Spec specs, Ast_Line line)
             return &Ast_TypeBool;
         } break;
         case PAR_SPEC_CHAR: {
+            if (specs & PAR_SPEC_SIGNED) {
+                return &Ast_TypeSChar;
+            }
             return Ast_IntegerType(AST_TYPE_KIND_CHAR, sign);
         } break;
         case PAR_SPEC_SHORT:

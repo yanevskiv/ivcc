@@ -131,6 +131,14 @@ enum Ast_TypeProto {
     AST_TYPE_PROTO    // written with its parameter types
 };
 
+// Whether a type is plain char, a type apart from the signed char it acts as.
+// [C99:6.2.5p15]: char, signed char and unsigned char, the character types
+typedef enum Ast_TypePlain Ast_TypePlain;
+enum Ast_TypePlain {
+    AST_TYPE_SIGN_WRITTEN, // any type but plain char
+    AST_TYPE_PLAIN_CHAR    // char written with no sign
+};
+
 // Whether an integer type holds negative values.
 // [C99:6.2.5p6]: an unsigned type for each signed one
 typedef enum Ast_TypeSign Ast_TypeSign;
@@ -242,6 +250,7 @@ struct Ast_Type {
     int32_t          at_size;     // bytes an object of this type occupies
     int32_t          at_align;    // address multiple an object must sit on
     Ast_TypeSign     at_sign;     // signedness of an integer kind
+    Ast_TypePlain    at_plain;    // whether a CHAR is plain char
     Ast_Qual         at_qual;     // the qualifiers written on the declaration
     Ast_Type        *at_base;     // pointee, element, or a COMPLEX's real type
     int32_t          at_len;      // element count for ARRAY
@@ -416,6 +425,7 @@ extern Ast_Node *Ast_FileAsms;
 extern Ast_Type Ast_TypeVoid;
 extern Ast_Type Ast_TypeBool;
 extern Ast_Type Ast_TypeChar;
+extern Ast_Type Ast_TypeSChar;
 extern Ast_Type Ast_TypeUChar;
 extern Ast_Type Ast_TypeShort;
 extern Ast_Type Ast_TypeUShort;

@@ -46,8 +46,18 @@ Ast_Type Ast_TypeBool = {
     .at_complete = AST_TYPE_COMPLETE
 };
 
-// The byte.
+// The byte, plain char, signed as signed char is.
 Ast_Type Ast_TypeChar = {
+    .at_kind     = AST_TYPE_KIND_CHAR,
+    .at_size     = AST_TYPE_SIZE_CHAR,
+    .at_align    = AST_TYPE_ALIGN_CHAR,
+    .at_sign     = AST_TYPE_SIGNED,
+    .at_plain    = AST_TYPE_PLAIN_CHAR,
+    .at_complete = AST_TYPE_COMPLETE
+};
+
+// The signed byte.
+Ast_Type Ast_TypeSChar = {
     .at_kind     = AST_TYPE_KIND_CHAR,
     .at_size     = AST_TYPE_SIZE_CHAR,
     .at_align    = AST_TYPE_ALIGN_CHAR,
@@ -540,7 +550,7 @@ bool Ast_IsCompatibleUnqualified(const Ast_Type *a, const Ast_Type *b)
             return tags && (open || a->at_members == b->at_members);
         } break;
         default: {
-            return a->at_sign == b->at_sign;
+            return a->at_sign == b->at_sign && a->at_plain == b->at_plain;
         }
     }
 }
