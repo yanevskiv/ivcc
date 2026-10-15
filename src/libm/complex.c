@@ -30,6 +30,42 @@
 // Includes.
 #include <_basic_complex.h>
 
+// Compute e to z.
+double complex cexp(double complex z)
+{
+    return __basic_complex_cexp(z);
+}
+
+// Compute e to z.
+float complex cexpf(float complex z)
+{
+    return __basic_complex_cexpf(z);
+}
+
+// Compute e to z.
+long double complex cexpl(long double complex z)
+{
+    return __basic_complex_cexpl(z);
+}
+
+// Compute the natural logarithm of z.
+double complex clog(double complex z)
+{
+    return __basic_complex_clog(z);
+}
+
+// Compute the natural logarithm of z.
+float complex clogf(float complex z)
+{
+    return __basic_complex_clogf(z);
+}
+
+// Compute the natural logarithm of z.
+long double complex clogl(long double complex z)
+{
+    return __basic_complex_clogl(z);
+}
+
 // Compute the absolute value of z.
 double cabs(double complex z)
 {
@@ -46,6 +82,42 @@ float cabsf(float complex z)
 long double cabsl(long double complex z)
 {
     return __basic_complex_cabsl(z);
+}
+
+// Raise x to the power y.
+double complex cpow(double complex x, double complex y)
+{
+    return __basic_complex_cpow(x, y);
+}
+
+// Raise x to the power y.
+float complex cpowf(float complex x, float complex y)
+{
+    return __basic_complex_cpowf(x, y);
+}
+
+// Raise x to the power y.
+long double complex cpowl(long double complex x, long double complex y)
+{
+    return __basic_complex_cpowl(x, y);
+}
+
+// Compute the square root of z.
+double complex csqrt(double complex z)
+{
+    return __basic_complex_csqrt(z);
+}
+
+// Compute the square root of z.
+float complex csqrtf(float complex z)
+{
+    return __basic_complex_csqrtf(z);
+}
+
+// Compute the square root of z.
+long double complex csqrtl(long double complex z)
+{
+    return __basic_complex_csqrtl(z);
 }
 
 // Compute the argument of z.

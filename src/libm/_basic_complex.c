@@ -30,6 +30,7 @@
 // Includes.
 #include <_basic_math.h>
 #include <_exact.h>
+#include <_fpu.h>
 
 // Make a float complex value of its two parts.
 float _Complex _Basic_Complex_JoinFloat(float x, float y)
@@ -260,6 +261,277 @@ void _Basic_Complex_DivideLDouble(long double a, long double b, long double c, l
     }
 }
 
+// Raise underflow for a nonzero finite x below least, a tiny result.
+void _Basic_Complex_CheckTiny(long double x, long double least)
+{
+    if (_BASIC_MATH_IS_FINITE(x) && x != 0 && __basic_math_fabsl(x) < least) {
+        _Fpu_RaiseFlags(_FPU_UNDERFLOW | _FPU_INEXACT);
+    }
+}
+
+// Round long double parts to a float complex value.
+float _Complex _Basic_Complex_RoundFloat(long double x, long double y)
+{
+    float re = (float) x;
+    float im = (float) y;
+
+    _Basic_Complex_CheckTiny(re, _BASIC_MATH_FLT_MIN);
+    _Basic_Complex_CheckTiny(im, _BASIC_MATH_FLT_MIN);
+    return _Basic_Complex_JoinFloat(re, im);
+}
+
+// Round long double parts to a double complex value.
+double _Complex _Basic_Complex_RoundDouble(long double x, long double y)
+{
+    double re = (double) x;
+    double im = (double) y;
+
+    _Basic_Complex_CheckTiny(re, _BASIC_MATH_DBL_MIN);
+    _Basic_Complex_CheckTiny(im, _BASIC_MATH_DBL_MIN);
+    return _Basic_Complex_JoinDouble(re, im);
+}
+
+// Join long double parts into a long double complex value.
+long double _Complex _Basic_Complex_RoundLDouble(long double x, long double y)
+{
+    _Basic_Complex_CheckTiny(x, _BASIC_MATH_LDBL_MIN);
+    _Basic_Complex_CheckTiny(y, _BASIC_MATH_LDBL_MIN);
+    return _Basic_Complex_JoinLDouble(x, y);
+}
+
+// Make a quiet NaN of no payload and a clear sign.
+long double _Basic_Complex_MakeNan(void)
+{
+    return _Exact_MakeLDouble(_EXACT_LDOUBLE_EXP_MAX, _BASIC_MATH_LDOUBLE_QUIET);
+}
+
+// Square x into a high and a low part, or zero where x is below least.
+long double _Basic_Complex_SquareParts(long double x, long double least, long double *low)
+{
+    if (__basic_math_fabsl(x) < least) {
+        *low = 0;
+        return 0;
+    }
+    return _Basic_Math_MultiplyParts(x, x, low);
+}
+
+// Take the sine and the cosine of a finite y.
+void _Basic_Complex_TakeSinCos(long double y, long double *s, long double *c)
+{
+    long double r;
+    long double low;
+    long double sine;
+    long double cosine;
+    long double swap;
+    unsigned int quadrant;
+
+    if (__basic_math_fabsl(y) < _BASIC_COMPLEX_TRIG_TINY) {
+        *s = y;
+        *c = 1;
+        return;
+    }
+    quadrant = _Basic_Math_ReduceTrig(__basic_math_fabsl(y), &r, &low);
+    sine = _Basic_Math_SumSin(r, low);
+    cosine = _Basic_Math_SumCos(r, low);
+    if ((quadrant & _BASIC_MATH_QUADRANT_ODD) != 0) {
+        swap = sine;
+        sine = cosine;
+        cosine = -swap;
+    }
+    if ((quadrant & _BASIC_MATH_QUADRANT_HALF) != 0) {
+        sine = -sine;
+        cosine = -cosine;
+    }
+    *s = y < 0 ? -sine : sine;
+    *c = cosine;
+}
+
+// Take e to x + iy, as e to x times the cosine and the sine of y.
+void _Basic_Complex_TakeExp(long double x, long double y, long double *re, long double *im)
+{
+    long double r;
+    long double s;
+    long double c;
+    long double m;
+    int n;
+
+    if (_BASIC_MATH_IS_FINITE(x) && _BASIC_MATH_IS_FINITE(y)) {
+        _Basic_Complex_TakeSinCos(y, &s, &c);
+        if (__basic_math_fabsl(x) > _BASIC_MATH_EXP_CLAMP) {
+            x = __basic_math_copysignl(_BASIC_MATH_EXP_CLAMP, x);
+        }
+        n = _Basic_Math_ReduceExp(x, _BASIC_MATH_BASE_E, &r);
+        m = 1 + _Basic_Math_SumExp(r);
+        *re = _Basic_Math_ScaleLDouble(m * c, n);
+        *im = _Basic_Math_ScaleLDouble(m * s, n);
+    } else if (_BASIC_MATH_IS_FINITE(x)) {
+        *re = _Basic_Complex_MakeNan();
+        *im = *re;
+        _Fpu_RaiseFlags(_FPU_INVALID);
+    } else if (_BASIC_MATH_IS_INF(x) && _BASIC_MATH_IS_FINITE(y)) {
+        m = x < 0 ? 0 : _EXACT_INFINITY;
+        if (y == 0) {
+            *re = m;
+            *im = y;
+        } else {
+            _Basic_Complex_TakeSinCos(y, &s, &c);
+            *re = __basic_math_copysignl(m, c);
+            *im = __basic_math_copysignl(m, s);
+        }
+    } else if (_BASIC_MATH_IS_INF(x)) {
+        *re = x < 0 ? 0 : x;
+        *im = x < 0 ? __basic_math_copysignl(0, y) : y - y;
+    } else {
+        *re = _Basic_Complex_MakeNan();
+        *im = y == 0 ? y : *re;
+        if (y != 0 && ! _BASIC_MATH_IS_NAN(y)) {
+            _Fpu_RaiseFlags(_FPU_INVALID);
+        }
+    }
+}
+
+// Take ln |x + iy| of finite parts not both zero.
+long double _Basic_Complex_TakeLogAbs(long double x, long double y)
+{
+    _Exact_Value sum;
+    _Exact_Value part;
+    long double a = __basic_math_fabsl(x);
+    long double b = __basic_math_fabsl(y);
+    long double p;
+    long double p_low;
+    long double q;
+    long double q_low;
+    long double high;
+    long double error;
+    long double rest;
+    long double t;
+
+    if (a < b) {
+        t = a;
+        a = b;
+        b = t;
+    }
+    if (a < _BASIC_COMPLEX_LOG_NEAR_LOW || a > _BASIC_COMPLEX_LOG_NEAR_HIGH) {
+        t = b / a;
+        if (t < _BASIC_COMPLEX_RATIO_TINY) {
+            return _Basic_Math_TakeLog(a, _BASIC_MATH_BASE_E);
+        }
+        return _Basic_Math_TakeLog(a, _BASIC_MATH_BASE_E) + _BASIC_MATH_HALF * _Basic_Math_TakeLog1p(t * t);
+    }
+    p = _Basic_Math_MultiplyParts(a, a, &p_low);
+    q = _Basic_Complex_SquareParts(b, a == 1 ? 0 : _BASIC_COMPLEX_LOG_SQUARE, &q_low);
+    high = _Basic_Math_AddParts(p, -1, &error);
+    high = _Basic_Math_AddParts(high, q, &rest);
+    t = high + (error + rest + p_low + q_low);
+    if (__basic_math_fabsl(t) < _BASIC_COMPLEX_LOG_EXACT && a != 1) {
+        _Exact_MakeValue(&sum, a);
+        _Exact_MultiplyValues(&sum, &sum, &sum);
+        _Exact_MakeValue(&part, -1);
+        _Exact_AddValues(&sum, &sum, &part);
+        if (b != 0) {
+            _Exact_MakeValue(&part, b);
+            _Exact_MultiplyValues(&part, &part, &part);
+            _Exact_AddValues(&sum, &sum, &part);
+        }
+        t = _Exact_RoundValue(&sum, _EXACT_TYPE_LDOUBLE);
+    }
+    return _BASIC_MATH_HALF * _Basic_Math_TakeLog1p(t);
+}
+
+// Take the natural logarithm of x + iy, its imaginary part in [-pi, pi].
+void _Basic_Complex_TakeLog(long double x, long double y, long double *re, long double *im)
+{
+    if (_BASIC_MATH_IS_NAN(x) || _BASIC_MATH_IS_NAN(y)) {
+        *re = _BASIC_MATH_IS_INF(x) || _BASIC_MATH_IS_INF(y) ? _EXACT_INFINITY : _Basic_Complex_MakeNan();
+        *im = _Basic_Complex_MakeNan();
+        return;
+    }
+    *im = _Basic_Math_TakeAtan2(y, x);
+    if (x == 0 && y == 0) {
+        *re = -1 / __basic_math_fabsl(x);
+    } else if (_BASIC_MATH_IS_INF(x) || _BASIC_MATH_IS_INF(y)) {
+        *re = _EXACT_INFINITY;
+    } else {
+        *re = _Basic_Complex_TakeLogAbs(x, y);
+    }
+}
+
+// Take the square root of x + iy by the root of half of |x| + |z|.
+void _Basic_Complex_TakeSqrt(long double x, long double y, long double *re, long double *im)
+{
+    int class_x = _BASIC_MATH_CLASSIFY(x);
+    int class_y = _BASIC_MATH_CLASSIFY(y);
+    long double a;
+    long double h;
+    long double t;
+    long double p;
+    long double p_low;
+    long double q;
+    long double q_low;
+    long double error;
+    int k = 0;
+
+    if (class_y == _BASIC_MATH_FP_INFINITE) {
+        *re = _EXACT_INFINITY;
+        *im = y;
+        return;
+    }
+    if (class_x == _BASIC_MATH_FP_INFINITE) {
+        *re = x > 0 ? x : class_y == _BASIC_MATH_FP_NAN ? _Basic_Complex_MakeNan() : 0;
+        *im = x < 0 ? __basic_math_copysignl(_EXACT_INFINITY, y) : class_y == _BASIC_MATH_FP_NAN ? _Basic_Complex_MakeNan() : __basic_math_copysignl(0, y);
+        return;
+    }
+    if (class_x == _BASIC_MATH_FP_NAN || class_y == _BASIC_MATH_FP_NAN) {
+        *re = _Basic_Complex_MakeNan();
+        *im = *re;
+        return;
+    }
+    if (class_x == _BASIC_MATH_FP_ZERO && class_y == _BASIC_MATH_FP_ZERO) {
+        *re = 0;
+        *im = y;
+        return;
+    }
+    a = __basic_math_fabsl(x) > __basic_math_fabsl(y) ? __basic_math_fabsl(x) : __basic_math_fabsl(y);
+    if (a > _BASIC_COMPLEX_ROOT_HUGE || a < _BASIC_COMPLEX_ROOT_TINY) {
+        k = __basic_math_ilogbl(a) / 2;
+        a = _Basic_Math_ScaleLDouble(a, -2 * k);
+        x = _Basic_Math_ScaleLDouble(x, -2 * k);
+        y = _Basic_Math_ScaleLDouble(y, -2 * k);
+    }
+    p = _Basic_Complex_SquareParts(x, a * _BASIC_COMPLEX_RATIO_TINY, &p_low);
+    q = _Basic_Complex_SquareParts(y, a * _BASIC_COMPLEX_RATIO_TINY, &q_low);
+    p = _Basic_Math_AddParts(p, q, &error);
+    h = _Basic_Math_IterateRoot(p);
+    h += (error + p_low + q_low) / (2 * h);
+    t = _Basic_Math_IterateRoot(_BASIC_MATH_HALF * (__basic_math_fabsl(x) + h));
+    if (x == 0) {
+        *re = t;
+        *im = __basic_math_copysignl(t, y);
+    } else if (x > 0) {
+        *re = t;
+        *im = y / (2 * t);
+    } else {
+        *re = __basic_math_fabsl(y) / (2 * t);
+        *im = __basic_math_copysignl(t, y);
+    }
+    if (k != 0) {
+        *re = _Basic_Math_ScaleLDouble(*re, k);
+        *im = _Basic_Math_ScaleLDouble(*im, k);
+    }
+}
+
+// Take x + iy to c + id, as e to (c + id) ln(x + iy).
+void _Basic_Complex_TakePow(long double x, long double y, long double c, long double d, long double *re, long double *im)
+{
+    long double u;
+    long double v;
+    long double _Complex w;
+
+    _Basic_Complex_TakeLog(x, y, &u, &v);
+    w = __basic_complex_mulxc3(c, d, u, v);
+    _Basic_Complex_TakeExp(__basic_complex_creall(w), __basic_complex_cimagl(w), re, im);
+}
+
 // Compute the absolute value of z, the hypotenuse of its parts.
 double __basic_complex_cabs(double _Complex z)
 {
@@ -296,6 +568,36 @@ long double __basic_complex_cargl(long double _Complex z)
     return __basic_math_atan2l(__basic_complex_cimagl(z), __basic_complex_creall(z));
 }
 
+// Compute e to z, in long double.
+double _Complex __basic_complex_cexp(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeExp(__basic_complex_creal(z), __basic_complex_cimag(z), &re, &im);
+    return _Basic_Complex_RoundDouble(re, im);
+}
+
+// Compute e to z, in long double.
+float _Complex __basic_complex_cexpf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeExp(__basic_complex_crealf(z), __basic_complex_cimagf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(re, im);
+}
+
+// Compute e to z.
+long double _Complex __basic_complex_cexpl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeExp(__basic_complex_creall(z), __basic_complex_cimagl(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(re, im);
+}
+
 // Read the imaginary part of z, its second element.
 double __basic_complex_cimag(double _Complex z)
 {
@@ -314,6 +616,36 @@ long double __basic_complex_cimagl(long double _Complex z)
     return ((long double *) &z)[1];
 }
 
+// Compute the natural logarithm of z, in long double.
+double _Complex __basic_complex_clog(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeLog(__basic_complex_creal(z), __basic_complex_cimag(z), &re, &im);
+    return _Basic_Complex_RoundDouble(re, im);
+}
+
+// Compute the natural logarithm of z, in long double.
+float _Complex __basic_complex_clogf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeLog(__basic_complex_crealf(z), __basic_complex_cimagf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(re, im);
+}
+
+// Compute the natural logarithm of z.
+long double _Complex __basic_complex_clogl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeLog(__basic_complex_creall(z), __basic_complex_cimagl(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(re, im);
+}
+
 // Compute the conjugate of z, its imaginary part's sign flipped.
 double _Complex __basic_complex_conj(double _Complex z)
 {
@@ -330,6 +662,36 @@ float _Complex __basic_complex_conjf(float _Complex z)
 long double _Complex __basic_complex_conjl(long double _Complex z)
 {
     return _Basic_Complex_JoinLDouble(__basic_complex_creall(z), -__basic_complex_cimagl(z));
+}
+
+// Raise x to the power y, in long double.
+double _Complex __basic_complex_cpow(double _Complex x, double _Complex y)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakePow(__basic_complex_creal(x), __basic_complex_cimag(x), __basic_complex_creal(y), __basic_complex_cimag(y), &re, &im);
+    return _Basic_Complex_RoundDouble(re, im);
+}
+
+// Raise x to the power y, in long double.
+float _Complex __basic_complex_cpowf(float _Complex x, float _Complex y)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakePow(__basic_complex_crealf(x), __basic_complex_cimagf(x), __basic_complex_crealf(y), __basic_complex_cimagf(y), &re, &im);
+    return _Basic_Complex_RoundFloat(re, im);
+}
+
+// Raise x to the power y.
+long double _Complex __basic_complex_cpowl(long double _Complex x, long double _Complex y)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakePow(__basic_complex_creall(x), __basic_complex_cimagl(x), __basic_complex_creall(y), __basic_complex_cimagl(y), &re, &im);
+    return _Basic_Complex_RoundLDouble(re, im);
 }
 
 // Project z onto the Riemann sphere, each infinity to +inf + i(+-0).
@@ -381,6 +743,36 @@ float __basic_complex_crealf(float _Complex z)
 long double __basic_complex_creall(long double _Complex z)
 {
     return ((long double *) &z)[0];
+}
+
+// Compute the square root of z, in the right half-plane, in long double.
+double _Complex __basic_complex_csqrt(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeSqrt(__basic_complex_creal(z), __basic_complex_cimag(z), &re, &im);
+    return _Basic_Complex_RoundDouble(re, im);
+}
+
+// Compute the square root of z, in the right half-plane, in long double.
+float _Complex __basic_complex_csqrtf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeSqrt(__basic_complex_crealf(z), __basic_complex_cimagf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(re, im);
+}
+
+// Compute the square root of z, in the right half-plane.
+long double _Complex __basic_complex_csqrtl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeSqrt(__basic_complex_creall(z), __basic_complex_cimagl(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(re, im);
 }
 
 // Multiply a + ib by c + id, float's helper, recovering lost infinities.

@@ -90,3 +90,29 @@ static bool is_zero_ldouble(long double _Complex z)
 {
     return REAL(z, long double) == 0 && IMAG(z, long double) == 0;
 }
+
+// Return whether a complex value of each type is NaN + iNaN, both its parts.
+static bool is_nan_float(float _Complex z)
+{
+    return isnan(REAL(z, float)) && isnan(IMAG(z, float));
+}
+
+static bool is_nan_double(double _Complex z)
+{
+    return isnan(REAL(z, double)) && isnan(IMAG(z, double));
+}
+
+static bool is_nan_ldouble(long double _Complex z)
+{
+    return isnan(REAL(z, long double)) && isnan(IMAG(z, long double));
+}
+
+// Return whether got is within ulps units in the last place of want, in a
+// type whose significand has digits bits.
+static bool within_ulps(long double got, long double want, int digits, long double ulps)
+{
+    int exp;
+
+    frexpl(want, &exp);
+    return fabsl(got - want) <= ldexpl(ulps, exp - digits);
+}

@@ -40,12 +40,34 @@
 // [C99:7.3.4p2]: CX_LIMITED_RANGE, on to allow the usual formulas, off by default
 // Taken and ignored, * and / keeping G.5.1's infinities in either state.
 
+// Exponential and logarithmic functions
+// [C99:7.3.7.1]: cexp, the complex base-e exponential
+// [C99:7.3.7.2]: clog, in [-ipi, +ipi], a branch cut along the negative real axis
+// [C99:G.6.3.1]: cexp of the infinities and NaNs
+// [C99:G.6.3.2]: clog of the zeros, infinities and NaNs
+double complex      cexp(double complex z);
+float complex       cexpf(float complex z);
+long double complex cexpl(long double complex z);
+double complex      clog(double complex z);
+float complex       clogf(float complex z);
+long double complex clogl(long double complex z);
+
 // Power and absolute-value functions
 // [C99:7.3.8.1]: cabs, the complex absolute value
+// [C99:7.3.8.2]: cpow, a branch cut for x along the negative real axis
+// [C99:7.3.8.3]: csqrt, in the right half-plane, a branch cut along the negative real axis
 // [C99:G.6p6]:   cabs(x + iy) as hypot(x, y)
-double      cabs(double complex z);
-float       cabsf(float complex z);
-long double cabsl(long double complex z);
+// [C99:G.6.4.1]: cpow(x, y) as cexp(y clog(x)), spurious exceptions allowed
+// [C99:G.6.4.2]: csqrt of the zeros, infinities and NaNs
+double              cabs(double complex z);
+float               cabsf(float complex z);
+long double         cabsl(long double complex z);
+double complex      cpow(double complex x, double complex y);
+float complex       cpowf(float complex x, float complex y);
+long double complex cpowl(long double complex x, long double complex y);
+double complex      csqrt(double complex z);
+float complex       csqrtf(float complex z);
+long double complex csqrtl(long double complex z);
 
 // Manipulation functions
 // [C99:7.3.9.1]: carg, in [-pi, +pi], a branch cut along the negative real axis
