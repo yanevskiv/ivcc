@@ -2,8 +2,9 @@
 // Predefined macros. __FILE__ and __LINE__ name the file and line they are
 // read on, and __COUNTER__ counts up each time it expands. #line renumbers the
 // lines after it and may rename the file, until the file ends. __STDC__,
-// __STDC_VERSION__, __DATE__ and __TIME__ are defined before the source is
-// read. __func__ is not a macro. A function body names its function with it.
+// __STDC_VERSION__, __STDC_IEC_559__, __DATE__ and __TIME__ are defined
+// before the source is read. __func__ is not a macro. A function body names
+// its function with it.
 
 #include "h/lang070_predefined.h"
 
@@ -77,6 +78,9 @@ int main()
 #endif
 #if ! defined __STDC_HOSTED__ || ! defined __x86_64__ || ! defined __LP64__
     return 12;
+#endif
+#if __STDC_IEC_559__ != 1
+    return 24;
 #endif
     if (sizeof(__DATE__) != 12 || __DATE__[3] != ' ' || __DATE__[6] != ' ') return 13;
     if (sizeof(__TIME__) != 9 || __TIME__[2] != ':' || __TIME__[5] != ':') return 14;

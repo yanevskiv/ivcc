@@ -122,12 +122,13 @@
     "^((add|sub|mul|div|ucomi)s[sd]|cvtss2sd|cvtsd2ss)" S XMM C XMM "$" \
     "|^(cvtsi2s[sd]q)" S R64 C XMM "$" \
     "|^(cvtts[sd]2si)q?" S XMM C R64 "$" \
+    "|^(cvtts[sd]2si)l?" S XMM C R32 "$" \
     "|^(mov)q" S R64 C XMM "$" \
     "|^(mov)q" S XMM C R64 "$"
 
 // The operands Enc_x86_64_EmitX87 encodes.
 #define TXT_X86_64_PATTERN_X87 \
-    "^(fldt|fstpt|fldl|fstpl|flds|fstps|fildq|fisttpq|fnstcw|fldcw|fnstsw|fnstenv|fldenv)" S MEM "$" \
+    "^(fldt|fstpt|fldl|fstpl|flds|fstps|fildq|fisttps|fisttpl|fisttpq|fnstcw|fldcw|fnstsw|fnstenv|fldenv)" S MEM "$" \
     "|^(faddp|fmulp|fsubrp|fdivrp)" S ST0 C ST "$" \
     "|^(fucomip)" S ST C ST0 "$" \
     "|^(fstp)" S ST "$" \
@@ -418,6 +419,8 @@ static const char *Txt_x86_64_OpName[ASM_X86_64_OP_COUNT] = {
     [ASM_X86_64_OP_FLDS]    = "flds",
     [ASM_X86_64_OP_FSTPS]   = "fstps",
     [ASM_X86_64_OP_FILDQ]   = "fildq",
+    [ASM_X86_64_OP_FISTTPS] = "fisttps",
+    [ASM_X86_64_OP_FISTTPL] = "fisttpl",
     [ASM_X86_64_OP_FISTTPQ] = "fisttpq",
     [ASM_X86_64_OP_FADDP]   = "faddp",
     [ASM_X86_64_OP_FMULP]   = "fmulp",

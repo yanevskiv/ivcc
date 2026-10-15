@@ -1,4 +1,3 @@
-// (Test) Compiler flags: -lm
 // (Test) Status: 0
 // A test file for <_fpu.h> flags and rounding.
 

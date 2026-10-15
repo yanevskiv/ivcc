@@ -141,8 +141,8 @@ enum Asm_x86_64_Op {
     ASM_X86_64_OP_CVTSD2SS,  // double to float
     ASM_X86_64_OP_CVTSI2SD,  // from a 64-bit register
     ASM_X86_64_OP_CVTSI2SS,  // from a 64-bit register
-    ASM_X86_64_OP_CVTTSD2SI, // into a 64-bit register
-    ASM_X86_64_OP_CVTTSS2SI, // into a 64-bit register
+    ASM_X86_64_OP_CVTTSD2SI, // into a 32- or 64-bit register
+    ASM_X86_64_OP_CVTTSS2SI, // into a 32- or 64-bit register
     ASM_X86_64_OP_FLDT,      // push a long double
     ASM_X86_64_OP_FSTPT,     // pop a long double to memory
     ASM_X86_64_OP_FLDL,      // push a double
@@ -150,6 +150,8 @@ enum Asm_x86_64_Op {
     ASM_X86_64_OP_FLDS,      // push a float
     ASM_X86_64_OP_FSTPS,     // pop a float to memory
     ASM_X86_64_OP_FILDQ,     // push a 64-bit integer
+    ASM_X86_64_OP_FISTTPS,   // pop a 16-bit integer truncated
+    ASM_X86_64_OP_FISTTPL,   // pop a 32-bit integer truncated
     ASM_X86_64_OP_FISTTPQ,   // pop a 64-bit integer truncated
     ASM_X86_64_OP_FADDP,     // %st(1) += %st, then pop
     ASM_X86_64_OP_FMULP,     // %st(1) *= %st, then pop
@@ -324,7 +326,7 @@ void Asm_x86_64_EmitMovToXmm(Asm_x86_64_Reg src, Asm_x86_64_Xmm dst);
 void Asm_x86_64_EmitMovFromXmm(Asm_x86_64_Xmm src, Asm_x86_64_Reg dst);
 void Asm_x86_64_EmitSse(Asm_x86_64_Op op, Asm_x86_64_Xmm src, Asm_x86_64_Xmm dst);
 void Asm_x86_64_EmitCvtToSse(Asm_x86_64_Op op, Asm_x86_64_Reg src, Asm_x86_64_Xmm dst);
-void Asm_x86_64_EmitCvtFromSse(Asm_x86_64_Op op, Asm_x86_64_Xmm src, Asm_x86_64_Reg dst);
+void Asm_x86_64_EmitCvtFromSse(Asm_x86_64_Op op, Asm_x86_64_Xmm src, Asm_x86_64_Reg dst, Asm_x86_64_Width width);
 void Asm_x86_64_EmitStmxcsr(Asm_x86_64_Reg base, int32_t disp);
 
 // The x87 stack

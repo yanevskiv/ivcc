@@ -203,9 +203,11 @@ void              Gen_x86_64_EmitBitfieldStore(const Ast_Member *member);
 // [C99:6.3.1.5p1]: a floating value widened, unchanged
 // [C99:6.5.8p6]:   <, >, <= and >=, 1 or 0
 // [C99:6.5.9p3]:   == and !=, 1 or 0
+// [C99:F.4p1]:     a floating value out of an integer type's range, invalid
 bool          Gen_x86_64_ByAddress(const Ast_Type *type);
 bool          Gen_x86_64_IsSse(const Ast_Type *type);
 bool          Gen_x86_64_IsWideUnsigned(const Ast_Type *type);
+bool          Gen_x86_64_IsHeldBy(const Ast_Type *type, Asm_x86_64_Width width);
 Asm_x86_64_Op Gen_x86_64_SseOp(Ast_NodeKind kind, const Ast_Type *type);
 Asm_x86_64_Op Gen_x86_64_X87Op(Ast_NodeKind kind);
 void          Gen_x86_64_EmitFNum(const Ast_Node *node);

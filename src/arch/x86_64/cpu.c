@@ -902,18 +902,19 @@ void Cpu_x86_64_X87Store(Cpu_x86_64_State *cpu, uint64_t addr, const Fp_Format *
     }
 }
 
-// Store %st at addr truncated to a signed 64-bit integer, then pop.
-void Cpu_x86_64_X87StoreInteger(Cpu_x86_64_State *cpu, uint64_t addr)
+// Store %st at addr truncated to a signed integer of width, then pop.
+void Cpu_x86_64_X87StoreInteger(Cpu_x86_64_State *cpu, uint64_t addr, Cpu_x86_64_OperandWidth width)
 {
     Fp_Context ctx = Cpu_x86_64_X87Context(cpu);
-    uint64_t integer = CPU_X86_64_INDEFINITE_64;
+    uint64_t indefinite = (uint64_t) 1 << (width - 1);
+    uint64_t integer = indefinite;
 
-    if (! Cpu_x86_64_WriteAt(cpu, addr, sizeof(uint64_t))) {
+    if (! Cpu_x86_64_WriteAt(cpu, addr, width / CPU_X86_64_BITS_PER_BYTE)) {
         return;
     }
     if (! Cpu_x86_64_IsStFull(cpu, 0)) {
         if (Cpu_x86_64_X87Underflow(cpu)) {
-            Cpu_x86_64_WriteMem(cpu, addr, integer, CPU_X86_64_WIDTH_64);
+            Cpu_x86_64_WriteMem(cpu, addr, integer, width);
             Cpu_x86_64_StPop(cpu);
         }
         return;
@@ -921,12 +922,12 @@ void Cpu_x86_64_X87StoreInteger(Cpu_x86_64_State *cpu, uint64_t addr)
 
     Fp_Value value = Fp_FormatUnpack(&Fp_FormatBinary80, *Cpu_x86_64_St(cpu, 0));
     ctx.fc_mode = FP_ROUND_ZERO;
-    integer = Fp_ToInteger(&value, CPU_X86_64_WIDTH_64, &ctx);
+    integer = Fp_ToInteger(&value, width, &ctx);
     if (ctx.fc_flags & FP_FLAG_INVALID) {
-        integer = CPU_X86_64_INDEFINITE_64;
+        integer = indefinite;
     }
     if (Cpu_x86_64_X87Settle(cpu, &ctx, 0, CPU_X86_64_X87_DEST_MEM)) {
-        Cpu_x86_64_WriteMem(cpu, addr, integer, CPU_X86_64_WIDTH_64);
+        Cpu_x86_64_WriteMem(cpu, addr, integer, width);
         Cpu_x86_64_StPop(cpu);
     }
 }
@@ -1097,7 +1098,13 @@ void Cpu_x86_64_StepX87Mem(Cpu_x86_64_State *cpu, const Cpu_x86_64_Insn *insn, u
             Cpu_x86_64_X87Store(cpu, addr, &Fp_FormatBinary64);
         } break;
         case ENC_X86_64_OPCODE_X87_DD << ENC_X86_64_REG_SHIFT | ENC_X86_64_X87_FISTTP_M64: {
-            Cpu_x86_64_X87StoreInteger(cpu, addr);
+            Cpu_x86_64_X87StoreInteger(cpu, addr, CPU_X86_64_WIDTH_64);
+        } break;
+        case ENC_X86_64_OPCODE_X87_DB << ENC_X86_64_REG_SHIFT | ENC_X86_64_X87_FISTTP_M32: {
+            Cpu_x86_64_X87StoreInteger(cpu, addr, CPU_X86_64_WIDTH_32);
+        } break;
+        case ENC_X86_64_OPCODE_X87_DF << ENC_X86_64_REG_SHIFT | ENC_X86_64_X87_FISTTP_M16: {
+            Cpu_x86_64_X87StoreInteger(cpu, addr, CPU_X86_64_WIDTH_16);
         } break;
         case ENC_X86_64_OPCODE_X87_DF << ENC_X86_64_REG_SHIFT | ENC_X86_64_X87_FILD_M64: {
             Cpu_x86_64_X87LoadInteger(cpu, Cpu_x86_64_ReadMem(cpu, addr, CPU_X86_64_WIDTH_64));
@@ -2066,7 +2073,8 @@ const char *Cpu_x86_64_X87Mnemonic(const Cpu_x86_64_Insn *insn)
             if (! mem) {
                 return form + i == ENC_X86_64_X87_FNCLEX ? "fnclex" : "(bad)";
             }
-            return digit == ENC_X86_64_X87_FLD_M80 ? "fldt" : digit == ENC_X86_64_X87_FSTP_M80 ? "fstpt" : "(bad)";
+            return digit == ENC_X86_64_X87_FLD_M80 ? "fldt" : digit == ENC_X86_64_X87_FSTP_M80 ? "fstpt"
+                 : digit == ENC_X86_64_X87_FISTTP_M32 ? "fisttpl" : "(bad)";
         } break;
         case ENC_X86_64_OPCODE_X87_DD: {
             if (! mem) {
@@ -2098,7 +2106,7 @@ const char *Cpu_x86_64_X87Mnemonic(const Cpu_x86_64_Insn *insn)
             if (! mem) {
                 return form + i == ENC_X86_64_X87_FNSTSW_AX ? "fnstsw" : "fucomip";
             }
-            return "fildq";
+            return digit == ENC_X86_64_X87_FILD_M64 ? "fildq" : digit == ENC_X86_64_X87_FISTTP_M16 ? "fisttps" : "(bad)";
         } break;
         default: {
             return "(bad)";

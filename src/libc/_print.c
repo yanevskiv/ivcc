@@ -47,6 +47,9 @@
 // The wide characters a stream is given.
 #include <_wfile.h>
 
+// The rounding direction a value is written in.
+#include <_fpu.h>
+
 // The conversions, a letter that means two things by its length being two.
 const _Print_Rule _Print_Rules[_PRINT_RULES] = {
     {'d', _PRINT_LENGTHS_INTEGER, _PRINT_KIND_INTEGER,     _PRINT_ARG_SIGNED,      _PRINT_BASE_DECIMAL, _PRINT_STYLE_NONE,        _PRINT_CASE_LOWER},
@@ -541,19 +544,34 @@ void _Print_ToNumeral(long double value, _Print_Numeral *num)
     }
 }
 
-// Round num to its first keep digits, to nearest and a tie to even.
+// Read the direction a magnitude of sign rounds in, upward away from zero.
+int _Print_ReadRound(_Print_Sign sign)
+{
+    int round = _Fpu_ReadRound();
+
+    if (sign == _PRINT_SIGN_MINUS && round == _FPU_UPWARD) {
+        return _FPU_DOWNWARD;
+    }
+    if (sign == _PRINT_SIGN_MINUS && round == _FPU_DOWNWARD) {
+        return _FPU_UPWARD;
+    }
+    return round;
+}
+
+// Round num to its first keep digits in the current direction.
 void _Print_RoundNumeral(_Print_Numeral *num, long keep)
 {
     _Bool up;
     unsigned long len;
     char *digit = num->pn_digit;
+    int round = _Print_ReadRound(num->pn_sign);
 
     if (keep >= (long) num->pn_len) {
         return;
     }
     len = keep > 0 ? (unsigned long) keep : 0;
-    up = keep >= 0 && digit[len] >= '5';
-    if (up && digit[len] == '5' && len + 1 == num->pn_len) {
+    up = round == _FPU_UPWARD || (round == _FPU_TONEAREST && keep >= 0 && digit[len] >= '5');
+    if (up && round == _FPU_TONEAREST && digit[len] == '5' && len + 1 == num->pn_len) {
         up = len > 0 && (digit[len - 1] - '0') % 2 != 0;
     }
     while (up && len > 0 && digit[len - 1] == '9') {
@@ -562,7 +580,7 @@ void _Print_RoundNumeral(_Print_Numeral *num, long keep)
     if (up && len == 0) {
         digit[0] = '1';
         len = 1;
-        num->pn_exp++;
+        num->pn_exp += keep > 0 ? 1 : (int) (1 - keep);
     } else if (up) {
         digit[len - 1]++;
     }
@@ -810,6 +828,7 @@ void _Print_WriteMantissa(_Print_Sink *sink, const _Print_Directive *dir, _Print
     char digits[_PRINT_HEX_DIGITS];
     int last = _PRINT_HEX_DIGITS - 1;
     _Bool upper = dir->pd_case == _PRINT_CASE_UPPER;
+    int round = _Print_ReadRound(sign);
 
     // Phase: round to the precision, or find the least that is exact
     if (precision == _PRINT_PRECISION_NONE) {
@@ -821,7 +840,7 @@ void _Print_WriteMantissa(_Print_Sink *sink, const _Print_Directive *dir, _Print
         unit = 1ULL << (_PRINT_HEX_BITS * (last - precision));
         below = mant & (unit - 1);
         mant -= below;
-        if (below > unit / 2 || (below == unit / 2 && (mant & unit) != 0)) {
+        if (round == _FPU_TONEAREST ? below > unit / 2 || (below == unit / 2 && (mant & unit) != 0) : round == _FPU_UPWARD && below != 0) {
             mant += unit;
             if (mant < unit) {
                 mant = 1ULL << (_PRINT_HEX_BITS * last);

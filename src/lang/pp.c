@@ -87,6 +87,7 @@ static const char *const Pp_Predefined[] = {
     "__STDC__=1",
     "__STDC_VERSION__=199901L",
     "__STDC_HOSTED__=0",
+    "__STDC_IEC_559__=1",
     "__x86_64__=1",
     "__LP64__=1"
 };

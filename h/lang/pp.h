@@ -432,6 +432,7 @@ char     *Pp_QuoteName(const char *name);
 // [C99:6.10.3p2]:   redefinition, only identical
 // [C99:6.10.3.5p2]: #undef
 // [C99:6.10.8]:     the predefined macros
+// [C99:6.10.8p2]:   __STDC_IEC_559__ 1, conformance to annex F
 bool            Pp_IsMacroName(const Pp_Token *tok);
 const Pp_Token *Pp_MacroNameAt(const Pp_File *file, size_t pos);
 uint32_t        Pp_HashName(const char *text, size_t len);

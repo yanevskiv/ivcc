@@ -408,7 +408,7 @@ void           Cpu_x86_64_X87Load(Cpu_x86_64_State *cpu, const Fp_Format *fmt, u
 void           Cpu_x86_64_X87LoadInteger(Cpu_x86_64_State *cpu, uint64_t bits);
 void           Cpu_x86_64_X87LoadExtended(Cpu_x86_64_State *cpu, uint64_t addr);
 void           Cpu_x86_64_X87Store(Cpu_x86_64_State *cpu, uint64_t addr, const Fp_Format *fmt);
-void           Cpu_x86_64_X87StoreInteger(Cpu_x86_64_State *cpu, uint64_t addr);
+void           Cpu_x86_64_X87StoreInteger(Cpu_x86_64_State *cpu, uint64_t addr, Cpu_x86_64_OperandWidth width);
 void           Cpu_x86_64_X87StoreExtended(Cpu_x86_64_State *cpu, uint64_t addr);
 void           Cpu_x86_64_X87Copy(Cpu_x86_64_State *cpu, int32_t i);
 void           Cpu_x86_64_X87Negate(Cpu_x86_64_State *cpu);

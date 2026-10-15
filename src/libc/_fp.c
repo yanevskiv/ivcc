@@ -39,6 +39,9 @@
 // The loop that copies a value's bytes.
 #include <_str.h>
 
+// The rounding direction a value is converted in.
+#include <_fpu.h>
+
 // The format of float, its exponents one below C's.
 const _Fp_Format _Fp_FloatFormat = {
     .ff_mant     = _FP_FLOAT_MANT,
@@ -307,11 +310,35 @@ void _Fp_DropBits(_Fp_Unrounded *value, long bits)
     }
 }
 
-// Round value to fmt to nearest, ties to even, with ERANGE as glibc's.
+// Read the direction real's magnitude rounds in, upward away from zero.
+int _Fp_ReadRound(const _Fp_Real *real)
+{
+    int round = _Fpu_ReadRound();
+
+    if (real->fr_negative && round == _FPU_UPWARD) {
+        return _FPU_DOWNWARD;
+    }
+    if (real->fr_negative && round == _FPU_DOWNWARD) {
+        return _FPU_UPWARD;
+    }
+    return round;
+}
+
+// Return whether part's magnitude rounds up to its next mantissa in round.
+_Bool _Fp_IsRoundedUp(const _Fp_Unrounded *part, int round)
+{
+    if (round == _FPU_TONEAREST) {
+        return part->fu_rest > _FP_REST_HALF || (part->fu_rest == _FP_REST_HALF && (part->fu_mant & 1));
+    }
+    return round == _FPU_UPWARD && part->fu_rest != _FP_REST_NONE;
+}
+
+// Round value to fmt in the current direction, ERANGE and flags as glibc's.
 void _Fp_RoundReal(const _Fp_Unrounded *value, const _Fp_Format *fmt, _Fp_Real *real)
 {
     _Fp_Unrounded part = *value;
     unsigned long long ones = ~0ULL >> (_FP_MANT_BITS - fmt->ff_mant);
+    int round = _Fp_ReadRound(real);
     _Bool tiny;
 
     real->fr_exp = 0;
@@ -322,21 +349,29 @@ void _Fp_RoundReal(const _Fp_Unrounded *value, const _Fp_Format *fmt, _Fp_Real *
     if (fmt->ff_mant < _FP_MANT_BITS) {
         _Fp_DropBits(&part, _FP_MANT_BITS - fmt->ff_mant);
     }
-    tiny = part.fu_exp < fmt->ff_min && ! (part.fu_exp == fmt->ff_min - 1 && part.fu_mant == ones && part.fu_rest >= _FP_REST_HALF);
+    tiny = part.fu_exp < fmt->ff_min && ! (part.fu_exp == fmt->ff_min - 1 && part.fu_mant == ones && _Fp_IsRoundedUp(&part, round));
     if (part.fu_exp < fmt->ff_min) {
         _Fp_DropBits(&part, fmt->ff_min - part.fu_exp);
     }
-    if (part.fu_rest > _FP_REST_HALF || (part.fu_rest == _FP_REST_HALF && (part.fu_mant & 1))) {
+    if (_Fp_IsRoundedUp(&part, round)) {
         part.fu_mant++;
         if (part.fu_exp >= fmt->ff_min && (part.fu_mant & ones) == 0) {
             part.fu_mant = 1ULL << (fmt->ff_mant - 1);
             part.fu_exp++;
         }
     }
-    if (part.fu_exp > fmt->ff_max) {
+    if (part.fu_exp > fmt->ff_max && (round == _FPU_TONEAREST || round == _FPU_UPWARD)) {
         real->fr_exp = (unsigned int) (2 * fmt->ff_max + 1);
         real->fr_mant = fmt->ff_explicit ? 1ULL << (fmt->ff_mant - 1) : 0;
         _Err_Errno = _SYS_ERANGE;
+        _Fpu_RaiseFlags(_FPU_OVERFLOW | _FPU_INEXACT);
+        return;
+    }
+    if (part.fu_exp > fmt->ff_max) {
+        real->fr_exp = (unsigned int) (2 * fmt->ff_max);
+        real->fr_mant = fmt->ff_explicit ? ones : ones >> 1;
+        _Err_Errno = _SYS_ERANGE;
+        _Fpu_RaiseFlags(_FPU_OVERFLOW | _FPU_INEXACT);
         return;
     }
     if (part.fu_exp >= fmt->ff_min) {
@@ -347,6 +382,10 @@ void _Fp_RoundReal(const _Fp_Unrounded *value, const _Fp_Format *fmt, _Fp_Real *
     real->fr_mant = fmt->ff_explicit ? part.fu_mant : part.fu_mant & ones >> 1;
     if (tiny && part.fu_rest != _FP_REST_NONE) {
         _Err_Errno = _SYS_ERANGE;
+        _Fpu_RaiseFlags(_FPU_UNDERFLOW);
+    }
+    if (part.fu_rest != _FP_REST_NONE) {
+        _Fpu_RaiseFlags(_FPU_INEXACT);
     }
 }
 

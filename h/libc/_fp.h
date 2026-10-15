@@ -138,6 +138,8 @@ unsigned long      _Fp_ReadNotANumber(const void *str, _Fp_Text text, unsigned l
 unsigned long      _Fp_ScanDecimal(const void *str, _Fp_Text text, unsigned long index, int point, _Fp_Decimal *dec);
 unsigned long      _Fp_ReadHex(const void *str, _Fp_Text text, unsigned long index, int point, _Fp_Unrounded *value);
 void               _Fp_DropBits(_Fp_Unrounded *value, long bits);
+int                _Fp_ReadRound(const _Fp_Real *real);
+_Bool              _Fp_IsRoundedUp(const _Fp_Unrounded *part, int round);
 void               _Fp_RoundReal(const _Fp_Unrounded *value, const _Fp_Format *fmt, _Fp_Real *real);
 
 // Converting

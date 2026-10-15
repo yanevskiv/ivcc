@@ -70,6 +70,8 @@ static const Enc_x86_64_X87Form Enc_x86_64_X87Forms[ASM_X86_64_OP_COUNT] = {
     [ASM_X86_64_OP_FLDS]    = { ENC_X86_64_OPCODE_X87_D9, ENC_X86_64_X87_FLD_M32 },
     [ASM_X86_64_OP_FSTPS]   = { ENC_X86_64_OPCODE_X87_D9, ENC_X86_64_X87_FSTP_M32 },
     [ASM_X86_64_OP_FILDQ]   = { ENC_X86_64_OPCODE_X87_DF, ENC_X86_64_X87_FILD_M64 },
+    [ASM_X86_64_OP_FISTTPS] = { ENC_X86_64_OPCODE_X87_DF, ENC_X86_64_X87_FISTTP_M16 },
+    [ASM_X86_64_OP_FISTTPL] = { ENC_X86_64_OPCODE_X87_DB, ENC_X86_64_X87_FISTTP_M32 },
     [ASM_X86_64_OP_FISTTPQ] = { ENC_X86_64_OPCODE_X87_DD, ENC_X86_64_X87_FISTTP_M64 },
     [ASM_X86_64_OP_FADDP]   = { ENC_X86_64_OPCODE_X87_DE, ENC_X86_64_X87_FADDP },
     [ASM_X86_64_OP_FMULP]   = { ENC_X86_64_OPCODE_X87_DE, ENC_X86_64_X87_FMULP },
@@ -439,7 +441,7 @@ void Enc_x86_64_EmitSse(const Asm_x86_64_Item *item)
         } break;
         case ASM_X86_64_OP_CVTTSD2SI:
         case ASM_X86_64_OP_CVTTSS2SI: {
-            Enc_x86_64_EmitSseRR(form->es_prefix, ASM_X86_64_WIDTH_64, form->es_opcode, item->ai_dst.ao_reg, item->ai_src.ao_xmm);
+            Enc_x86_64_EmitSseRR(form->es_prefix, item->ai_dst.ao_width, form->es_opcode, item->ai_dst.ao_reg, item->ai_src.ao_xmm);
         } break;
         default: {
             Enc_x86_64_EmitSseRR(form->es_prefix, ASM_X86_64_WIDTH_32, form->es_opcode, item->ai_dst.ao_xmm, item->ai_src.ao_xmm);
@@ -650,6 +652,8 @@ void Enc_x86_64_EmitInstr(const Asm_x86_64_Item *item)
         case ASM_X86_64_OP_FLDS:
         case ASM_X86_64_OP_FSTPS:
         case ASM_X86_64_OP_FILDQ:
+        case ASM_X86_64_OP_FISTTPS:
+        case ASM_X86_64_OP_FISTTPL:
         case ASM_X86_64_OP_FISTTPQ:
         case ASM_X86_64_OP_FADDP:
         case ASM_X86_64_OP_FMULP:

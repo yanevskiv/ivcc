@@ -179,6 +179,8 @@ enum Enc_x86_64_X87Digit {
     ENC_X86_64_X87_FSTP_M32   = 3, // after 0xD9
     ENC_X86_64_X87_FLD_M80    = 5, // after 0xDB
     ENC_X86_64_X87_FSTP_M80   = 7, // after 0xDB
+    ENC_X86_64_X87_FISTTP_M32 = 1, // after 0xDB
+    ENC_X86_64_X87_FISTTP_M16 = 1, // after 0xDF
     ENC_X86_64_X87_FLD_M64    = 0, // after 0xDD
     ENC_X86_64_X87_FISTTP_M64 = 1, // after 0xDD
     ENC_X86_64_X87_FSTP_M64   = 3, // after 0xDD

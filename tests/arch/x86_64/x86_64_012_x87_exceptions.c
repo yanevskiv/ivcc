@@ -18,6 +18,8 @@ unsigned long op_fucomip(unsigned fcw, const struct x80 *a, const struct x80 *b,
 unsigned long op_fstps(unsigned fcw, const struct x80 *a, unsigned long *dst, struct x80 *out);
 unsigned long op_fstpl(unsigned fcw, const struct x80 *a, unsigned long *dst, struct x80 *out);
 unsigned long op_fisttpq(unsigned fcw, const struct x80 *a, unsigned long *dst, struct x80 *out);
+unsigned long op_fisttpl(unsigned fcw, const struct x80 *a, unsigned long *dst, struct x80 *out);
+unsigned long op_fisttps(unsigned fcw, const struct x80 *a, unsigned long *dst, struct x80 *out);
 unsigned long op_flds(unsigned fcw, const struct x80 *src, unsigned long *unused, struct x80 *out);
 unsigned long op_fldl(unsigned fcw, const struct x80 *src, unsigned long *unused, struct x80 *out);
 unsigned long op_fldt(unsigned fcw, const struct x80 *src, unsigned long *unused, struct x80 *out);
@@ -85,6 +87,8 @@ __asm__ (".text\n"
          X87_STORE("op_fstps", "fstps")
          X87_STORE("op_fstpl", "fstpl")
          X87_STORE("op_fisttpq", "fisttpq")
+         X87_STORE("op_fisttpl", "fisttpl")
+         X87_STORE("op_fisttps", "fisttps")
          X87_LOAD("op_flds", "flds")
          X87_LOAD("op_fldl", "fldl")
          X87_LOAD("op_fldt", "fldt")
@@ -312,9 +316,9 @@ static int check_compare(void)
 }
 
 // A store should quiet an SNaN, keeping its payload's top bits, and store
-// the indefinite for an unsupported value, both under IE; FISTTP the integer
-// indefinite for a NaN, an unsupported value or one out of range; a denormal
-// stores with no DE.
+// the indefinite for an unsupported value, both under IE; FISTTP, at each of
+// its widths, the integer indefinite for a NaN, an unsupported value or one
+// out of range; a denormal stores with no DE.
 // [Amd64-Vol1:6.8.4.2]: Table 6-18, the causes of IE
 static int check_stores(void)
 {
@@ -329,7 +333,13 @@ static int check_stores(void)
         {op_fisttpq, {0x8000000000000000, 0xC03E},         0x0000, 0x8000000000000000},
         {op_fisttpq, QNAN1,                                0x0001, 0x8000000000000000},
         {op_fisttpq, UNNORMAL,                             0x0001, 0x8000000000000000},
-        {op_fisttpq, DENORMAL,                             0x0020, 0}
+        {op_fisttpq, DENORMAL,                             0x0020, 0},
+        {op_fisttpl, {0x8000000000000000, 0x401E},         0x0001, 0x80000000},
+        {op_fisttpl, {0x8000000000000000, 0xC01E},         0x0000, 0x80000000},
+        {op_fisttpl, QNAN1,                                0x0001, 0x80000000},
+        {op_fisttps, {0x8000000000000000, 0x400E},         0x0001, 0x8000},
+        {op_fisttps, {0x8000000000000000, 0xC00E},         0x0000, 0x8000},
+        {op_fisttps, {0xC000000000000000, 0xBFFF},         0x0020, 0xFFFF}
     };
     return run_stores(stores, (int) (sizeof(stores) / sizeof(stores[0])), 50);
 }

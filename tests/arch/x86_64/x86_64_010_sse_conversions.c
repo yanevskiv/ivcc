@@ -11,6 +11,7 @@ unsigned long op_cvtsi2ssq(unsigned mxcsr, unsigned long a, unsigned long b, uns
 unsigned long op_cvttsd2siq(unsigned mxcsr, unsigned long a, unsigned long b, unsigned *after);
 unsigned long op_cvttsd2sil(unsigned mxcsr, unsigned long a, unsigned long b, unsigned *after);
 unsigned long op_cvttss2siq(unsigned mxcsr, unsigned long a, unsigned long b, unsigned *after);
+unsigned long op_cvttss2sil(unsigned mxcsr, unsigned long a, unsigned long b, unsigned *after);
 
 // Run INSN from b into a's register under mxcsr, give it and MXCSR after.
 #define SSE_OP(NAME, INSN)            \
@@ -50,8 +51,9 @@ __asm__ (".text\n"
          SSE_OP("op_cvtsi2sdq", "cvtsi2sdq %rdx, %xmm0")
          SSE_OP("op_cvtsi2ssq", "cvtsi2ssq %rdx, %xmm0")
          SSE_TO_INT("op_cvttsd2siq", "cvttsd2si %xmm1, %rax")
-         SSE_TO_INT("op_cvttsd2sil", ".byte 0xf2, 0x0f, 0x2c, 0xc1 # cvttsd2si %xmm1, %eax")
-         SSE_TO_INT("op_cvttss2siq", "cvttss2si %xmm1, %rax"));
+         SSE_TO_INT("op_cvttsd2sil", "cvttsd2si %xmm1, %eax")
+         SSE_TO_INT("op_cvttss2siq", "cvttss2si %xmm1, %rax")
+         SSE_TO_INT("op_cvttss2sil", "cvttss2si %xmm1, %eax"));
 #endif
 
 // Every exception masked, DAZ, and two rounding modes.
@@ -145,7 +147,10 @@ static int check_to_integer(void)
         {op_cvttsd2sil, MASKED,       0xC1E0000000000000, 0x0000000080000000, 0x1F80},
         {op_cvttsd2sil, MASKED,       0xC1E0000000100000, 0x0000000080000000, 0x1FA0},
         {op_cvttss2siq, MASKED,       0xDF000000,         0x8000000000000000, 0x1F80},
-        {op_cvttss2siq, MASKED,       0x5F000000,         0x8000000000000000, 0x1F81}
+        {op_cvttss2siq, MASKED,       0x5F000000,         0x8000000000000000, 0x1F81},
+        {op_cvttss2sil, MASKED,       0x4F000000,         0x0000000080000000, 0x1F81},
+        {op_cvttss2sil, MASKED,       0xCF000000,         0x0000000080000000, 0x1F80},
+        {op_cvttss2sil, MASKED,       0xBFC00000,         0x00000000FFFFFFFF, 0x1FA0}
     };
     return run(checks, (int) (sizeof(checks) / sizeof(checks[0])), 40);
 }

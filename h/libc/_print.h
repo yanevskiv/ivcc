@@ -313,6 +313,7 @@ _Print_Real   _Print_ToParts(long double value, _Print_Sign *sign, unsigned long
 void          _Print_ToNumeral(long double value, _Print_Numeral *num);
 
 // Numbers
+int  _Print_ReadRound(_Print_Sign sign);
 void _Print_RoundNumeral(_Print_Numeral *num, long keep);
 void _Print_StoreCount(void *dest, _Print_Length length, unsigned long count);
 

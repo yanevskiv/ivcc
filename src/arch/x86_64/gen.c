@@ -988,6 +988,14 @@ bool Gen_x86_64_IsWideUnsigned(const Ast_Type *type)
     return Ast_IsInteger(type) && type->at_sign == AST_TYPE_UNSIGNED && type->at_size == GEN_X86_64_WORD_SIZE;
 }
 
+// Return whether a signed integer of width holds every value of type.
+bool Gen_x86_64_IsHeldBy(const Ast_Type *type, Asm_x86_64_Width width)
+{
+    Asm_x86_64_Width bits = Gen_x86_64_TypeWidth(type);
+
+    return bits < width || (bits == width && type->at_sign != AST_TYPE_UNSIGNED);
+}
+
 // Return the SSE instruction an arithmetic operator takes at a type.
 Asm_x86_64_Op Gen_x86_64_SseOp(Ast_NodeKind kind, const Ast_Type *type)
 {
@@ -1121,12 +1129,15 @@ void Gen_x86_64_EmitX87ToSse(const Ast_Type *to)
     Asm_x86_64_EmitPop(ASM_X86_64_REG_RAX);
 }
 
-// Pop %st into %rax as an integer, truncating toward zero.
+// Pop %st into %rax as an integer truncated in the narrowest that holds to.
 void Gen_x86_64_EmitX87ToInt(const Ast_Type *to)
 {
     Asm_x86_64_EmitPush(ASM_X86_64_REG_RAX);
     if (! Gen_x86_64_IsWideUnsigned(to)) {
-        Asm_x86_64_EmitX87Mem(ASM_X86_64_OP_FISTTPQ, ASM_X86_64_REG_RSP, 0);
+        Asm_x86_64_Op op = Gen_x86_64_IsHeldBy(to, ASM_X86_64_WIDTH_16)   ? ASM_X86_64_OP_FISTTPS
+                         : Gen_x86_64_IsHeldBy(to, ASM_X86_64_WIDTH_32) ? ASM_X86_64_OP_FISTTPL
+                                                                        : ASM_X86_64_OP_FISTTPQ;
+        Asm_x86_64_EmitX87Mem(op, ASM_X86_64_REG_RSP, 0);
         Asm_x86_64_EmitPop(ASM_X86_64_REG_RAX);
         Gen_x86_64_EmitCast(to);
         return;
@@ -1179,7 +1190,8 @@ void Gen_x86_64_EmitConvert(const Ast_Type *from, const Ast_Type *to, int32_t tm
     }
     if (! wide && Gen_x86_64_IsSse(from) && Ast_IsInteger(to)) {
         Asm_x86_64_EmitMovToXmm(ASM_X86_64_REG_RAX, ASM_X86_64_XMM0);
-        Asm_x86_64_EmitCvtFromSse(from->at_kind == AST_TYPE_KIND_DOUBLE ? ASM_X86_64_OP_CVTTSD2SI : ASM_X86_64_OP_CVTTSS2SI, ASM_X86_64_XMM0, ASM_X86_64_REG_RAX);
+        Asm_x86_64_Width width = Gen_x86_64_IsHeldBy(to, ASM_X86_64_WIDTH_32) ? ASM_X86_64_WIDTH_32 : ASM_X86_64_WIDTH_64;
+        Asm_x86_64_EmitCvtFromSse(from->at_kind == AST_TYPE_KIND_DOUBLE ? ASM_X86_64_OP_CVTTSD2SI : ASM_X86_64_OP_CVTTSS2SI, ASM_X86_64_XMM0, ASM_X86_64_REG_RAX, width);
         Gen_x86_64_EmitCast(to);
         return;
     }
