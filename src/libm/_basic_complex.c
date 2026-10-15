@@ -412,10 +412,10 @@ long double _Basic_Complex_TakeLogAbs(long double x, long double y)
         b = t;
     }
     if (a < _BASIC_COMPLEX_LOG_NEAR_LOW || a > _BASIC_COMPLEX_LOG_NEAR_HIGH) {
-        t = b / a;
-        if (t < _BASIC_COMPLEX_RATIO_TINY) {
+        if ((a >= _BASIC_COMPLEX_LOG_SQUARE && b < a * _BASIC_COMPLEX_RATIO_TINY) || b / a < _BASIC_COMPLEX_RATIO_TINY) {
             return _Basic_Math_TakeLog(a, _BASIC_MATH_BASE_E);
         }
+        t = b / a;
         return _Basic_Math_TakeLog(a, _BASIC_MATH_BASE_E) + _BASIC_MATH_HALF * _Basic_Math_TakeLog1p(t * t);
     }
     p = _Basic_Math_MultiplyParts(a, a, &p_low);
