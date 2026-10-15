@@ -184,6 +184,10 @@ enum Err_Code {
     ERR_PAR_OFFSETOF_BITFIELD,             // can't take the offset of a bit-field
     ERR_PAR_OFFSETOF_THROUGH_POINTER,      // can't take the offset of an element a pointer points to
     ERR_PAR_OFFSETOF_NOT_ARRAY,            // can't take the offset of an index into something that is not an array
+    ERR_PAR_GENERIC_TWO_DEFAULTS,          // can't give a generic selection more than one default association
+    ERR_PAR_GENERIC_TYPE_NOT_OBJECT,       // can't name in a generic association a type that is no complete, fixed-size object type
+    ERR_PAR_GENERIC_TYPES_COMPATIBLE,      // can't name compatible types in two associations of one generic selection
+    ERR_PAR_GENERIC_NO_MATCH,              // can't pick no association, none matching and no default given
     ERR_PAR_NAN_TAG_NOT_NARROW,            // can't give a NaN builtin a wide string as its tag
     ERR_PAR_TYPEDEF_INITIALIZED,           // can't initialize a typedef
     ERR_PAR_VLA_INITIALIZED,               // can't initialize a variable-length array

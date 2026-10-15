@@ -72,6 +72,7 @@ void yyerror(const char *s);
 %token BUILTIN_INF BUILTIN_INFF BUILTIN_INFL BUILTIN_NAN BUILTIN_NANF BUILTIN_NANL
 %token STATIC_ASSERT
 %token ALIGNOF ALIGNAS
+%token GENERIC
 %token ADD SUB MUL DIV MOD ASSIGN NOT AMP PIPE CARET TILDE SHL SHR
 %token INC DEC QUESTION COLON
 %token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN
@@ -82,7 +83,7 @@ void yyerror(const char *s);
 %type <node> stmt stmt_list compound_stmt decl decl_body local_list local_decl
 %type <node> for_init expr expr_comma expr_opt args arg_list
 %type <node> initializer init_body init_list init_item designators designator
-%type <node> cast unary postfix primary offsetof_desig
+%type <node> cast unary postfix primary offsetof_desig generic_assocs
 %type <str>  string
 %type <var>  param
 %type <decl> member_declarators member_declarator
@@ -734,6 +735,20 @@ primary
         { $$ = Par_NanLiteral(&Ast_TypeFloat, $3, @1); }
     | BUILTIN_NANL LPAREN string RPAREN
         { $$ = Par_NanLiteral(&Ast_TypeLDouble, $3, @1); }
+    | GENERIC LPAREN expr COMMA generic_assocs RPAREN
+        { $$ = Par_Generic($3, $5, @1); }
+    ;
+
+/* The associations of a _Generic, each a type or `default` and its result. */
+generic_assocs
+    : type_name COLON expr
+        { $$ = Par_AddGenericAssoc(NULL, $1, $3, @1); }
+    | DEFAULT COLON expr
+        { $$ = Par_AddGenericAssoc(NULL, NULL, $3, @1); }
+    | generic_assocs COMMA type_name COLON expr
+        { $$ = Par_AddGenericAssoc($1, $3, $5, @3); }
+    | generic_assocs COMMA DEFAULT COLON expr
+        { $$ = Par_AddGenericAssoc($1, NULL, $5, @3); }
     ;
 
 /* The members and indices __builtin_offsetof walks, `a->b` being `a[0].b`. */

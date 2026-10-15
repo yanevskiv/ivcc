@@ -1813,6 +1813,60 @@ Ast_Node *Par_OffsetOf(Ast_Type *type, Ast_Node *steps, Ast_Line line)
     return num;
 }
 
+// Append an association to a _Generic's, checked against those before it.
+Ast_Node *Par_AddGenericAssoc(Ast_Node *head, Ast_Type *type, Ast_Node *expr, Ast_Line line)
+{
+    Ast_Node *assoc = Ast_NewUnary(AST_NODE_KIND_ASSOC, expr, line);
+
+    assoc->an_type = type;
+    if (type) {
+        bool object = type->at_complete == AST_TYPE_COMPLETE && type->at_kind != AST_TYPE_KIND_VOID && type->at_kind != AST_TYPE_KIND_FUNC;
+        Err_AssertAt(line, object && ! Ast_IsVm(type), ERR_PAR_GENERIC_TYPE_NOT_OBJECT);
+    }
+    if (! head) {
+        return assoc;
+    }
+
+    Ast_Node *last = head;
+    for (Ast_Node *iter = head; iter; iter = iter->an_next) {
+        if (! type) {
+            Err_AssertAt(line, iter->an_type, ERR_PAR_GENERIC_TWO_DEFAULTS);
+        } else {
+            Err_AssertAt(line, ! iter->an_type || ! Ast_IsCompatible(iter->an_type, type), ERR_PAR_GENERIC_TYPES_COMPATIBLE);
+        }
+        last = iter;
+    }
+    last->an_next = assoc;
+    return head;
+}
+
+// Pick a _Generic's result while parsing, so that it may fold as a constant.
+Ast_Node *Par_Generic(Ast_Node *control, Ast_Node *assocs, Ast_Line line)
+{
+    Sem_Node(control);
+
+    Ast_Type *type = Sem_ValueType(control->an_type);
+    Ast_Node *picked = NULL;
+    Ast_Node *fallback = NULL;
+
+    for (Ast_Node *iter = assocs; iter; iter = iter->an_next) {
+        if (! iter->an_type) {
+            fallback = iter;
+        } else if (! iter->an_type->at_qual && Ast_IsCompatibleUnqualified(iter->an_type, type)) {
+            picked = iter;
+        }
+    }
+    picked = picked ? picked : fallback;
+    Err_AssertAt(line, picked, ERR_PAR_GENERIC_NO_MATCH);
+
+    for (Ast_Node *iter = assocs; iter; iter = iter->an_next) {
+        if (iter != picked) {
+            Sem_Node(iter->an_lhs);
+        }
+    }
+    return picked->an_lhs;
+}
+
 // Build a jump or a jump's target, noting the variably modified names in scope.
 Ast_Node *Par_NewJump(Ast_NodeKind kind, Ast_Line line)
 {

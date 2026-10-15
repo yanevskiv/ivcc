@@ -105,6 +105,7 @@ BEXP    [pP][+-]?{DIGIT}+
 "_Static_assert"        return STATIC_ASSERT;
 "_Alignof"              return ALIGNOF;
 "_Alignas"              return ALIGNAS;
+"_Generic"              return GENERIC;
 
 {ALPHA}{ALNUM}*         { yylval.name = Str_Clone(yytext);
                           return Ast_FindTypedef(yytext) ? TYPEDEF_NAME : IDENT; }

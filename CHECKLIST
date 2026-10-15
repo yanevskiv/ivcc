@@ -139,7 +139,7 @@ Checklist toward ISO C99: the language, then the standard library of clause 7.
             - [ ] the system layer: one syscall stub, and the syscalls libc needs answered by `ivemu`
             - [ ] signal delivery in `ivemu`: a handler, its frame and `rt_sigreturn`
             - [ ] the floating-point control and status instructions, and `ivemu`'s rounding modes and exception flags
-            - [ ] `_Generic`, for `<tgmath.h>`
+            - [x] `_Generic`, for `<tgmath.h>`
             - [ ] `__STDC_HOSTED__` is 1
 
         `<stddef.h>` (7.17)

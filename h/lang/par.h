@@ -407,12 +407,16 @@ void      Par_AddDeclared(Par_Decl *decl, Ast_Node *init, Ast_Line line);
 // [C99:6.5.3.4p1]: sizeof, not of an incomplete type
 // [C99:7.17p3]:    offsetof
 // [C11:6.5.3.4p3]: _Alignof, an array's being its element's
+// [C11:6.5.1.1p2]: _Generic's associations, one default, distinct object types
+// [C11:6.5.1.1p3]: _Generic's result, the association of a compatible type
 Ast_Node *Par_Designator(char *name, Ast_Line line);
 Ast_Node *Par_MakeCall(Ast_Node *callee, Ast_Node *args, Ast_Line line);
 Ast_Node *Par_SizeOfType(Ast_Type *type, Ast_Line line);
 Ast_Node *Par_AlignOfType(Ast_Type *type, Ast_Line line);
 Ast_Node *Par_AddOffsetStep(Ast_Node *head, char *name, Ast_Node *index, Ast_Line line);
 Ast_Node *Par_OffsetOf(Ast_Type *type, Ast_Node *steps, Ast_Line line);
+Ast_Node *Par_AddGenericAssoc(Ast_Node *head, Ast_Type *type, Ast_Node *expr, Ast_Line line);
+Ast_Node *Par_Generic(Ast_Node *control, Ast_Node *assocs, Ast_Line line);
 
 // Statements
 // [C99:6.8.6]: goto, continue, break and return

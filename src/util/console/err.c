@@ -842,6 +842,34 @@ static const Err_Entry Err_Table[ERR_CODE_COUNT] = {
     },
 
     // Args: none
+    [ERR_PAR_GENERIC_TWO_DEFAULTS] = {
+        .ee_level  = ERR_LEVEL_FATAL,
+        .ee_name   = "ERR_PAR_GENERIC_TWO_DEFAULTS",
+        .ee_format = "duplicate 'default' association in '_Generic'"
+    },
+
+    // Args: none
+    [ERR_PAR_GENERIC_TYPE_NOT_OBJECT] = {
+        .ee_level  = ERR_LEVEL_FATAL,
+        .ee_name   = "ERR_PAR_GENERIC_TYPE_NOT_OBJECT",
+        .ee_format = "'_Generic' association has an incomplete, function or variably modified type"
+    },
+
+    // Args: none
+    [ERR_PAR_GENERIC_TYPES_COMPATIBLE] = {
+        .ee_level  = ERR_LEVEL_FATAL,
+        .ee_name   = "ERR_PAR_GENERIC_TYPES_COMPATIBLE",
+        .ee_format = "'_Generic' association names a type compatible with an earlier one's"
+    },
+
+    // Args: none
+    [ERR_PAR_GENERIC_NO_MATCH] = {
+        .ee_level  = ERR_LEVEL_FATAL,
+        .ee_name   = "ERR_PAR_GENERIC_NO_MATCH",
+        .ee_format = "'_Generic' selector's type is compatible with no association, and there is no default"
+    },
+
+    // Args: none
     [ERR_PAR_NAN_TAG_NOT_NARROW] = {
         .ee_level  = ERR_LEVEL_FATAL,
         .ee_name   = "ERR_PAR_NAN_TAG_NOT_NARROW",

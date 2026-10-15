@@ -1551,7 +1551,7 @@ void Sem_Annotate(Ast_Node *node)
         } break;
 
         case AST_NODE_KIND_VA_START: {
-            Err_AssertAt(node->an_line, Sem_CurFunc->af_type->at_va != AST_TYPE_FIXED, ERR_SEM_VA_START_FIXED);
+            Err_AssertAt(node->an_line, ! Sem_CurFunc || Sem_CurFunc->af_type->at_va != AST_TYPE_FIXED, ERR_SEM_VA_START_FIXED);
             node->an_type = &Ast_TypeInt;
         } break;
 
@@ -1610,6 +1610,7 @@ void Sem_Annotate(Ast_Node *node)
         case AST_NODE_KIND_INIT:
         case AST_NODE_KIND_INITLIST:
         case AST_NODE_KIND_DESIGNATOR:
+        case AST_NODE_KIND_ASSOC:
         case AST_NODE_KIND_ZERO:
         case AST_NODE_KIND_NOP:
         case AST_NODE_KIND_COUNT: {
