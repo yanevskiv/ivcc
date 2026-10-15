@@ -28,7 +28,7 @@ Checklist toward ISO C99: the language, then the standard library of clause 7.
             - [x] `long`, `long long`
             - [x] `float`, `double`
             - [x] `long double` (80-bit x87: 16 bytes, aligned 16, passed on the stack, returned in `%st`)
-            - [x] `float _Complex`, `double _Complex`, `long double _Complex`: conversions, `==`, `!=`, unary `+` and `-`, and gcc's imaginary constants (`2.0i`)
+            - [x] `float _Complex`, `double _Complex`, `long double _Complex`: conversions, `+`, `-`, `*`, `/` and their compound assignments, `==`, `!=`, unary `+` and `-`, parameters and results, and gcc's imaginary constants (`2.0i`)
             - [x] `_Bool`
             - [x] `signed` / `unsigned`
             - [x] `const` qualifier
@@ -138,7 +138,7 @@ Checklist toward ISO C99: the language, then the standard library of clause 7.
             - [ ] the system layer: one syscall stub, and the syscalls libc needs answered by `ivemu`
             - [ ] signal delivery in `ivemu`: a handler, its frame and `rt_sigreturn`
             - [ ] the floating-point control and status instructions, and `ivemu`'s rounding modes and exception flags
-            - [ ] `_Complex`: the arithmetic of the three types, and their calling convention
+            - [ ] `_Complex`: `va_arg` of the three types
             - [ ] `_Generic`, for `<tgmath.h>`
             - [ ] `__STDC_HOSTED__` is 1
 

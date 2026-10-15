@@ -67,6 +67,9 @@
 #define GEN_X86_64_FLT_ROUNDS_TABLE 0x2D
 #define GEN_X86_64_FLT_ROUNDS_MASK  3
 
+// The parts libgcc's complex helpers take, both operands' real and imaginary.
+#define GEN_X86_64_COMPLEX_HELPER_PARTS 4
+
 // The shift that brings a 64-bit sign bit down to bit 0 and back.
 #define GEN_X86_64_SIGN_SHIFT 63
 
@@ -95,13 +98,14 @@ enum Gen_x86_64_VlaField {
 // The class the SysV ABI gives one eightbyte of an argument.
 typedef enum Gen_x86_64_SysV_Class Gen_x86_64_SysV_Class;
 enum Gen_x86_64_SysV_Class {
-    GEN_X86_64_SYSV_CLASS_NONE,    // no member reaches the eightbyte
-    GEN_X86_64_SYSV_CLASS_INTEGER, // a general-purpose register carries it
-    GEN_X86_64_SYSV_CLASS_SSE,     // an SSE register carries it
-    GEN_X86_64_SYSV_CLASS_X87,     // the low eightbyte of a long double
-    GEN_X86_64_SYSV_CLASS_X87UP,   // the high eightbyte of a long double
-    GEN_X86_64_SYSV_CLASS_MEMORY,  // the stack carries it, or a hidden pointer returns it
-    GEN_X86_64_SYSV_CLASS_COUNT    // number of classes
+    GEN_X86_64_SYSV_CLASS_NONE,        // no member reaches the eightbyte
+    GEN_X86_64_SYSV_CLASS_INTEGER,     // a general-purpose register carries it
+    GEN_X86_64_SYSV_CLASS_SSE,         // an SSE register carries it
+    GEN_X86_64_SYSV_CLASS_X87,         // the low eightbyte of a long double
+    GEN_X86_64_SYSV_CLASS_X87UP,       // the high eightbyte of a long double
+    GEN_X86_64_SYSV_CLASS_COMPLEX_X87, // long double _Complex, returned in %st
+    GEN_X86_64_SYSV_CLASS_MEMORY,      // on the stack, or returned by pointer
+    GEN_X86_64_SYSV_CLASS_COUNT        // number of classes
 };
 
 // An address a global's image holds.
@@ -131,6 +135,7 @@ struct Gen_x86_64_SysV_Loc {
 };
 
 // SysV classification
+// [Amd64-SysV:3.2.3]: complex T as two T, complex long double COMPLEX_X87
 Gen_x86_64_SysV_Class Gen_x86_64_SysV_Merge(Gen_x86_64_SysV_Class a, Gen_x86_64_SysV_Class b);
 void                  Gen_x86_64_SysV_ClassifyAt(const Ast_Type *type, int32_t offset, Gen_x86_64_SysV_Class *classes);
 void                  Gen_x86_64_SysV_Classify(const Ast_Type *type, Gen_x86_64_SysV_Class *classes);
@@ -138,6 +143,7 @@ int32_t               Gen_x86_64_SysV_Eightbytes(const Ast_Type *type);
 bool                  Gen_x86_64_SysV_InMemory(const Ast_Type *type);
 bool                  Gen_x86_64_SysV_ReturnsInMemory(const Ast_Type *type);
 bool                  Gen_x86_64_SysV_ReturnsInX87(const Ast_Type *type);
+bool                  Gen_x86_64_SysV_ReturnsInX87Pair(const Ast_Type *type);
 
 // SysV argument placement
 void                 Gen_x86_64_SysV_StartCursor(Gen_x86_64_SysV_Cursor *cur, const Ast_Type *ret);
@@ -228,11 +234,22 @@ void          Gen_x86_64_EmitFltRounds(void);
 // [C99:6.3.1.7p2]: a complex value converted to real, its imaginary part discarded
 // [C99:6.5.3.3p3]: unary -, the negative of its operand
 // [C99:6.5.9p4]:   complex values equal when both their parts are
-void Gen_x86_64_EmitPartStore(const Ast_Type *from, const Ast_Type *part, int32_t disp);
-void Gen_x86_64_EmitComplexConvert(const Ast_Type *from, const Ast_Type *to, int32_t tmp);
-void Gen_x86_64_EmitPartCompare(Ast_NodeKind kind, const Ast_Type *part, int32_t disp);
-void Gen_x86_64_EmitComplexCompare(const Ast_Node *node);
-void Gen_x86_64_EmitComplexNeg(const Ast_Node *node);
+// [C99:G.5.1p2]:   * of a real and a complex operand, each part times the real one
+// [C99:G.5.1p3]:   / by a real operand, each part divided by it
+// [C99:G.5.1p4]:   * and /, an infinite operand giving an infinite or zero result
+// [C99:G.5.2p2]:   + and -, part by part, a real operand's imaginary part absent
+void        Gen_x86_64_EmitPartStore(const Ast_Type *from, const Ast_Type *part, int32_t disp);
+void        Gen_x86_64_EmitComplexConvert(const Ast_Type *from, const Ast_Type *to, int32_t tmp);
+void        Gen_x86_64_EmitPartCompare(Ast_NodeKind kind, const Ast_Type *part, int32_t disp);
+void        Gen_x86_64_EmitComplexCompare(const Ast_Node *node);
+void        Gen_x86_64_EmitComplexNeg(const Ast_Node *node);
+void        Gen_x86_64_EmitPartLoad(const Ast_Type *type, Asm_x86_64_Reg reg, int32_t k, Asm_x86_64_Xmm xmm);
+void        Gen_x86_64_EmitComplexPart(const Ast_Node *node, int32_t k);
+const char *Gen_x86_64_ComplexHelper(Ast_NodeKind kind, const Ast_Type *part);
+void        Gen_x86_64_EmitX87HelperArgs(const Ast_Node *node);
+void        Gen_x86_64_EmitSseHelperArgs(const Ast_Node *node);
+void        Gen_x86_64_EmitComplexCall(Ast_Node *node);
+void        Gen_x86_64_EmitComplexArith(Ast_Node *node);
 
 // Variable-length arrays
 // [C99:6.2.4p6]:   a variable length array, alive from its declaration to its scope's end

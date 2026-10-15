@@ -1339,13 +1339,6 @@ static const Err_Entry Err_Table[ERR_CODE_COUNT] = {
     },
 
     // Args: none
-    [ERR_SEM_COMPLEX_ARITH_NOT_SUPPORTED] = {
-        .ee_level  = ERR_LEVEL_FATAL,
-        .ee_name   = "ERR_SEM_COMPLEX_ARITH_NOT_SUPPORTED",
-        .ee_format = "arithmetic on complex values is not supported yet"
-    },
-
-    // Args: none
     [ERR_SEM_OPERAND_NOT_INTEGER] = {
         .ee_level  = ERR_LEVEL_FATAL,
         .ee_name   = "ERR_SEM_OPERAND_NOT_INTEGER",

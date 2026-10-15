@@ -145,6 +145,11 @@ void Gen_x86_64_SysV_ClassifyAt(const Ast_Type *type, int32_t offset, Gen_x86_64
             classes[index] = Gen_x86_64_SysV_Merge(classes[index], GEN_X86_64_SYSV_CLASS_X87);
             classes[index + 1] = Gen_x86_64_SysV_Merge(classes[index + 1], GEN_X86_64_SYSV_CLASS_X87UP);
         } break;
+        case AST_TYPE_KIND_COMPLEX: {
+            for (int32_t k = 0; k < AST_COMPLEX_PARTS; k++) {
+                Gen_x86_64_SysV_ClassifyAt(type->at_base, offset + k * type->at_base->at_size, classes);
+            }
+        } break;
         default: {
             classes[index] = Gen_x86_64_SysV_Merge(classes[index], GEN_X86_64_SYSV_CLASS_INTEGER);
         }
@@ -161,6 +166,12 @@ void Gen_x86_64_SysV_Classify(const Ast_Type *type, Gen_x86_64_SysV_Class *class
     }
     if (! Gen_x86_64_ByAddress(type)) {
         classes[0] = Gen_x86_64_IsSse(type) ? GEN_X86_64_SYSV_CLASS_SSE : GEN_X86_64_SYSV_CLASS_INTEGER;
+        return;
+    }
+    if (Ast_IsComplex(type) && type->at_base->at_kind == AST_TYPE_KIND_LDOUBLE) {
+        for (int32_t k = 0; k < GEN_X86_64_SYSV_MAX_EIGHTBYTES; k++) {
+            classes[k] = GEN_X86_64_SYSV_CLASS_COMPLEX_X87;
+        }
         return;
     }
     if (! memory) {
@@ -195,7 +206,7 @@ bool Gen_x86_64_SysV_InMemory(const Ast_Type *type)
     Gen_x86_64_SysV_Class classes[GEN_X86_64_SYSV_MAX_EIGHTBYTES];
 
     Gen_x86_64_SysV_Classify(type, classes);
-    return classes[0] == GEN_X86_64_SYSV_CLASS_MEMORY || classes[0] == GEN_X86_64_SYSV_CLASS_X87;
+    return classes[0] == GEN_X86_64_SYSV_CLASS_MEMORY || classes[0] == GEN_X86_64_SYSV_CLASS_X87 || classes[0] == GEN_X86_64_SYSV_CLASS_COMPLEX_X87;
 }
 
 // True when this type is returned through a hidden pointer.
@@ -220,6 +231,18 @@ bool Gen_x86_64_SysV_ReturnsInX87(const Ast_Type *type)
     }
     Gen_x86_64_SysV_Classify(type, classes);
     return classes[0] == GEN_X86_64_SYSV_CLASS_X87;
+}
+
+// True when this type is returned in %st0 and %st1, its real part in %st0.
+bool Gen_x86_64_SysV_ReturnsInX87Pair(const Ast_Type *type)
+{
+    Gen_x86_64_SysV_Class classes[GEN_X86_64_SYSV_MAX_EIGHTBYTES];
+
+    if (! Gen_x86_64_ByAddress(type)) {
+        return false;
+    }
+    Gen_x86_64_SysV_Classify(type, classes);
+    return classes[0] == GEN_X86_64_SYSV_CLASS_COMPLEX_X87;
 }
 
 // Start placing the arguments of a function returning ret.
@@ -306,6 +329,11 @@ void Gen_x86_64_SysV_EmitReturnValue(Ast_Node *node)
         return;
     }
     if (Gen_x86_64_SysV_ReturnsInX87(node->an_type)) {
+        Asm_x86_64_EmitX87Mem(ASM_X86_64_OP_FLDT, ASM_X86_64_REG_RAX, 0);
+        return;
+    }
+    if (Gen_x86_64_SysV_ReturnsInX87Pair(node->an_type)) {
+        Asm_x86_64_EmitX87Mem(ASM_X86_64_OP_FLDT, ASM_X86_64_REG_RAX, node->an_type->at_base->at_size);
         Asm_x86_64_EmitX87Mem(ASM_X86_64_OP_FLDT, ASM_X86_64_REG_RAX, 0);
         return;
     }
@@ -466,6 +494,12 @@ void Gen_x86_64_SysV_EmitCallResult(Ast_Node *node)
     }
     if (Gen_x86_64_SysV_ReturnsInX87(node->an_type)) {
         Gen_x86_64_EmitX87Result(node->an_tmp);
+        return;
+    }
+    if (Gen_x86_64_SysV_ReturnsInX87Pair(node->an_type)) {
+        Asm_x86_64_EmitX87Mem(ASM_X86_64_OP_FSTPT, ASM_X86_64_REG_RBP, node->an_tmp);
+        Gen_x86_64_EmitX87Result(node->an_tmp + node->an_type->at_base->at_size);
+        Asm_x86_64_EmitLea(ASM_X86_64_REG_RBP, node->an_tmp, ASM_X86_64_REG_RAX);
         return;
     }
 
@@ -1419,6 +1453,157 @@ void Gen_x86_64_EmitComplexNeg(const Ast_Node *node)
     Asm_x86_64_EmitLea(ASM_X86_64_REG_RBP, node->an_tmp, ASM_X86_64_REG_RAX);
 }
 
+// Load part k of the complex or real operand reg holds into xmm, or onto %st.
+void Gen_x86_64_EmitPartLoad(const Ast_Type *type, Asm_x86_64_Reg reg, int32_t k, Asm_x86_64_Xmm xmm)
+{
+    const Ast_Type *part = Ast_IsComplex(type) ? type->at_base : type;
+    int32_t disp = Ast_IsComplex(type) ? k * part->at_size : 0;
+
+    if (part->at_kind == AST_TYPE_KIND_LDOUBLE) {
+        Asm_x86_64_EmitX87Mem(ASM_X86_64_OP_FLDT, reg, disp);
+        return;
+    }
+    if (Ast_IsComplex(type)) {
+        Gen_x86_64_EmitLoadFrom(reg, disp, ASM_X86_64_REG_RAX, part);
+        Asm_x86_64_EmitMovToXmm(ASM_X86_64_REG_RAX, xmm);
+        return;
+    }
+    Asm_x86_64_EmitMovToXmm(reg, xmm);
+}
+
+// Compute part k of + -, or of * / by a real value, into the node's slot.
+void Gen_x86_64_EmitComplexPart(const Ast_Node *node, int32_t k)
+{
+    const Ast_Type *part = node->an_type->at_base;
+    bool additive = node->an_kind == AST_NODE_KIND_ADD || node->an_kind == AST_NODE_KIND_SUB;
+    bool lhs = ! additive || k == 0 || Ast_IsComplex(node->an_lhs->an_type);
+    bool rhs = ! additive || k == 0 || Ast_IsComplex(node->an_rhs->an_type);
+    bool negate = ! lhs && node->an_kind == AST_NODE_KIND_SUB;
+    int32_t disp = node->an_tmp + k * part->at_size;
+
+    if (lhs) {
+        Gen_x86_64_EmitPartLoad(node->an_lhs->an_type, ASM_X86_64_REG_RSI, k, ASM_X86_64_XMM0);
+    }
+    if (rhs) {
+        Gen_x86_64_EmitPartLoad(node->an_rhs->an_type, ASM_X86_64_REG_RDI, k, lhs ? ASM_X86_64_XMM1 : ASM_X86_64_XMM0);
+    }
+
+    if (part->at_kind == AST_TYPE_KIND_LDOUBLE) {
+        if (lhs && rhs) {
+            Asm_x86_64_EmitX87(Gen_x86_64_X87Op(node->an_kind));
+        } else if (negate) {
+            Asm_x86_64_EmitX87(ASM_X86_64_OP_FCHS);
+        }
+        Asm_x86_64_EmitX87Mem(ASM_X86_64_OP_FSTPT, ASM_X86_64_REG_RBP, disp);
+        return;
+    }
+    if (lhs && rhs) {
+        Asm_x86_64_EmitSse(Gen_x86_64_SseOp(node->an_kind, part), ASM_X86_64_XMM1, ASM_X86_64_XMM0);
+    }
+    Asm_x86_64_EmitMovFromXmm(ASM_X86_64_XMM0, ASM_X86_64_REG_RAX);
+    if (negate) {
+        Asm_x86_64_EmitMovImm(part->at_kind == AST_TYPE_KIND_FLOAT ? GEN_X86_64_FLOAT_SIGN : GEN_X86_64_DOUBLE_SIGN, ASM_X86_64_REG_RCX);
+        Asm_x86_64_EmitXor(ASM_X86_64_REG_RCX, ASM_X86_64_REG_RAX);
+    }
+    Asm_x86_64_EmitMovStore(ASM_X86_64_REG_RAX, ASM_X86_64_REG_RBP, disp, Gen_x86_64_TypeWidth(part));
+}
+
+// Return libgcc's helper that multiplies or divides complex values.
+const char *Gen_x86_64_ComplexHelper(Ast_NodeKind kind, const Ast_Type *part)
+{
+    bool mul = kind == AST_NODE_KIND_MUL;
+
+    switch (part->at_kind) {
+        case AST_TYPE_KIND_FLOAT: {
+            return mul ? "__mulsc3" : "__divsc3";
+        } break;
+        case AST_TYPE_KIND_DOUBLE: {
+            return mul ? "__muldc3" : "__divdc3";
+        } break;
+        default: {
+            return mul ? "__mulxc3" : "__divxc3";
+        }
+    }
+}
+
+// Pass the parts at %rsi and %rdi to a long double helper on the stack.
+void Gen_x86_64_EmitX87HelperArgs(const Ast_Node *node)
+{
+    int32_t size = node->an_type->at_base->at_size;
+
+    Asm_x86_64_EmitSubImm(GEN_X86_64_COMPLEX_HELPER_PARTS * size, ASM_X86_64_REG_RSP);
+    Gen_x86_64_Depth += GEN_X86_64_COMPLEX_HELPER_PARTS * size / GEN_X86_64_SYSV_EIGHTBYTE;
+    for (int32_t k = 0; k < AST_COMPLEX_PARTS; k++) {
+        if (k == 0 || Ast_IsComplex(node->an_lhs->an_type)) {
+            Gen_x86_64_EmitPartLoad(node->an_lhs->an_type, ASM_X86_64_REG_RSI, k, ASM_X86_64_XMM0);
+            Asm_x86_64_EmitX87Mem(ASM_X86_64_OP_FSTPT, ASM_X86_64_REG_RSP, k * size);
+        } else {
+            Asm_x86_64_EmitMovImm(0, ASM_X86_64_REG_RCX);
+            Asm_x86_64_EmitMovStore(ASM_X86_64_REG_RCX, ASM_X86_64_REG_RSP, k * size, ASM_X86_64_WIDTH_64);
+            Asm_x86_64_EmitMovStore(ASM_X86_64_REG_RCX, ASM_X86_64_REG_RSP, k * size + GEN_X86_64_SYSV_EIGHTBYTE, ASM_X86_64_WIDTH_64);
+        }
+        Gen_x86_64_EmitPartLoad(node->an_rhs->an_type, ASM_X86_64_REG_RDI, k, ASM_X86_64_XMM0);
+        Asm_x86_64_EmitX87Mem(ASM_X86_64_OP_FSTPT, ASM_X86_64_REG_RSP, (AST_COMPLEX_PARTS + k) * size);
+    }
+}
+
+// Pass the parts in %rsi and %rdi to a float or double helper in %xmm0-3.
+void Gen_x86_64_EmitSseHelperArgs(const Ast_Node *node)
+{
+    for (int32_t k = 0; k < AST_COMPLEX_PARTS; k++) {
+        if (k == 0 || Ast_IsComplex(node->an_lhs->an_type)) {
+            Gen_x86_64_EmitPartLoad(node->an_lhs->an_type, ASM_X86_64_REG_RSI, k, ASM_X86_64_XMM0 + k);
+        } else {
+            Asm_x86_64_EmitMovImm(0, ASM_X86_64_REG_RAX);
+            Asm_x86_64_EmitMovToXmm(ASM_X86_64_REG_RAX, ASM_X86_64_XMM0 + k);
+        }
+        Gen_x86_64_EmitPartLoad(node->an_rhs->an_type, ASM_X86_64_REG_RDI, k, ASM_X86_64_XMM0 + AST_COMPLEX_PARTS + k);
+    }
+}
+
+// Multiply or divide the values in %rax and %rdi by libgcc's helper.
+void Gen_x86_64_EmitComplexCall(Ast_Node *node)
+{
+    bool x87 = node->an_type->at_base->at_kind == AST_TYPE_KIND_LDOUBLE;
+    int32_t pad = Gen_x86_64_Depth % (GEN_X86_64_SYSV_STACK_ALIGN / GEN_X86_64_SYSV_EIGHTBYTE);
+    int32_t args = x87 ? GEN_X86_64_COMPLEX_HELPER_PARTS * node->an_type->at_base->at_size : 0;
+
+    Asm_x86_64_EmitMovRR(ASM_X86_64_REG_RAX, ASM_X86_64_REG_RSI);
+    if (pad) {
+        Asm_x86_64_EmitSubImm(GEN_X86_64_SYSV_EIGHTBYTE, ASM_X86_64_REG_RSP);
+        Gen_x86_64_Depth++;
+    }
+    if (x87) {
+        Gen_x86_64_EmitX87HelperArgs(node);
+    } else {
+        Gen_x86_64_EmitSseHelperArgs(node);
+    }
+    Asm_x86_64_EmitCall("%s", Gen_x86_64_ComplexHelper(node->an_kind, node->an_type->at_base));
+    if (args + pad * GEN_X86_64_SYSV_EIGHTBYTE > 0) {
+        Asm_x86_64_EmitAddImm(args + pad * GEN_X86_64_SYSV_EIGHTBYTE, ASM_X86_64_REG_RSP);
+        Gen_x86_64_Depth -= args / GEN_X86_64_SYSV_EIGHTBYTE + pad;
+    }
+    Gen_x86_64_SysV_EmitCallResult(node);
+}
+
+// Apply + - * or / to the complex or real values in %rax and %rdi.
+void Gen_x86_64_EmitComplexArith(Ast_Node *node)
+{
+    bool lhs = Ast_IsComplex(node->an_lhs->an_type);
+    bool rhs = Ast_IsComplex(node->an_rhs->an_type);
+    bool multiplicative = node->an_kind == AST_NODE_KIND_MUL || node->an_kind == AST_NODE_KIND_DIV;
+
+    if (multiplicative && rhs && (lhs || node->an_kind == AST_NODE_KIND_DIV)) {
+        Gen_x86_64_EmitComplexCall(node);
+        return;
+    }
+    Asm_x86_64_EmitMovRR(ASM_X86_64_REG_RAX, ASM_X86_64_REG_RSI);
+    for (int32_t k = 0; k < AST_COMPLEX_PARTS; k++) {
+        Gen_x86_64_EmitComplexPart(node, k);
+    }
+    Asm_x86_64_EmitLea(ASM_X86_64_REG_RBP, node->an_tmp, ASM_X86_64_REG_RAX);
+}
+
 // Record the frame offset a new variable-length array saved %rsp at.
 void Gen_x86_64_PushVla(int32_t saved)
 {
@@ -1797,6 +1982,10 @@ void Gen_x86_64_EmitExpr(Ast_Node *node)
                 Gen_x86_64_EmitPush();
                 Gen_x86_64_EmitExpr(node->an_lhs);
                 Gen_x86_64_EmitPop(ASM_X86_64_REG_RDI);
+            }
+            if (Ast_IsComplex(node->an_type)) {
+                Gen_x86_64_EmitComplexArith(node);
+                break;
             }
             if (Ast_IsComplex(node->an_lhs->an_type)) {
                 Gen_x86_64_EmitComplexCompare(node);

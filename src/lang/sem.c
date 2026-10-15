@@ -279,6 +279,20 @@ void Sem_UsualArith(Ast_Node *node)
     node->an_type = type;
 }
 
+// Convert the operands of + - * / to a common type, a real one staying real.
+void Sem_ConvertKeepDomain(Ast_Node *node)
+{
+    Ast_Type *type = Sem_CommonType(node->an_lhs->an_type, node->an_rhs->an_type);
+
+    if (! Ast_IsComplex(type)) {
+        Sem_UsualArith(node);
+        return;
+    }
+    node->an_lhs = Sem_Convert(node->an_lhs, Ast_IsComplex(node->an_lhs->an_type) ? type : type->at_base);
+    node->an_rhs = Sem_Convert(node->an_rhs, Ast_IsComplex(node->an_rhs->an_type) ? type : type->at_base);
+    node->an_type = type;
+}
+
 // Promote each operand of a shift on its own.
 void Sem_PromoteShift(Ast_Node *node)
 {
@@ -768,6 +782,14 @@ bool Sem_FoldComplex(const Ast_Node *node, long double *real, long double *imag)
             *real = -*real;
             *imag = -*imag;
         } break;
+        case AST_NODE_KIND_ADD:
+        case AST_NODE_KIND_SUB:
+        case AST_NODE_KIND_MUL:
+        case AST_NODE_KIND_DIV: {
+            if (! Sem_FoldComplexArith(node, real, imag)) {
+                return false;
+            }
+        } break;
         case AST_NODE_KIND_COND: {
             if (! Sem_Fold(node->an_cond, &cond)) {
                 return false;
@@ -781,6 +803,61 @@ bool Sem_FoldComplex(const Ast_Node *node, long double *real, long double *imag)
         }
     }
     return true;
+}
+
+// Fold complex + - * / part by part, or * and / of two complex values whole.
+bool Sem_FoldComplexArith(const Ast_Node *node, long double *real, long double *imag)
+{
+    long double a = 0;
+    long double b = 0;
+    long double c = 0;
+    long double d = 0;
+    Ast_NodeKind kind = node->an_kind;
+    const Ast_Type *part = node->an_type->at_base;
+    bool zlhs = Ast_IsComplex(node->an_lhs->an_type);
+    bool zrhs = Ast_IsComplex(node->an_rhs->an_type);
+
+    if (! Sem_FoldComplex(node->an_lhs, &a, &b) || ! Sem_FoldComplex(node->an_rhs, &c, &d)) {
+        return false;
+    }
+    *real = Sem_FoldFloatOp(kind, part, a, c);
+    if (kind == AST_NODE_KIND_ADD || kind == AST_NODE_KIND_SUB) {
+        if (! zrhs) {
+            *imag = b;
+        } else if (! zlhs) {
+            *imag = kind == AST_NODE_KIND_SUB ? -d : d;
+        } else {
+            *imag = Sem_FoldFloatOp(kind, part, b, d);
+        }
+        return true;
+    }
+    if (zrhs && (zlhs || kind == AST_NODE_KIND_DIV)) {
+        return Sem_FoldComplexProduct(kind, part, a, b, c, d, real, imag);
+    }
+    *imag = zlhs ? Sem_FoldFloatOp(kind, part, b, c) : Sem_FoldFloatOp(kind, part, a, d);
+    return true;
+}
+
+// Return whether a folded value is finite, neither an infinity nor a NaN.
+bool Sem_IsFiniteFold(long double value)
+{
+    return value - value == 0;
+}
+
+// Fold a complex product or quotient in long double, if all of it is finite.
+bool Sem_FoldComplexProduct(Ast_NodeKind kind, const Ast_Type *part, long double a, long double b, long double c, long double d, long double *real, long double *imag)
+{
+    long double denom = c * c + d * d;
+    long double x = a * c - b * d;
+    long double y = a * d + b * c;
+
+    if (kind == AST_NODE_KIND_DIV) {
+        x = (a * c + b * d) / denom;
+        y = (b * c - a * d) / denom;
+    }
+    *real = Sem_RoundFloat(part, x);
+    *imag = Sem_RoundFloat(part, y);
+    return Sem_IsFiniteFold(a) && Sem_IsFiniteFold(b) && Sem_IsFiniteFold(c) && Sem_IsFiniteFold(d) && Sem_IsFiniteFold(*real) && Sem_IsFiniteFold(*imag);
 }
 
 // Fold the address of an object with static storage to a symbol and an offset.
@@ -1090,8 +1167,7 @@ void Sem_Arith(Ast_Node *node)
 
     if (! Sem_IsPointer(lhs) && ! Sem_IsPointer(rhs)) {
         Sem_NeedArithmetic(node);
-        Sem_RefuseComplexArith(node);
-        Sem_UsualArith(node);
+        Sem_ConvertKeepDomain(node);
         return;
     }
     Err_AssertAt(node->an_line, ! Ast_IsFloating(lhs) && ! Ast_IsFloating(rhs), ERR_SEM_POINTER_FLOATING);
@@ -1119,15 +1195,6 @@ void Sem_Arith(Ast_Node *node)
 
     node->an_rhs  = Sem_ScaleBy(node->an_rhs, Sem_Stride(lhs, node->an_line));
     node->an_type = Sem_Decay(lhs);
-}
-
-// Reject the complex operands arithmetic does not take yet.
-void Sem_RefuseComplexArith(const Ast_Node *node)
-{
-    bool lhs = Ast_IsComplex(node->an_lhs->an_type);
-    bool rhs = Ast_IsComplex(node->an_rhs->an_type);
-
-    Err_AssertAt(node->an_line, ! lhs && ! rhs, ERR_SEM_COMPLEX_ARITH_NOT_SUPPORTED);
 }
 
 // Reject a floating operand of an operator that takes only integers.
@@ -1305,8 +1372,7 @@ void Sem_Annotate(Ast_Node *node)
         case AST_NODE_KIND_MUL:
         case AST_NODE_KIND_DIV: {
             Sem_NeedArithmetic(node);
-            Sem_RefuseComplexArith(node);
-            Sem_UsualArith(node);
+            Sem_ConvertKeepDomain(node);
         } break;
 
         case AST_NODE_KIND_MOD:

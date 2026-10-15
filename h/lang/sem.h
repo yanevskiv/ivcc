@@ -50,7 +50,7 @@ bool        Sem_SameType(const Ast_Type *a, const Ast_Type *b);
 // Conversions
 // [C99:6.3.1.1p2]:  the integer promotions
 // [C99:6.3.1.2p1]:  a scalar converted to _Bool, 0 or 1
-// [C99:6.3.1.8p1]:  the usual arithmetic conversions, a complex result if either is
+// [C99:6.3.1.8p1]:  the usual arithmetic conversions, each operand keeping its type domain
 // [C99:6.3.2.3p3]:  null pointer constants
 // [C99:6.5.2.2p6]:  the default argument promotions
 // [C99:6.5.7p3]:    a shift's type, its promoted left operand's
@@ -68,6 +68,7 @@ void      Sem_CheckAssign(const Ast_Type *to, const Ast_Node *from, const char *
 Ast_Type *Sem_CondType(const Ast_Node *node);
 Ast_Node *Sem_Convert(Ast_Node *node, Ast_Type *type);
 void      Sem_UsualArith(Ast_Node *node);
+void      Sem_ConvertKeepDomain(Ast_Node *node);
 void      Sem_PromoteShift(Ast_Node *node);
 
 // Constant expressions
@@ -91,6 +92,9 @@ double      Sem_FoldDoubleOp(Ast_NodeKind kind, double lhs, double rhs);
 long double Sem_FoldFloatOp(Ast_NodeKind kind, const Ast_Type *type, long double lhs, long double rhs);
 bool        Sem_FoldFloat(const Ast_Node *node, long double *value);
 bool        Sem_FoldComplex(const Ast_Node *node, long double *real, long double *imag);
+bool        Sem_FoldComplexArith(const Ast_Node *node, long double *real, long double *imag);
+bool        Sem_IsFiniteFold(long double value);
+bool        Sem_FoldComplexProduct(Ast_NodeKind kind, const Ast_Type *part, long double a, long double b, long double c, long double d, long double *real, long double *imag);
 bool        Sem_FoldObject(const Ast_Node *node, const char **symbol, int64_t *addend);
 bool        Sem_FoldAddr(const Ast_Node *node, const char **symbol, int64_t *addend);
 
@@ -143,7 +147,6 @@ void      Sem_LowerPostInc(Ast_Node *node);
 Ast_Node *Sem_Stride(const Ast_Type *type, Ast_Line line);
 Ast_Node *Sem_ScaleBy(Ast_Node *node, Ast_Node *size);
 void      Sem_Arith(Ast_Node *node);
-void      Sem_RefuseComplexArith(const Ast_Node *node);
 void      Sem_NeedInteger(const Ast_Node *node);
 void      Sem_NeedArithmetic(const Ast_Node *node);
 bool      Sem_IsScalar(const Ast_Type *type);

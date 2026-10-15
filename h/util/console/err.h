@@ -257,7 +257,6 @@ enum Err_Code {
     ERR_SEM_INCDEC_NOT_ARITHMETIC,         // can't increment or decrement what is not a number or a pointer
     ERR_SEM_INCDEC_COMPLEX,                // can't increment or decrement a complex value
     ERR_SEM_COMPARE_COMPLEX,               // can't order complex values with `<`, `>`, `<=` or `>=`
-    ERR_SEM_COMPLEX_ARITH_NOT_SUPPORTED,   // can't add, subtract, multiply or divide complex values yet
     ERR_SEM_OPERAND_NOT_INTEGER,           // can't apply an integer operator to what is not an integer
     ERR_SEM_OPERAND_NOT_SCALAR,            // can't test for truth what is not a number or a pointer
     ERR_SEM_CAST_NOT_SCALAR,               // can't cast anything but a number or pointer to one or to `void`
