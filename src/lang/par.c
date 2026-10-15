@@ -375,23 +375,30 @@ Par_Num Par_NumLiteral(const char *text)
 // Give a floating literal the value and type its spelling asks for.
 Par_FNum Par_FloatLiteral(const char *text)
 {
-    char last = text[strlen(text) - 1];
+    Ast_Type *type = &Ast_TypeDouble;
+    bool imaginary = false;
+    long double val = 0;
 
-    if (last == 'f' || last == 'F') {
-        return (Par_FNum) {
-            .pf_val  = strtof(text, NULL),
-            .pf_type = &Ast_TypeFloat
-        };
+    for (size_t len = strlen(text); len > 0 && strchr(PAR_FLOAT_SUFFIXES, text[len - 1]); len--) {
+        if (strchr(PAR_IMAGINARY_SUFFIXES, text[len - 1])) {
+            imaginary = true;
+        } else if (text[len - 1] == 'f' || text[len - 1] == 'F') {
+            type = &Ast_TypeFloat;
+        } else {
+            type = &Ast_TypeLDouble;
+        }
     }
-    if (last == 'l' || last == 'L') {
-        return (Par_FNum) {
-            .pf_val  = strtold(text, NULL),
-            .pf_type = &Ast_TypeLDouble
-        };
+
+    if (type == &Ast_TypeFloat) {
+        val = strtof(text, NULL);
+    } else if (type == &Ast_TypeLDouble) {
+        val = strtold(text, NULL);
+    } else {
+        val = strtod(text, NULL);
     }
     return (Par_FNum) {
-        .pf_val  = strtod(text, NULL),
-        .pf_type = &Ast_TypeDouble
+        .pf_val  = val,
+        .pf_type = imaginary ? Ast_ComplexType(type) : type
     };
 }
 
@@ -787,9 +794,23 @@ Ast_Storage Par_SpecsStorage(const Par_Specs *specs, Par_StorageUse use, Ast_Lin
     return specs->ps_storage;
 }
 
+// Return the complex type a declaration's specifier keywords name.
+Ast_Type *Par_ComplexSpecType(Par_Spec specs, Ast_Line line)
+{
+    Par_Spec real = specs ^ PAR_SPEC_COMPLEX;
+    bool floating = real == PAR_SPEC_FLOAT || real == PAR_SPEC_DOUBLE || real == (PAR_SPEC_LONG | PAR_SPEC_DOUBLE);
+
+    Err_AssertAt(line, floating, ERR_PAR_COMPLEX_NOT_FLOATING);
+    return Ast_ComplexType(Par_SpecType(real, line));
+}
+
 // Return the type a declaration's specifier keywords name.
 Ast_Type *Par_SpecType(Par_Spec specs, Ast_Line line)
 {
+    if (specs & PAR_SPEC_COMPLEX) {
+        return Par_ComplexSpecType(specs, line);
+    }
+
     int32_t base = specs & ~(PAR_SPEC_SIGNED | PAR_SPEC_UNSIGNED);
     bool floating = base == PAR_SPEC_FLOAT || base == PAR_SPEC_DOUBLE || base == (PAR_SPEC_LONG | PAR_SPEC_DOUBLE);
     Par_Spec explicit = specs & (PAR_SPEC_SIGNED | PAR_SPEC_UNSIGNED);

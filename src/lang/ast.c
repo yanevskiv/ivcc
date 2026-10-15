@@ -160,6 +160,40 @@ Ast_Type Ast_TypeLDouble = {
     .at_complete = AST_TYPE_COMPLETE
 };
 
+// The pair of floats.
+Ast_Type Ast_TypeFloatComplex = {
+    .at_kind     = AST_TYPE_KIND_COMPLEX,
+    .at_size     = AST_COMPLEX_PARTS * AST_TYPE_SIZE_FLOAT,
+    .at_align    = AST_TYPE_ALIGN_FLOAT,
+    .at_base     = &Ast_TypeFloat,
+    .at_complete = AST_TYPE_COMPLETE
+};
+
+// The pair of doubles.
+Ast_Type Ast_TypeDoubleComplex = {
+    .at_kind     = AST_TYPE_KIND_COMPLEX,
+    .at_size     = AST_COMPLEX_PARTS * AST_TYPE_SIZE_DOUBLE,
+    .at_align    = AST_TYPE_ALIGN_DOUBLE,
+    .at_base     = &Ast_TypeDouble,
+    .at_complete = AST_TYPE_COMPLETE
+};
+
+// The pair of long doubles.
+Ast_Type Ast_TypeLDoubleComplex = {
+    .at_kind     = AST_TYPE_KIND_COMPLEX,
+    .at_size     = AST_COMPLEX_PARTS * AST_TYPE_SIZE_LDOUBLE,
+    .at_align    = AST_TYPE_ALIGN_LDOUBLE,
+    .at_base     = &Ast_TypeLDouble,
+    .at_complete = AST_TYPE_COMPLETE
+};
+
+// Every complex type, by the kind of its real type.
+static Ast_Type *Ast_ComplexTypes[AST_TYPE_KIND_COUNT] = {
+    [AST_TYPE_KIND_FLOAT]   = &Ast_TypeFloatComplex,
+    [AST_TYPE_KIND_DOUBLE]  = &Ast_TypeDoubleComplex,
+    [AST_TYPE_KIND_LDOUBLE] = &Ast_TypeLDoubleComplex
+};
+
 // Every integer type.
 static Ast_Type *Ast_IntTypes[AST_TYPE_KIND_COUNT][2] = {
     [AST_TYPE_KIND_BOOL]  = {&Ast_TypeBool,  &Ast_TypeBool},
@@ -237,10 +271,28 @@ bool Ast_IsFloating(const Ast_Type *type)
     return type->at_kind >= AST_TYPE_KIND_FIRST_FLOAT && type->at_kind <= AST_TYPE_KIND_LAST_FLOAT;
 }
 
-// Return whether this type is an integer or a floating type.
+// Return whether this type is a complex type.
+bool Ast_IsComplex(const Ast_Type *type)
+{
+    return type->at_kind == AST_TYPE_KIND_COMPLEX;
+}
+
+// Return whether this type is an integer, a floating or a complex type.
 bool Ast_IsArithmetic(const Ast_Type *type)
 {
-    return Ast_IsInteger(type) || Ast_IsFloating(type);
+    return Ast_IsInteger(type) || Ast_IsFloating(type) || Ast_IsComplex(type);
+}
+
+// Return the complex type whose real type is real.
+Ast_Type *Ast_ComplexType(const Ast_Type *real)
+{
+    return Ast_ComplexTypes[real->at_kind];
+}
+
+// Return a complex type's real type, or the type itself when it is real.
+Ast_Type *Ast_RealType(Ast_Type *type)
+{
+    return Ast_IsComplex(type) ? type->at_base : type;
 }
 
 // Build the pointer type that points at base.
@@ -471,6 +523,9 @@ bool Ast_IsCompatibleUnqualified(const Ast_Type *a, const Ast_Type *b)
         case AST_TYPE_KIND_PTR: {
             return Ast_IsCompatible(a->at_base, b->at_base);
         } break;
+        case AST_TYPE_KIND_COMPLEX: {
+            return a->at_base->at_kind == b->at_base->at_kind;
+        } break;
         case AST_TYPE_KIND_ARRAY: {
             bool fixed = ! Ast_IsUnsized(a) && ! Ast_IsUnsized(b) && ! Ast_IsVla(a) && ! Ast_IsVla(b);
             return Ast_IsCompatible(a->at_base, b->at_base) && (! fixed || a->at_len == b->at_len);
@@ -572,6 +627,16 @@ Ast_Node *Ast_NewOpAssign(Ast_NodeKind op, Ast_Node *lhs, Ast_Node *rhs, Ast_Lin
 Ast_Node *Ast_NewPostInc(Ast_Node *lhs, int64_t step, Ast_Line line)
 {
     Ast_Node *node = Ast_NewUnary(AST_NODE_KIND_POSTINC, lhs, line);
+    node->an_step = step;
+    return node;
+}
+
+// Build a prefix ++ or --, the compound assignment that steps by one.
+Ast_Node *Ast_NewPreInc(Ast_Node *lhs, int64_t step, Ast_Line line)
+{
+    Ast_NodeKind op = step > 0 ? AST_NODE_KIND_ADD : AST_NODE_KIND_SUB;
+    Ast_Node *node = Ast_NewOpAssign(op, lhs, Ast_NewNum(1, line), line);
+
     node->an_step = step;
     return node;
 }

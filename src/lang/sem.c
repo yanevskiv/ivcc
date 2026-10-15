@@ -129,6 +129,10 @@ Ast_Type *Sem_PromoteArg(Ast_Type *type)
 // Return the type two arithmetic operands meet in.
 Ast_Type *Sem_CommonType(Ast_Type *lhs, Ast_Type *rhs)
 {
+    if (Ast_IsComplex(lhs) || Ast_IsComplex(rhs)) {
+        return Ast_ComplexType(Sem_CommonType(Ast_RealType(lhs), Ast_RealType(rhs)));
+    }
+
     lhs = Sem_Promote(lhs);
     rhs = Sem_Promote(rhs);
 
@@ -154,13 +158,13 @@ Ast_Type *Sem_CommonType(Ast_Type *lhs, Ast_Type *rhs)
     return Ast_IntegerType(sign->at_kind, AST_TYPE_UNSIGNED);
 }
 
-// Turn a floating value tested for truth into its comparison with zero.
+// Compare a floating or complex value tested for truth with zero.
 Ast_Node *Sem_Truth(Ast_Node *node)
 {
-    if (! node || ! node->an_type || ! Ast_IsFloating(node->an_type)) {
+    if (! node || ! node->an_type || (! Ast_IsFloating(node->an_type) && ! Ast_IsComplex(node->an_type))) {
         return node;
     }
-    return Sem_NewBinary(AST_NODE_KIND_NE, node, Ast_NewFNum(0, node->an_type, node->an_line), node->an_line);
+    return Sem_NewBinary(AST_NODE_KIND_NE, node, Ast_NewFNum(0, Ast_RealType(node->an_type), node->an_line), node->an_line);
 }
 
 // Return the type a value of this type has once arrays and functions decay.
@@ -304,6 +308,7 @@ int64_t Sem_Truncate(const Ast_Type *type, int64_t value)
         case AST_TYPE_KIND_FLOAT:
         case AST_TYPE_KIND_DOUBLE:
         case AST_TYPE_KIND_LDOUBLE:
+        case AST_TYPE_KIND_COMPLEX:
         case AST_TYPE_KIND_VOID:
         case AST_TYPE_KIND_PTR:
         case AST_TYPE_KIND_ARRAY:
@@ -503,13 +508,15 @@ bool Sem_FoldOp(Ast_NodeKind kind, int64_t lhs, int64_t rhs, Ast_TypeSign sign, 
     return true;
 }
 
-// Fold an integer a cast or a comparison makes of floating operands.
+// Fold an integer a cast or a comparison makes of floating or complex operands.
 bool Sem_FoldFromFloat(const Ast_Node *node, int64_t *value)
 {
     long double lhs = 0;
     long double rhs = 0;
+    long double ilhs = 0;
+    long double irhs = 0;
 
-    if (! Sem_FoldFloat(node->an_lhs, &lhs)) {
+    if (! Sem_FoldComplex(node->an_lhs, &lhs, &ilhs)) {
         return false;
     }
     if (node->an_kind == AST_NODE_KIND_CAST) {
@@ -517,16 +524,16 @@ bool Sem_FoldFromFloat(const Ast_Node *node, int64_t *value)
         *value = Sem_Truncate(node->an_type, high ? (int64_t) (uint64_t) lhs : (int64_t) lhs);
         return true;
     }
-    if (! Sem_FoldFloat(node->an_rhs, &rhs)) {
+    if (! Sem_FoldComplex(node->an_rhs, &rhs, &irhs)) {
         return false;
     }
 
     switch (node->an_kind) {
         case AST_NODE_KIND_EQ: {
-            *value = lhs == rhs;
+            *value = lhs == rhs && ilhs == irhs;
         } break;
         case AST_NODE_KIND_NE: {
-            *value = lhs != rhs;
+            *value = lhs != rhs || ilhs != irhs;
         } break;
         case AST_NODE_KIND_LT: {
             *value = lhs < rhs;
@@ -550,7 +557,7 @@ bool Sem_Fold(const Ast_Node *node, int64_t *value)
     if (! node) {
         return false;
     }
-    if (node->an_kind != AST_NODE_KIND_SIZEOF && node->an_lhs && node->an_lhs->an_type && Ast_IsFloating(node->an_lhs->an_type)) {
+    if (node->an_kind != AST_NODE_KIND_SIZEOF && node->an_lhs && node->an_lhs->an_type && (Ast_IsFloating(node->an_lhs->an_type) || Ast_IsComplex(node->an_lhs->an_type))) {
         return Sem_FoldFromFloat(node, value);
     }
 
@@ -671,6 +678,7 @@ bool Sem_FoldFloat(const Ast_Node *node, long double *value)
     int64_t cond = 0;
     long double lhs = 0;
     long double rhs = 0;
+    long double imag = 0;
 
     if (! node || ! node->an_type) {
         return false;
@@ -691,7 +699,7 @@ bool Sem_FoldFloat(const Ast_Node *node, long double *value)
             *value = Sem_RoundFloat(node->an_type, node->an_fval);
         } break;
         case AST_NODE_KIND_CAST: {
-            if (! Sem_FoldFloat(node->an_lhs, &lhs)) {
+            if (! Sem_FoldComplex(node->an_lhs, &lhs, &imag)) {
                 return false;
             }
             *value = Sem_RoundFloat(node->an_type, lhs);
@@ -716,6 +724,55 @@ bool Sem_FoldFloat(const Ast_Node *node, long double *value)
                 return false;
             }
             if (! Sem_FoldFloat(cond ? node->an_then : node->an_els, value)) {
+                return false;
+            }
+        } break;
+        default: {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Fold an arithmetic constant expression to its real and imaginary parts.
+bool Sem_FoldComplex(const Ast_Node *node, long double *real, long double *imag)
+{
+    int64_t cond = 0;
+
+    if (! node || ! node->an_type) {
+        return false;
+    }
+    if (! Ast_IsComplex(node->an_type)) {
+        *imag = 0;
+        return Sem_FoldFloat(node, real);
+    }
+
+    const Ast_Type *part = node->an_type->at_base;
+
+    switch (node->an_kind) {
+        case AST_NODE_KIND_FNUM: {
+            *real = 0;
+            *imag = Sem_RoundFloat(part, node->an_fval);
+        } break;
+        case AST_NODE_KIND_CAST: {
+            if (! Sem_FoldComplex(node->an_lhs, real, imag)) {
+                return false;
+            }
+            *real = Sem_RoundFloat(part, *real);
+            *imag = Sem_RoundFloat(part, *imag);
+        } break;
+        case AST_NODE_KIND_NEG: {
+            if (! Sem_FoldComplex(node->an_lhs, real, imag)) {
+                return false;
+            }
+            *real = -*real;
+            *imag = -*imag;
+        } break;
+        case AST_NODE_KIND_COND: {
+            if (! Sem_Fold(node->an_cond, &cond)) {
+                return false;
+            }
+            if (! Sem_FoldComplex(cond ? node->an_then : node->an_els, real, imag)) {
                 return false;
             }
         } break;
@@ -949,16 +1006,21 @@ Ast_Node *Sem_Target(Ast_Node *lhs, Ast_Var *ptr)
     return target;
 }
 
-// Return whether an assignment's floating operand calls for a rewrite.
+// Return whether an assignment's floating or complex operand needs a rewrite.
 bool Sem_NeedsFloatAssign(const Ast_Node *node)
 {
+    const Ast_Type *lhs = node->an_lhs->an_type;
+
     if (! Sem_CurFunc) {
         return false;
     }
-    if (Ast_IsFloating(node->an_lhs->an_type)) {
+    if (Ast_IsFloating(lhs) || Ast_IsComplex(lhs)) {
         return true;
     }
-    return node->an_kind == AST_NODE_KIND_OPASSIGN && Ast_IsFloating(node->an_rhs->an_type);
+    if (node->an_kind != AST_NODE_KIND_OPASSIGN) {
+        return false;
+    }
+    return Ast_IsFloating(node->an_rhs->an_type) || Ast_IsComplex(node->an_rhs->an_type);
 }
 
 // Put another node's contents in place of a node, keeping its place in a list.
@@ -1028,6 +1090,7 @@ void Sem_Arith(Ast_Node *node)
 
     if (! Sem_IsPointer(lhs) && ! Sem_IsPointer(rhs)) {
         Sem_NeedArithmetic(node);
+        Sem_RefuseComplexArith(node);
         Sem_UsualArith(node);
         return;
     }
@@ -1056,6 +1119,15 @@ void Sem_Arith(Ast_Node *node)
 
     node->an_rhs  = Sem_ScaleBy(node->an_rhs, Sem_Stride(lhs, node->an_line));
     node->an_type = Sem_Decay(lhs);
+}
+
+// Reject the complex operands arithmetic does not take yet.
+void Sem_RefuseComplexArith(const Ast_Node *node)
+{
+    bool lhs = Ast_IsComplex(node->an_lhs->an_type);
+    bool rhs = Ast_IsComplex(node->an_rhs->an_type);
+
+    Err_AssertAt(node->an_line, ! lhs && ! rhs, ERR_SEM_COMPLEX_ARITH_NOT_SUPPORTED);
 }
 
 // Reject a floating operand of an operator that takes only integers.
@@ -1092,6 +1164,12 @@ void Sem_NeedScalar(const Ast_Node *operand, Ast_Line line)
     Err_AssertAt(line, ! operand || ! operand->an_type || Sem_IsScalar(operand->an_type), ERR_SEM_OPERAND_NOT_SCALAR);
 }
 
+// Reject a complex operand of ++ or --, which take a real or pointer one.
+void Sem_NeedRealStep(const Ast_Type *type, Ast_Line line)
+{
+    Err_AssertAt(line, ! Ast_IsComplex(type), ERR_SEM_INCDEC_COMPLEX);
+}
+
 // Reject operands a compound assignment's operator cannot take.
 void Sem_CheckOpAssign(const Ast_Node *node)
 {
@@ -1123,8 +1201,11 @@ void Sem_CheckCast(Ast_Node *node)
     if (! from || to->at_kind == AST_TYPE_KIND_VOID) {
         return;
     }
+    bool tofloat = Ast_IsFloating(to) || Ast_IsComplex(to);
+    bool fromfloat = Ast_IsFloating(from) || Ast_IsComplex(from);
+
     Err_AssertAt(node->an_line, Sem_IsScalar(to) && Sem_IsScalar(from), ERR_SEM_CAST_NOT_SCALAR);
-    Err_AssertAt(node->an_line, (! Ast_IsFloating(to) || Ast_IsArithmetic(from)) && (! Ast_IsFloating(from) || Ast_IsArithmetic(to)), ERR_SEM_CAST_FLOATING);
+    Err_AssertAt(node->an_line, (! tofloat || Ast_IsArithmetic(from)) && (! fromfloat || Ast_IsArithmetic(to)), ERR_SEM_CAST_FLOATING);
     if (to->at_kind == AST_TYPE_KIND_BOOL) {
         node->an_lhs = Sem_Truth(node->an_lhs);
     }
@@ -1224,6 +1305,7 @@ void Sem_Annotate(Ast_Node *node)
         case AST_NODE_KIND_MUL:
         case AST_NODE_KIND_DIV: {
             Sem_NeedArithmetic(node);
+            Sem_RefuseComplexArith(node);
             Sem_UsualArith(node);
         } break;
 
@@ -1244,6 +1326,9 @@ void Sem_Annotate(Ast_Node *node)
             if (! Sem_IsPointer(node->an_lhs->an_type) && ! Sem_IsPointer(node->an_rhs->an_type)) {
                 Sem_NeedArithmetic(node);
                 Sem_UsualArith(node);
+            }
+            if (node->an_kind == AST_NODE_KIND_LT || node->an_kind == AST_NODE_KIND_LE) {
+                Err_AssertAt(node->an_line, ! Ast_IsComplex(node->an_lhs->an_type), ERR_SEM_COMPARE_COMPLEX);
             }
             node->an_type = &Ast_TypeInt;
         } break;
@@ -1343,6 +1428,9 @@ void Sem_Annotate(Ast_Node *node)
         case AST_NODE_KIND_OPASSIGN: {
             Err_AssertAt(node->an_line, Sem_IsLvalue(node->an_lhs), ERR_SEM_OPASSIGN_NOT_ASSIGNABLE);
             Err_AssertAt(node->an_line, Sem_IsModifiable(node->an_lhs->an_type), ERR_SEM_OPASSIGN_CONST);
+            if (node->an_step) {
+                Sem_NeedRealStep(node->an_lhs->an_type, node->an_line);
+            }
             Sem_CheckOpAssign(node);
             if (Sem_NeedsFloatAssign(node)) {
                 Sem_LowerOpAssign(node);
@@ -1360,6 +1448,7 @@ void Sem_Annotate(Ast_Node *node)
             Err_AssertAt(node->an_line, Sem_IsLvalue(node->an_lhs), ERR_SEM_INCDEC_NOT_ASSIGNABLE);
             Err_AssertAt(node->an_line, Sem_IsModifiable(type), ERR_SEM_INCDEC_CONST);
             Err_AssertAt(node->an_line, Ast_IsArithmetic(type) || type->at_kind == AST_TYPE_KIND_PTR, ERR_SEM_INCDEC_NOT_ARITHMETIC);
+            Sem_NeedRealStep(type, node->an_line);
             if (Sem_NeedsFloatAssign(node) || (Sem_IsPointer(type) && Ast_IsVla(type->at_base))) {
                 Sem_LowerPostInc(node);
                 break;

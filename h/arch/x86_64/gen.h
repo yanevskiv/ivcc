@@ -50,7 +50,6 @@
 // The sign bit of a float and of a double.
 #define GEN_X86_64_FLOAT_SIGN  0x80000000LL
 #define GEN_X86_64_DOUBLE_SIGN INT64_MIN
-
 // The float bits of 2^63 and 2^64, the edges of the unsigned 64-bit range.
 // [C99:6.3.1.4p1]: a floating value converted to an integer, truncated toward zero
 // [C99:6.3.1.4p2]: an integer converted to floating, rounded if inexact
@@ -210,6 +209,7 @@ bool          Gen_x86_64_IsWideUnsigned(const Ast_Type *type);
 bool          Gen_x86_64_IsHeldBy(const Ast_Type *type, Asm_x86_64_Width width);
 Asm_x86_64_Op Gen_x86_64_SseOp(Ast_NodeKind kind, const Ast_Type *type);
 Asm_x86_64_Op Gen_x86_64_X87Op(Ast_NodeKind kind);
+void          Gen_x86_64_EmitFloatStore(const Ast_Type *type, long double value, int32_t disp);
 void          Gen_x86_64_EmitFNum(const Ast_Node *node);
 void          Gen_x86_64_EmitX87Result(int32_t tmp);
 void          Gen_x86_64_EmitIntToX87(const Ast_Type *from);
@@ -221,6 +221,18 @@ void          Gen_x86_64_EmitFloatCompare(Ast_NodeKind kind);
 void          Gen_x86_64_EmitFloatBinary(Ast_Node *node);
 void          Gen_x86_64_EmitFloatNeg(Ast_Node *node);
 void          Gen_x86_64_EmitFltRounds(void);
+
+// Complex values
+// [C99:6.3.1.6p1]: a complex value converted to another, each part as its real type's
+// [C99:6.3.1.7p1]: a real value converted to complex, a zero imaginary part
+// [C99:6.3.1.7p2]: a complex value converted to real, its imaginary part discarded
+// [C99:6.5.3.3p3]: unary -, the negative of its operand
+// [C99:6.5.9p4]:   complex values equal when both their parts are
+void Gen_x86_64_EmitPartStore(const Ast_Type *from, const Ast_Type *part, int32_t disp);
+void Gen_x86_64_EmitComplexConvert(const Ast_Type *from, const Ast_Type *to, int32_t tmp);
+void Gen_x86_64_EmitPartCompare(Ast_NodeKind kind, const Ast_Type *part, int32_t disp);
+void Gen_x86_64_EmitComplexCompare(const Ast_Node *node);
+void Gen_x86_64_EmitComplexNeg(const Ast_Node *node);
 
 // Variable-length arrays
 // [C99:6.2.4p6]:   a variable length array, alive from its declaration to its scope's end
@@ -254,6 +266,8 @@ void Gen_x86_64_AssignTemps(Ast_Node *node, int32_t *offset);
 void Gen_x86_64_AssignLvarOffsets(Ast_Func *func);
 void Gen_x86_64_EmitStrings(void);
 void Gen_x86_64_EmitFloatConstant(uint8_t *bytes, const Ast_Node *item, const Ast_Var *var);
+void Gen_x86_64_EmitComplexConstant(uint8_t *bytes, const Ast_Node *item, const Ast_Var *var);
+void Gen_x86_64_EmitFloatBytes(uint8_t *bytes, const Ast_Type *type, long double value);
 void Gen_x86_64_EmitConstant(uint8_t *bytes, const Ast_Node *item, const Ast_Var *var, Gen_x86_64_Addr *addrs, int32_t *naddrs);
 void Gen_x86_64_EmitImage(const uint8_t *bytes, int32_t size, const Gen_x86_64_Addr *addrs, int32_t naddrs);
 void Gen_x86_64_EmitGlobal(Ast_Var *var);

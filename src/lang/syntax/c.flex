@@ -41,7 +41,7 @@ ALPHA   [A-Za-z_]
 ALNUM   [A-Za-z_0-9]
 HEX     [0-9A-Fa-f]
 ISUFFIX ([uU](l|L|ll|LL)?|(l|L|ll|LL)[uU]?)
-FSUFFIX [fFlL]
+FSUFFIX ([fFlL][iIjJ]?|[iIjJ][fFlL]?)
 DEXP    [eE][+-]?{DIGIT}+
 BEXP    [pP][+-]?{DIGIT}+
 
@@ -60,6 +60,8 @@ BEXP    [pP][+-]?{DIGIT}+
 "_Bool"                 return BOOL;
 "float"                 return FLOAT;
 "double"                return DOUBLE;
+"_Complex"              return COMPLEX;
+"_Imaginary"            { Err_RaiseAt((Ast_Line) yylineno, ERR_LEX_IMAGINARY_NOT_SUPPORTED); }
 "void"                  return VOID;
 "const"                 return CONST;
 "volatile"              return VOLATILE;

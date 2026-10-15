@@ -50,6 +50,7 @@ typedef struct Ast_Node Ast_Node;
 
 // The kind of a type, the integer and floating kinds in rank order.
 // [C99:6.2.5]:     types
+// [C99:6.2.5p11]:  float, double and long double _Complex
 // [C99:6.3.1.1p1]: integer conversion ranks
 typedef enum Ast_TypeKind Ast_TypeKind;
 enum Ast_TypeKind {
@@ -63,6 +64,7 @@ enum Ast_TypeKind {
     AST_TYPE_KIND_FLOAT,                              // float
     AST_TYPE_KIND_DOUBLE,                             // double
     AST_TYPE_KIND_LDOUBLE,                            // long double
+    AST_TYPE_KIND_COMPLEX,                            // a complex type
     AST_TYPE_KIND_PTR,                                // a pointer
     AST_TYPE_KIND_ARRAY,                              // an array
     AST_TYPE_KIND_FUNC,                               // a function
@@ -74,6 +76,10 @@ enum Ast_TypeKind {
     AST_TYPE_KIND_FIRST_FLOAT = AST_TYPE_KIND_FLOAT,  // narrowest floating kind
     AST_TYPE_KIND_LAST_FLOAT  = AST_TYPE_KIND_LDOUBLE // widest floating kind
 };
+
+// The parts of a complex value, its real part first.
+// [C99:6.2.5p13]: a complex type, as an array of two of its real type
+#define AST_COMPLEX_PARTS 2
 
 // The target ABI's sizes in bytes.
 typedef enum Ast_TypeSize Ast_TypeSize;
@@ -237,7 +243,7 @@ struct Ast_Type {
     int32_t          at_align;    // address multiple an object must sit on
     Ast_TypeSign     at_sign;     // signedness of an integer kind
     Ast_Qual         at_qual;     // the qualifiers written on the declaration
-    Ast_Type        *at_base;     // pointee for PTR, element type for ARRAY
+    Ast_Type        *at_base;     // pointee, element, or a COMPLEX's real type
     int32_t          at_len;      // element count for ARRAY
     Ast_Node        *at_vlen;     // run-time length of an ARRAY; NOP for `[*]`
     Ast_Var         *at_vsize;    // local that sizes a variable-length ARRAY
@@ -365,7 +371,7 @@ struct Ast_Node {
     Ast_Node    *an_casenext;   // next case of the switch this one belongs to
     int32_t      an_label;      // label number a case is emitted with
     int64_t      an_val;        // value of a NUM or a CASE
-    int64_t      an_step;       // amount a POSTINC steps by
+    int64_t      an_step;       // what a POSTINC or a prefix ++ or -- steps by
     int64_t      an_index;      // array index a DESIGNATOR names
     int32_t      an_offset;     // byte offset an INIT stores at
     int32_t      an_size;       // bytes a ZERO clears
@@ -422,8 +428,12 @@ extern Ast_Type Ast_TypeULLong;
 extern Ast_Type Ast_TypeFloat;
 extern Ast_Type Ast_TypeDouble;
 extern Ast_Type Ast_TypeLDouble;
+extern Ast_Type Ast_TypeFloatComplex;
+extern Ast_Type Ast_TypeDoubleComplex;
+extern Ast_Type Ast_TypeLDoubleComplex;
 
 // Type construction
+// [C99:6.2.5p12]:  a complex type's corresponding real type
 // [C99:6.2.5p20]:  derived types
 // [C99:6.2.7p1]:   compatible types
 // [C99:6.7.2.1p2]: no incomplete or function member, a flexible array last
@@ -435,7 +445,10 @@ Ast_Type   *Ast_IntegerType(Ast_TypeKind kind, Ast_TypeSign sign);
 Ast_Type   *Ast_Qualify(Ast_Type *type, Ast_Qual qual);
 bool        Ast_IsInteger(const Ast_Type *type);
 bool        Ast_IsFloating(const Ast_Type *type);
+bool        Ast_IsComplex(const Ast_Type *type);
 bool        Ast_IsArithmetic(const Ast_Type *type);
+Ast_Type   *Ast_ComplexType(const Ast_Type *real);
+Ast_Type   *Ast_RealType(Ast_Type *type);
 Ast_Type   *Ast_NewPointer(Ast_Type *base);
 Ast_Type   *Ast_NewArray(Ast_Type *base, int32_t len);
 Ast_Type   *Ast_NewUnsizedArray(Ast_Type *base);
@@ -465,6 +478,7 @@ Ast_Node *Ast_NewFNum(long double val, Ast_Type *type, Ast_Line line);
 Ast_Node *Ast_NewVarNode(Ast_Var *var, Ast_Line line);
 Ast_Node *Ast_NewOpAssign(Ast_NodeKind op, Ast_Node *lhs, Ast_Node *rhs, Ast_Line line);
 Ast_Node *Ast_NewPostInc(Ast_Node *lhs, int64_t step, Ast_Line line);
+Ast_Node *Ast_NewPreInc(Ast_Node *lhs, int64_t step, Ast_Line line);
 Ast_Node *Ast_NewMemberNode(Ast_Node *lhs, const char *name, Ast_Line line);
 void      Ast_AddFileAsm(Ast_Node *node);
 

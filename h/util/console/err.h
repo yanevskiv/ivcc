@@ -112,6 +112,7 @@ enum Err_Code {
     ERR_PP_WARNING_DIRECTIVE,              // shouldn't reach a #warning
 
     ERR_LEX_CHAR_NOT_EXPECTED,             // can't use a character that starts no token
+    ERR_LEX_IMAGINARY_NOT_SUPPORTED,       // can't use `_Imaginary`, whose types ivcc leaves out
 
     ERR_PAR_SYNTAX,                        // can't write what C's grammar does not allow
     ERR_PAR_TEXT_TOO_LONG,                 // can't lex more than 2 GiB of preprocessed text
@@ -142,6 +143,7 @@ enum Err_Code {
     ERR_PAR_VOID_SIGNED,                   // can't have a signed or unsigned `void`
     ERR_PAR_BOOL_SIGNED,                   // can't have a signed or unsigned `_Bool`
     ERR_PAR_FLOAT_SIGNED,                  // can't have a signed or unsigned floating type
+    ERR_PAR_COMPLEX_NOT_FLOATING,          // can't have `_Complex` but with `float`, `double` or `long double`
     ERR_PAR_VA_ARG_TYPE,                   // can't take an incomplete type or an array from `__builtin_va_arg`
     ERR_PAR_BITFIELD_NOT_CONSTANT,         // can't have a bit-field width known only at run time
     ERR_PAR_BITFIELD_NOT_INTEGER,          // can't have a bit-field of a type that is not an integer
@@ -253,6 +255,9 @@ enum Err_Code {
     ERR_SEM_OPERAND_NOT_ARITHMETIC,        // can't apply an arithmetic operator to what is not a number
     ERR_SEM_OPASSIGN_NOT_ARITHMETIC,       // can't apply an arithmetic `op=` to what is not a number
     ERR_SEM_INCDEC_NOT_ARITHMETIC,         // can't increment or decrement what is not a number or a pointer
+    ERR_SEM_INCDEC_COMPLEX,                // can't increment or decrement a complex value
+    ERR_SEM_COMPARE_COMPLEX,               // can't order complex values with `<`, `>`, `<=` or `>=`
+    ERR_SEM_COMPLEX_ARITH_NOT_SUPPORTED,   // can't add, subtract, multiply or divide complex values yet
     ERR_SEM_OPERAND_NOT_INTEGER,           // can't apply an integer operator to what is not an integer
     ERR_SEM_OPERAND_NOT_SCALAR,            // can't test for truth what is not a number or a pointer
     ERR_SEM_CAST_NOT_SCALAR,               // can't cast anything but a number or pointer to one or to `void`
@@ -268,6 +273,7 @@ enum Err_Code {
     ERR_GEN_INIT_ADDRESS_WIDTH,            // can't initialize an object narrower than a pointer with an address
     ERR_GEN_INIT_NOT_CONSTANT,             // can't initialize a file-scope integer or pointer with a run-time value
     ERR_GEN_INIT_FLOAT_NOT_CONSTANT,       // can't initialize a file-scope floating object with a run-time value
+    ERR_GEN_INIT_COMPLEX_NOT_CONSTANT,     // can't initialize a file-scope complex object with a run-time value
 
     ERR_LINK_MULTIPLE_DEFINITION,          // can't link two definitions of one symbol
     ERR_LINK_OBJECT_NOT_READABLE,          // can't link a file that is no archive and no object the linker reads

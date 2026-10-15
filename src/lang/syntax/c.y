@@ -60,7 +60,7 @@ void yyerror(const char *s);
 %token <fnum> FNUM
 %token <name> IDENT
 %token <str>  STR
-%token INT CHAR SHORT LONG SIGNED UNSIGNED BOOL FLOAT DOUBLE VOID RETURN IF ELSE FOR WHILE DO BREAK CONTINUE SIZEOF
+%token INT CHAR SHORT LONG SIGNED UNSIGNED BOOL FLOAT DOUBLE COMPLEX VOID RETURN IF ELSE FOR WHILE DO BREAK CONTINUE SIZEOF
 %token CONST VOLATILE RESTRICT
 %token STRUCT UNION ENUM TYPEDEF
 %token <name> TYPEDEF_NAME
@@ -268,6 +268,7 @@ spec
     | BOOL                 { Par_ClearSpecs(&$$); $$.ps_specs = PAR_SPEC_BOOL; }
     | FLOAT                { Par_ClearSpecs(&$$); $$.ps_specs = PAR_SPEC_FLOAT; }
     | DOUBLE               { Par_ClearSpecs(&$$); $$.ps_specs = PAR_SPEC_DOUBLE; }
+    | COMPLEX              { Par_ClearSpecs(&$$); $$.ps_specs = PAR_SPEC_COMPLEX; }
     | VOID                 { Par_ClearSpecs(&$$); $$.ps_specs = PAR_SPEC_VOID; }
     | qual                 { Par_ClearSpecs(&$$); $$.ps_qual = $1; }
     | named_type           { $$ = $1; }
@@ -671,8 +672,8 @@ unary
     | ADD cast             { $$ = $2; }
     | MUL cast             { $$ = Ast_NewUnary(AST_NODE_KIND_DEREF, $2, @1); }
     | AMP cast             { $$ = Ast_NewUnary(AST_NODE_KIND_ADDR, $2, @1); }
-    | INC unary            { $$ = Ast_NewOpAssign(AST_NODE_KIND_ADD, $2, Ast_NewNum(1, @1), @1); }
-    | DEC unary            { $$ = Ast_NewOpAssign(AST_NODE_KIND_SUB, $2, Ast_NewNum(1, @1), @1); }
+    | INC unary            { $$ = Ast_NewPreInc($2, 1, @1); }
+    | DEC unary            { $$ = Ast_NewPreInc($2, -1, @1); }
     | SIZEOF unary         { $$ = Ast_NewUnary(AST_NODE_KIND_SIZEOF, $2, @1); }
     | SIZEOF LPAREN type_name RPAREN
         { $$ = Par_SizeOfType($3, @1); }

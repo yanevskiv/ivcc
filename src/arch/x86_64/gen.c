@@ -872,6 +872,7 @@ void Gen_x86_64_EmitCast(const Ast_Type *type)
         case AST_TYPE_KIND_FLOAT:
         case AST_TYPE_KIND_DOUBLE:
         case AST_TYPE_KIND_LDOUBLE:
+        case AST_TYPE_KIND_COMPLEX:
         case AST_TYPE_KIND_VOID:
         case AST_TYPE_KIND_PTR:
         case AST_TYPE_KIND_ARRAY:
@@ -973,7 +974,7 @@ void Gen_x86_64_EmitBitfieldStore(const Ast_Member *member)
 // Return whether a value of this type travels in %rax as its address.
 bool Gen_x86_64_ByAddress(const Ast_Type *type)
 {
-    return Sem_IsAggregate(type) || type->at_kind == AST_TYPE_KIND_LDOUBLE;
+    return Sem_IsAggregate(type) || type->at_kind == AST_TYPE_KIND_LDOUBLE || Ast_IsComplex(type);
 }
 
 // Return whether a value of this type is a float or a double.
@@ -1039,22 +1040,24 @@ Asm_x86_64_Op Gen_x86_64_X87Op(Ast_NodeKind kind)
     }
 }
 
-// Load a floating literal into %rax.
-void Gen_x86_64_EmitFNum(const Ast_Node *node)
+// Store a floating constant of a real type at disp(%rbp).
+void Gen_x86_64_EmitFloatStore(const Ast_Type *type, long double value, int32_t disp)
 {
     uint8_t bytes[FP_EXTENDED_SIZE];
     uint64_t low = 0;
     uint64_t high = 0;
 
-    switch (node->an_type->at_kind) {
+    switch (type->at_kind) {
         case AST_TYPE_KIND_FLOAT: {
-            Asm_x86_64_EmitMovImm(Fp_HostFloatBits((float) node->an_fval), ASM_X86_64_REG_RAX);
+            Asm_x86_64_EmitMovImm(Fp_HostFloatBits((float) value), ASM_X86_64_REG_RCX);
+            Asm_x86_64_EmitMovStore(ASM_X86_64_REG_RCX, ASM_X86_64_REG_RBP, disp, ASM_X86_64_WIDTH_32);
         } break;
         case AST_TYPE_KIND_DOUBLE: {
-            Asm_x86_64_EmitMovImm((int64_t) Fp_HostDoubleBits((double) node->an_fval), ASM_X86_64_REG_RAX);
+            Asm_x86_64_EmitMovImm((int64_t) Fp_HostDoubleBits((double) value), ASM_X86_64_REG_RCX);
+            Asm_x86_64_EmitMovStore(ASM_X86_64_REG_RCX, ASM_X86_64_REG_RBP, disp, ASM_X86_64_WIDTH_64);
         } break;
         default: {
-            Fp_HostEncodeExtended(node->an_fval, bytes);
+            Fp_HostEncodeExtended(value, bytes);
             for (int32_t i = 0; i < FP_EXTENDED_SIZE; i++) {
                 if (i < FP_EXTENDED_TOP_OFF) {
                     low |= (uint64_t) bytes[i] << (i * FP_BITS_PER_BYTE);
@@ -1063,9 +1066,32 @@ void Gen_x86_64_EmitFNum(const Ast_Node *node)
                 }
             }
             Asm_x86_64_EmitMovImm((int64_t) low, ASM_X86_64_REG_RCX);
-            Asm_x86_64_EmitMovStore(ASM_X86_64_REG_RCX, ASM_X86_64_REG_RBP, node->an_tmp, ASM_X86_64_WIDTH_64);
+            Asm_x86_64_EmitMovStore(ASM_X86_64_REG_RCX, ASM_X86_64_REG_RBP, disp, ASM_X86_64_WIDTH_64);
             Asm_x86_64_EmitMovImm((int64_t) high, ASM_X86_64_REG_RCX);
-            Asm_x86_64_EmitMovStore(ASM_X86_64_REG_RCX, ASM_X86_64_REG_RBP, node->an_tmp + FP_EXTENDED_TOP_OFF, ASM_X86_64_WIDTH_16);
+            Asm_x86_64_EmitMovStore(ASM_X86_64_REG_RCX, ASM_X86_64_REG_RBP, disp + FP_EXTENDED_TOP_OFF, ASM_X86_64_WIDTH_16);
+        }
+    }
+}
+
+// Load a floating literal into %rax, an imaginary one's (0, v) by address.
+void Gen_x86_64_EmitFNum(const Ast_Node *node)
+{
+    const Ast_Type *type = node->an_type;
+
+    switch (type->at_kind) {
+        case AST_TYPE_KIND_FLOAT: {
+            Asm_x86_64_EmitMovImm(Fp_HostFloatBits((float) node->an_fval), ASM_X86_64_REG_RAX);
+        } break;
+        case AST_TYPE_KIND_DOUBLE: {
+            Asm_x86_64_EmitMovImm((int64_t) Fp_HostDoubleBits((double) node->an_fval), ASM_X86_64_REG_RAX);
+        } break;
+        case AST_TYPE_KIND_COMPLEX: {
+            Gen_x86_64_EmitFloatStore(type->at_base, 0, node->an_tmp);
+            Gen_x86_64_EmitFloatStore(type->at_base, node->an_fval, node->an_tmp + type->at_base->at_size);
+            Asm_x86_64_EmitLea(ASM_X86_64_REG_RBP, node->an_tmp, ASM_X86_64_REG_RAX);
+        } break;
+        default: {
+            Gen_x86_64_EmitFloatStore(type, node->an_fval, node->an_tmp);
             Asm_x86_64_EmitLea(ASM_X86_64_REG_RBP, node->an_tmp, ASM_X86_64_REG_RAX);
         }
     }
@@ -1169,6 +1195,10 @@ void Gen_x86_64_EmitConvert(const Ast_Type *from, const Ast_Type *to, int32_t tm
     bool wide = Gen_x86_64_IsWideUnsigned(from) || Gen_x86_64_IsWideUnsigned(to);
 
     if (to->at_kind == AST_TYPE_KIND_VOID) {
+        return;
+    }
+    if (Ast_IsComplex(from) || Ast_IsComplex(to)) {
+        Gen_x86_64_EmitComplexConvert(from, to, tmp);
         return;
     }
     if (! Ast_IsFloating(from) && ! Ast_IsFloating(to)) {
@@ -1292,6 +1322,101 @@ void Gen_x86_64_EmitFltRounds(void)
     Asm_x86_64_EmitShr(ASM_X86_64_REG_RAX);
     Asm_x86_64_EmitMovImm(GEN_X86_64_FLT_ROUNDS_MASK, ASM_X86_64_REG_RCX);
     Asm_x86_64_EmitAnd(ASM_X86_64_REG_RCX, ASM_X86_64_REG_RAX);
+}
+
+// Convert an arithmetic value in %rax into one part of a complex at disp(%rbp).
+void Gen_x86_64_EmitPartStore(const Ast_Type *from, const Ast_Type *part, int32_t disp)
+{
+    Gen_x86_64_EmitConvert(from, part, disp);
+    if (! Gen_x86_64_ByAddress(part)) {
+        Asm_x86_64_EmitMovStore(ASM_X86_64_REG_RAX, ASM_X86_64_REG_RBP, disp, Gen_x86_64_TypeWidth(part));
+    }
+}
+
+// Convert the value in %rax to or from a complex type, part by part.
+void Gen_x86_64_EmitComplexConvert(const Ast_Type *from, const Ast_Type *to, int32_t tmp)
+{
+    if (! Ast_IsComplex(to)) {
+        Gen_x86_64_EmitLoad(from->at_base);
+        Gen_x86_64_EmitConvert(from->at_base, to, tmp);
+        return;
+    }
+
+    const Ast_Type *part = to->at_base;
+
+    if (! Ast_IsComplex(from)) {
+        Asm_x86_64_EmitLea(ASM_X86_64_REG_RBP, tmp + part->at_size, ASM_X86_64_REG_RDI);
+        Gen_x86_64_EmitZero(part->at_size);
+        Gen_x86_64_EmitPartStore(from, part, tmp);
+        Asm_x86_64_EmitLea(ASM_X86_64_REG_RBP, tmp, ASM_X86_64_REG_RAX);
+        return;
+    }
+
+    Gen_x86_64_EmitPush();
+    Gen_x86_64_EmitLoad(from->at_base);
+    Gen_x86_64_EmitPartStore(from->at_base, part, tmp);
+    Gen_x86_64_EmitPop(ASM_X86_64_REG_RAX);
+    Asm_x86_64_EmitAddImm(from->at_base->at_size, ASM_X86_64_REG_RAX);
+    Gen_x86_64_EmitLoad(from->at_base);
+    Gen_x86_64_EmitPartStore(from->at_base, part, tmp + part->at_size);
+    Asm_x86_64_EmitLea(ASM_X86_64_REG_RBP, tmp, ASM_X86_64_REG_RAX);
+}
+
+// Compare the parts at disp(%rsi) and disp(%rdi) into 0 or 1 in %rax.
+void Gen_x86_64_EmitPartCompare(Ast_NodeKind kind, const Ast_Type *part, int32_t disp)
+{
+    if (part->at_kind == AST_TYPE_KIND_LDOUBLE) {
+        Asm_x86_64_EmitX87Mem(ASM_X86_64_OP_FLDT, ASM_X86_64_REG_RSI, disp);
+        Asm_x86_64_EmitX87Mem(ASM_X86_64_OP_FLDT, ASM_X86_64_REG_RDI, disp);
+        Asm_x86_64_EmitX87(ASM_X86_64_OP_FUCOMIP);
+        Asm_x86_64_EmitX87(ASM_X86_64_OP_FSTP);
+        Gen_x86_64_EmitFloatCompare(kind);
+        return;
+    }
+    Gen_x86_64_EmitLoadFrom(ASM_X86_64_REG_RDI, disp, ASM_X86_64_REG_RAX, part);
+    Asm_x86_64_EmitMovToXmm(ASM_X86_64_REG_RAX, ASM_X86_64_XMM0);
+    Gen_x86_64_EmitLoadFrom(ASM_X86_64_REG_RSI, disp, ASM_X86_64_REG_RAX, part);
+    Asm_x86_64_EmitMovToXmm(ASM_X86_64_REG_RAX, ASM_X86_64_XMM1);
+    Asm_x86_64_EmitSse(Gen_x86_64_SseOp(kind, part), ASM_X86_64_XMM1, ASM_X86_64_XMM0);
+    Gen_x86_64_EmitFloatCompare(kind);
+}
+
+// Compare the complex values at %rax and %rdi, equal when both parts are.
+void Gen_x86_64_EmitComplexCompare(const Ast_Node *node)
+{
+    const Ast_Type *part = node->an_lhs->an_type->at_base;
+
+    Asm_x86_64_EmitMovRR(ASM_X86_64_REG_RAX, ASM_X86_64_REG_RSI);
+    Gen_x86_64_EmitPartCompare(node->an_kind, part, 0);
+    Asm_x86_64_EmitMovRR(ASM_X86_64_REG_RAX, ASM_X86_64_REG_RDX);
+    Gen_x86_64_EmitPartCompare(node->an_kind, part, part->at_size);
+    if (node->an_kind == AST_NODE_KIND_EQ) {
+        Asm_x86_64_EmitAnd(ASM_X86_64_REG_RDX, ASM_X86_64_REG_RAX);
+    } else {
+        Asm_x86_64_EmitOr(ASM_X86_64_REG_RDX, ASM_X86_64_REG_RAX);
+    }
+}
+
+// Negate the complex value at %rax into the node's frame slot, part by part.
+void Gen_x86_64_EmitComplexNeg(const Ast_Node *node)
+{
+    const Ast_Type *part = node->an_type->at_base;
+
+    Asm_x86_64_EmitMovRR(ASM_X86_64_REG_RAX, ASM_X86_64_REG_RSI);
+    for (int32_t k = 0; k < AST_COMPLEX_PARTS; k++) {
+        int32_t disp = k * part->at_size;
+        if (part->at_kind == AST_TYPE_KIND_LDOUBLE) {
+            Asm_x86_64_EmitX87Mem(ASM_X86_64_OP_FLDT, ASM_X86_64_REG_RSI, disp);
+            Asm_x86_64_EmitX87(ASM_X86_64_OP_FCHS);
+            Asm_x86_64_EmitX87Mem(ASM_X86_64_OP_FSTPT, ASM_X86_64_REG_RBP, node->an_tmp + disp);
+            continue;
+        }
+        Gen_x86_64_EmitLoadFrom(ASM_X86_64_REG_RSI, disp, ASM_X86_64_REG_RAX, part);
+        Asm_x86_64_EmitMovImm(part->at_kind == AST_TYPE_KIND_FLOAT ? GEN_X86_64_FLOAT_SIGN : GEN_X86_64_DOUBLE_SIGN, ASM_X86_64_REG_RCX);
+        Asm_x86_64_EmitXor(ASM_X86_64_REG_RCX, ASM_X86_64_REG_RAX);
+        Asm_x86_64_EmitMovStore(ASM_X86_64_REG_RAX, ASM_X86_64_REG_RBP, node->an_tmp + disp, Gen_x86_64_TypeWidth(part));
+    }
+    Asm_x86_64_EmitLea(ASM_X86_64_REG_RBP, node->an_tmp, ASM_X86_64_REG_RAX);
 }
 
 // Record the frame offset a new variable-length array saved %rsp at.
@@ -1580,6 +1705,10 @@ void Gen_x86_64_EmitExpr(Ast_Node *node)
         } break;
         case AST_NODE_KIND_NEG: {
             Gen_x86_64_EmitExpr(node->an_lhs);
+            if (Ast_IsComplex(node->an_type)) {
+                Gen_x86_64_EmitComplexNeg(node);
+                break;
+            }
             if (Ast_IsFloating(node->an_type)) {
                 Gen_x86_64_EmitFloatNeg(node);
                 break;
@@ -1668,6 +1797,10 @@ void Gen_x86_64_EmitExpr(Ast_Node *node)
                 Gen_x86_64_EmitPush();
                 Gen_x86_64_EmitExpr(node->an_lhs);
                 Gen_x86_64_EmitPop(ASM_X86_64_REG_RDI);
+            }
+            if (Ast_IsComplex(node->an_lhs->an_type)) {
+                Gen_x86_64_EmitComplexCompare(node);
+                break;
             }
             if (Ast_IsFloating(node->an_lhs->an_type)) {
                 Gen_x86_64_EmitFloatBinary(node);
@@ -1934,7 +2067,7 @@ bool Gen_x86_64_NeedsTemp(const Ast_Node *node)
         case AST_NODE_KIND_MUL:
         case AST_NODE_KIND_DIV:
         case AST_NODE_KIND_NEG: {
-            return node->an_type->at_kind == AST_TYPE_KIND_LDOUBLE;
+            return node->an_type->at_kind == AST_TYPE_KIND_LDOUBLE || Ast_IsComplex(node->an_type);
         } break;
         default: {
             return false;
@@ -2008,12 +2141,31 @@ void Gen_x86_64_EmitStrings(void)
 // Write one floating initializer into the bytes it fills.
 void Gen_x86_64_EmitFloatConstant(uint8_t *bytes, const Ast_Node *item, const Ast_Var *var)
 {
-    uint32_t single = 0;
-    uint64_t dbl = 0;
     long double value = 0;
 
     Err_AssertAt(var->av_line, Sem_FoldFloat(item->an_lhs, &value), ERR_GEN_INIT_FLOAT_NOT_CONSTANT, var->av_name);
-    switch (item->an_type->at_kind) {
+    Gen_x86_64_EmitFloatBytes(bytes, item->an_type, value);
+}
+
+// Write one complex initializer into the bytes it fills, part by part.
+void Gen_x86_64_EmitComplexConstant(uint8_t *bytes, const Ast_Node *item, const Ast_Var *var)
+{
+    const Ast_Type *part = item->an_type->at_base;
+    long double real = 0;
+    long double imag = 0;
+
+    Err_AssertAt(var->av_line, Sem_FoldComplex(item->an_lhs, &real, &imag), ERR_GEN_INIT_COMPLEX_NOT_CONSTANT, var->av_name);
+    Gen_x86_64_EmitFloatBytes(bytes, part, real);
+    Gen_x86_64_EmitFloatBytes(bytes + part->at_size, part, imag);
+}
+
+// Write a value of a real floating type into the bytes it fills.
+void Gen_x86_64_EmitFloatBytes(uint8_t *bytes, const Ast_Type *type, long double value)
+{
+    uint32_t single = 0;
+    uint64_t dbl = 0;
+
+    switch (type->at_kind) {
         case AST_TYPE_KIND_FLOAT: {
             single = Fp_HostFloatBits((float) value);
             for (int32_t i = 0; i < AST_TYPE_SIZE_FLOAT; i++) {
@@ -2044,6 +2196,10 @@ void Gen_x86_64_EmitConstant(uint8_t *bytes, const Ast_Node *item, const Ast_Var
     Err_AssertAt(var->av_line, offset + size <= var->av_type->at_size, ERR_GEN_INIT_TOO_LARGE, var->av_name);
     if (Ast_IsFloating(item->an_type)) {
         Gen_x86_64_EmitFloatConstant(bytes + offset, item, var);
+        return;
+    }
+    if (Ast_IsComplex(item->an_type)) {
+        Gen_x86_64_EmitComplexConstant(bytes + offset, item, var);
         return;
     }
     if (Sem_FoldAddr(item->an_lhs, &symbol, &addend)) {

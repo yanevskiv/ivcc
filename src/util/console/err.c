@@ -344,6 +344,13 @@ static const Err_Entry Err_Table[ERR_CODE_COUNT] = {
         .ee_format = "unexpected character '%s'"
     },
 
+    // Args: none
+    [ERR_LEX_IMAGINARY_NOT_SUPPORTED] = {
+        .ee_level  = ERR_LEVEL_FATAL,
+        .ee_name   = "ERR_LEX_IMAGINARY_NOT_SUPPORTED",
+        .ee_format = "imaginary types are not supported"
+    },
+
     // Args: [parser message]
     [ERR_PAR_SYNTAX] = {
         .ee_level  = ERR_LEVEL_FATAL,
@@ -545,6 +552,13 @@ static const Err_Entry Err_Table[ERR_CODE_COUNT] = {
         .ee_level  = ERR_LEVEL_FATAL,
         .ee_name   = "ERR_PAR_FLOAT_SIGNED",
         .ee_format = "a floating type cannot be signed or unsigned"
+    },
+
+    // Args: none
+    [ERR_PAR_COMPLEX_NOT_FLOATING] = {
+        .ee_level  = ERR_LEVEL_FATAL,
+        .ee_name   = "ERR_PAR_COMPLEX_NOT_FLOATING",
+        .ee_format = "'_Complex' takes only 'float', 'double' or 'long double'"
     },
 
     // Args: none
@@ -1311,6 +1325,27 @@ static const Err_Entry Err_Table[ERR_CODE_COUNT] = {
     },
 
     // Args: none
+    [ERR_SEM_INCDEC_COMPLEX] = {
+        .ee_level  = ERR_LEVEL_FATAL,
+        .ee_name   = "ERR_SEM_INCDEC_COMPLEX",
+        .ee_format = "'++' and '--' take only real or pointer operands, not complex ones"
+    },
+
+    // Args: none
+    [ERR_SEM_COMPARE_COMPLEX] = {
+        .ee_level  = ERR_LEVEL_FATAL,
+        .ee_name   = "ERR_SEM_COMPARE_COMPLEX",
+        .ee_format = "'<', '>', '<=' and '>=' take only real or pointer operands, not complex ones"
+    },
+
+    // Args: none
+    [ERR_SEM_COMPLEX_ARITH_NOT_SUPPORTED] = {
+        .ee_level  = ERR_LEVEL_FATAL,
+        .ee_name   = "ERR_SEM_COMPLEX_ARITH_NOT_SUPPORTED",
+        .ee_format = "arithmetic on complex values is not supported yet"
+    },
+
+    // Args: none
     [ERR_SEM_OPERAND_NOT_INTEGER] = {
         .ee_level  = ERR_LEVEL_FATAL,
         .ee_name   = "ERR_SEM_OPERAND_NOT_INTEGER",
@@ -1406,6 +1441,13 @@ static const Err_Entry Err_Table[ERR_CODE_COUNT] = {
         .ee_level  = ERR_LEVEL_FATAL,
         .ee_name   = "ERR_GEN_INIT_FLOAT_NOT_CONSTANT",
         .ee_format = "initializer for '%s' is not a floating constant"
+    },
+
+    // Args: [name]
+    [ERR_GEN_INIT_COMPLEX_NOT_CONSTANT] = {
+        .ee_level  = ERR_LEVEL_FATAL,
+        .ee_name   = "ERR_GEN_INIT_COMPLEX_NOT_CONSTANT",
+        .ee_format = "initializer for '%s' is not a complex constant"
     },
 
     // Args: [symbol]

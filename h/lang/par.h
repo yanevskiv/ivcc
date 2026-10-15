@@ -52,6 +52,11 @@
 #define PAR_INF        "INF"
 #define PAR_NAN_TAGGED "NAN(%s)"
 
+// The letters a floating literal may end in, and gcc's that make it imaginary.
+// [C99:6.4.4.2p1]: f, l, F and L, the floating suffixes
+#define PAR_FLOAT_SUFFIXES     "fFlLiIjJ"
+#define PAR_IMAGINARY_SUFFIXES "iIjJ"
+
 // All bits of one byte set.
 #define PAR_BYTE_MASK 0xFF
 
@@ -99,18 +104,19 @@ enum Par_AsmQual {
 // [C99:6.7.2p2]: the sets of type specifiers that name a type
 typedef enum Par_Spec Par_Spec;
 enum Par_Spec {
-    PAR_SPEC_NONE     = 0,      // no specifier keyword was written
-    PAR_SPEC_VOID     = 1 << 0, // void
-    PAR_SPEC_BOOL     = 1 << 1, // _Bool
-    PAR_SPEC_CHAR     = 1 << 2, // char
-    PAR_SPEC_SHORT    = 1 << 3, // short
-    PAR_SPEC_INT      = 1 << 4, // int
-    PAR_SPEC_LONG     = 1 << 5, // the first `long`
-    PAR_SPEC_LLONG    = 1 << 6, // set when a second `long` arrives
-    PAR_SPEC_SIGNED   = 1 << 7, // signed
-    PAR_SPEC_UNSIGNED = 1 << 8, // unsigned
-    PAR_SPEC_FLOAT    = 1 << 9, // float
-    PAR_SPEC_DOUBLE   = 1 << 10 // double
+    PAR_SPEC_NONE     = 0,       // no specifier keyword was written
+    PAR_SPEC_VOID     = 1 << 0,  // void
+    PAR_SPEC_BOOL     = 1 << 1,  // _Bool
+    PAR_SPEC_CHAR     = 1 << 2,  // char
+    PAR_SPEC_SHORT    = 1 << 3,  // short
+    PAR_SPEC_INT      = 1 << 4,  // int
+    PAR_SPEC_LONG     = 1 << 5,  // the first `long`
+    PAR_SPEC_LLONG    = 1 << 6,  // set when a second `long` arrives
+    PAR_SPEC_SIGNED   = 1 << 7,  // signed
+    PAR_SPEC_UNSIGNED = 1 << 8,  // unsigned
+    PAR_SPEC_FLOAT    = 1 << 9,  // float
+    PAR_SPEC_DOUBLE   = 1 << 10, // double
+    PAR_SPEC_COMPLEX  = 1 << 11  // _Complex
 };
 
 // The storage-class and function specifiers a place in the grammar allows.
@@ -161,11 +167,11 @@ struct Par_Num {
     Ast_Type *pn_type; // its type, from its value and suffix
 };
 
-// A floating literal.
+// A floating literal, gcc's imaginary ones a complex type's of value (0, v).
 // [C99:6.4.4.2p4]: double, float by f or F, long double by l or L
 typedef struct Par_FNum Par_FNum;
 struct Par_FNum {
-    long double pf_val;  // its value
+    long double pf_val;  // its value, an imaginary literal's imaginary part
     Ast_Type   *pf_type; // its type, from its suffix
 };
 
@@ -309,6 +315,7 @@ Par_Specs   Par_StorageSpec(Ast_Storage storage);
 Par_Spec    Par_AddSpec(Par_Spec specs, Par_Spec spec, Ast_Line line);
 void        Par_TakeSpec(Par_Specs *into, const Par_Specs *one, Ast_Line line);
 Ast_Storage Par_SpecsStorage(const Par_Specs *specs, Par_StorageUse use, Ast_Line line);
+Ast_Type   *Par_ComplexSpecType(Par_Spec specs, Ast_Line line);
 Ast_Type   *Par_SpecType(Par_Spec specs, Ast_Line line);
 Ast_Type   *Par_SpecsType(const Par_Specs *specs, Ast_Line line);
 Ast_Type   *Par_VaListType(void);

@@ -50,7 +50,7 @@ bool        Sem_SameType(const Ast_Type *a, const Ast_Type *b);
 // Conversions
 // [C99:6.3.1.1p2]:  the integer promotions
 // [C99:6.3.1.2p1]:  a scalar converted to _Bool, 0 or 1
-// [C99:6.3.1.8p1]:  the usual arithmetic conversions
+// [C99:6.3.1.8p1]:  the usual arithmetic conversions, a complex result if either is
 // [C99:6.3.2.3p3]:  null pointer constants
 // [C99:6.5.2.2p6]:  the default argument promotions
 // [C99:6.5.7p3]:    a shift's type, its promoted left operand's
@@ -90,6 +90,7 @@ long double Sem_RoundFloat(const Ast_Type *type, long double value);
 double      Sem_FoldDoubleOp(Ast_NodeKind kind, double lhs, double rhs);
 long double Sem_FoldFloatOp(Ast_NodeKind kind, const Ast_Type *type, long double lhs, long double rhs);
 bool        Sem_FoldFloat(const Ast_Node *node, long double *value);
+bool        Sem_FoldComplex(const Ast_Node *node, long double *real, long double *imag);
 bool        Sem_FoldObject(const Ast_Node *node, const char **symbol, int64_t *addend);
 bool        Sem_FoldAddr(const Ast_Node *node, const char **symbol, int64_t *addend);
 
@@ -131,6 +132,7 @@ void      Sem_LowerPostInc(Ast_Node *node);
 // [C99:6.5.6p3]:    - of arithmetic, of two pointers, or of a pointer and an integer
 // [C99:6.5.6p8]:    a pointer plus an integer, counted in elements
 // [C99:6.5.6p9]:    a pointer minus a pointer, counted in elements
+// [C99:6.5.8p2]:    <, >, <= and >=, of real or of pointer operands
 // [C99:6.5.16p2]:   assignment, to a modifiable lvalue
 // [C99:6.5.16.2p1]: += and -=, of a pointer and an integer or of arithmetic
 // [C99:6.8.4.2p2]:  a switch, not into a variably modified type's scope
@@ -141,10 +143,12 @@ void      Sem_LowerPostInc(Ast_Node *node);
 Ast_Node *Sem_Stride(const Ast_Type *type, Ast_Line line);
 Ast_Node *Sem_ScaleBy(Ast_Node *node, Ast_Node *size);
 void      Sem_Arith(Ast_Node *node);
+void      Sem_RefuseComplexArith(const Ast_Node *node);
 void      Sem_NeedInteger(const Ast_Node *node);
 void      Sem_NeedArithmetic(const Ast_Node *node);
 bool      Sem_IsScalar(const Ast_Type *type);
 void      Sem_NeedScalar(const Ast_Node *operand, Ast_Line line);
+void      Sem_NeedRealStep(const Ast_Type *type, Ast_Line line);
 void      Sem_CheckOpAssign(const Ast_Node *node);
 void      Sem_CheckCast(Ast_Node *node);
 Ast_Node *Sem_FindLabel(Ast_Node *node, const char *name);
