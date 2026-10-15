@@ -315,6 +315,57 @@ long double _Basic_Complex_SquareParts(long double x, long double least, long do
     return _Basic_Math_MultiplyParts(x, x, low);
 }
 
+// Sum a^2 + b^2 - 1 for a >= b >= 0, b's square dropped below least.
+long double _Basic_Complex_SumUnitGap(long double a, long double b, long double least)
+{
+    _Exact_Value sum;
+    _Exact_Value part;
+    long double p;
+    long double p_low;
+    long double q;
+    long double q_low;
+    long double high;
+    long double error;
+    long double rest;
+    long double t;
+
+    p = _Basic_Math_MultiplyParts(a, a, &p_low);
+    q = _Basic_Complex_SquareParts(b, least, &q_low);
+    high = _Basic_Math_AddParts(p, -1, &error);
+    high = _Basic_Math_AddParts(high, q, &rest);
+    t = high + (error + rest + p_low + q_low);
+    if (__basic_math_fabsl(t) < _BASIC_COMPLEX_LOG_EXACT && a != 1) {
+        _Exact_MakeValue(&sum, a);
+        _Exact_MultiplyValues(&sum, &sum, &sum);
+        _Exact_MakeValue(&part, -1);
+        _Exact_AddValues(&sum, &sum, &part);
+        if (b != 0) {
+            _Exact_MakeValue(&part, b);
+            _Exact_MultiplyValues(&part, &part, &part);
+            _Exact_AddValues(&sum, &sum, &part);
+        }
+        t = _Exact_RoundValue(&sum, _EXACT_TYPE_LDOUBLE);
+    }
+    return t;
+}
+
+// Take |x + iy| of parts within 2^-8000 to 2^8000, a the larger magnitude.
+long double _Basic_Complex_TakeAbs(long double x, long double y, long double a)
+{
+    long double p;
+    long double p_low;
+    long double q;
+    long double q_low;
+    long double error;
+    long double h;
+
+    p = _Basic_Complex_SquareParts(x, a * _BASIC_COMPLEX_RATIO_TINY, &p_low);
+    q = _Basic_Complex_SquareParts(y, a * _BASIC_COMPLEX_RATIO_TINY, &q_low);
+    p = _Basic_Math_AddParts(p, q, &error);
+    h = _Basic_Math_IterateRoot(p);
+    return h + (error + p_low + q_low) / (2 * h);
+}
+
 // Take the sine and the cosine of a finite y.
 void _Basic_Complex_TakeSinCos(long double y, long double *s, long double *c)
 {
@@ -393,17 +444,8 @@ void _Basic_Complex_TakeExp(long double x, long double y, long double *re, long 
 // Take ln |x + iy| of finite parts not both zero.
 long double _Basic_Complex_TakeLogAbs(long double x, long double y)
 {
-    _Exact_Value sum;
-    _Exact_Value part;
     long double a = __basic_math_fabsl(x);
     long double b = __basic_math_fabsl(y);
-    long double p;
-    long double p_low;
-    long double q;
-    long double q_low;
-    long double high;
-    long double error;
-    long double rest;
     long double t;
 
     if (a < b) {
@@ -418,23 +460,7 @@ long double _Basic_Complex_TakeLogAbs(long double x, long double y)
         t = b / a;
         return _Basic_Math_TakeLog(a, _BASIC_MATH_BASE_E) + _BASIC_MATH_HALF * _Basic_Math_TakeLog1p(t * t);
     }
-    p = _Basic_Math_MultiplyParts(a, a, &p_low);
-    q = _Basic_Complex_SquareParts(b, a == 1 ? 0 : _BASIC_COMPLEX_LOG_SQUARE, &q_low);
-    high = _Basic_Math_AddParts(p, -1, &error);
-    high = _Basic_Math_AddParts(high, q, &rest);
-    t = high + (error + rest + p_low + q_low);
-    if (__basic_math_fabsl(t) < _BASIC_COMPLEX_LOG_EXACT && a != 1) {
-        _Exact_MakeValue(&sum, a);
-        _Exact_MultiplyValues(&sum, &sum, &sum);
-        _Exact_MakeValue(&part, -1);
-        _Exact_AddValues(&sum, &sum, &part);
-        if (b != 0) {
-            _Exact_MakeValue(&part, b);
-            _Exact_MultiplyValues(&part, &part, &part);
-            _Exact_AddValues(&sum, &sum, &part);
-        }
-        t = _Exact_RoundValue(&sum, _EXACT_TYPE_LDOUBLE);
-    }
+    t = _Basic_Complex_SumUnitGap(a, b, a == 1 ? 0 : _BASIC_COMPLEX_LOG_SQUARE);
     return _BASIC_MATH_HALF * _Basic_Math_TakeLog1p(t);
 }
 
@@ -464,11 +490,6 @@ void _Basic_Complex_TakeSqrt(long double x, long double y, long double *re, long
     long double a;
     long double h;
     long double t;
-    long double p;
-    long double p_low;
-    long double q;
-    long double q_low;
-    long double error;
     int k = 0;
 
     if (class_y == _BASIC_MATH_FP_INFINITE) {
@@ -498,11 +519,7 @@ void _Basic_Complex_TakeSqrt(long double x, long double y, long double *re, long
         x = _Basic_Math_ScaleLDouble(x, -2 * k);
         y = _Basic_Math_ScaleLDouble(y, -2 * k);
     }
-    p = _Basic_Complex_SquareParts(x, a * _BASIC_COMPLEX_RATIO_TINY, &p_low);
-    q = _Basic_Complex_SquareParts(y, a * _BASIC_COMPLEX_RATIO_TINY, &q_low);
-    p = _Basic_Math_AddParts(p, q, &error);
-    h = _Basic_Math_IterateRoot(p);
-    h += (error + p_low + q_low) / (2 * h);
+    h = _Basic_Complex_TakeAbs(x, y, a);
     t = _Basic_Math_IterateRoot(_BASIC_MATH_HALF * (__basic_math_fabsl(x) + h));
     if (x == 0) {
         *re = t;
@@ -532,6 +549,423 @@ void _Basic_Complex_TakePow(long double x, long double y, long double c, long do
     _Basic_Complex_TakeExp(__basic_complex_creall(w), __basic_complex_cimagl(w), re, im);
 }
 
+// Take sinh and cosh of a finite a >= 0, each scaled by 2 to minus the result.
+int _Basic_Complex_TakeSinhCosh(long double a, long double *sh, long double *ch)
+{
+    long double r;
+    int n;
+
+    if (a < _BASIC_COMPLEX_TRIG_TINY) {
+        *sh = a;
+        *ch = 1;
+        return 0;
+    }
+    if (a <= _BASIC_MATH_HYPERBOLIC_WIDE) {
+        *sh = _Basic_Math_TakeHyperbolic(a, _BASIC_MATH_TRIG_SIN);
+        *ch = _Basic_Math_TakeHyperbolic(a, _BASIC_MATH_TRIG_COS);
+        return 0;
+    }
+    if (a > _BASIC_MATH_EXP_CLAMP) {
+        a = _BASIC_MATH_EXP_CLAMP;
+    }
+    n = _Basic_Math_ReduceExp(a, _BASIC_MATH_BASE_E, &r);
+    *sh = 1 + _Basic_Math_SumExp(r);
+    *ch = *sh;
+    return n - 1;
+}
+
+// Take the hyperbolic sine of x + iy, as sinh x cos y + i cosh x sin y.
+void _Basic_Complex_TakeSinh(long double x, long double y, long double *re, long double *im)
+{
+    long double sh;
+    long double ch;
+    long double s;
+    long double c;
+    int n;
+
+    if (_BASIC_MATH_IS_FINITE(x) && _BASIC_MATH_IS_FINITE(y)) {
+        n = _Basic_Complex_TakeSinhCosh(__basic_math_fabsl(x), &sh, &ch);
+        _Basic_Complex_TakeSinCos(y, &s, &c);
+        *re = __basic_math_copysignl(sh, x) * c;
+        *im = ch * s;
+        if (n != 0) {
+            *re = _Basic_Math_ScaleLDouble(*re, n);
+            *im = _Basic_Math_ScaleLDouble(*im, n);
+        }
+    } else if (_BASIC_MATH_IS_FINITE(x)) {
+        if (x == 0) {
+            *re = x;
+            *im = y - y;
+        } else {
+            *re = _Basic_Complex_MakeNan();
+            *im = *re;
+            _Fpu_RaiseFlags(_FPU_INVALID);
+        }
+    } else if (_BASIC_MATH_IS_INF(x) && _BASIC_MATH_IS_FINITE(y)) {
+        if (y == 0) {
+            *re = x;
+            *im = y;
+        } else {
+            _Basic_Complex_TakeSinCos(y, &s, &c);
+            *re = __basic_math_copysignl(_EXACT_INFINITY, c);
+            *re = x < 0 ? -*re : *re;
+            *im = __basic_math_copysignl(_EXACT_INFINITY, s);
+        }
+    } else if (_BASIC_MATH_IS_INF(x)) {
+        *re = _EXACT_INFINITY;
+        *im = y - y;
+    } else {
+        *re = _Basic_Complex_MakeNan();
+        *im = y == 0 ? y : *re;
+    }
+}
+
+// Take the hyperbolic cosine of x + iy, as cosh x cos y + i sinh x sin y.
+void _Basic_Complex_TakeCosh(long double x, long double y, long double *re, long double *im)
+{
+    long double sh;
+    long double ch;
+    long double s;
+    long double c;
+    int n;
+
+    if (_BASIC_MATH_IS_FINITE(x) && _BASIC_MATH_IS_FINITE(y)) {
+        n = _Basic_Complex_TakeSinhCosh(__basic_math_fabsl(x), &sh, &ch);
+        _Basic_Complex_TakeSinCos(y, &s, &c);
+        *re = ch * c;
+        *im = __basic_math_copysignl(sh, x) * s;
+        if (n != 0) {
+            *re = _Basic_Math_ScaleLDouble(*re, n);
+            *im = _Basic_Math_ScaleLDouble(*im, n);
+        }
+    } else if (_BASIC_MATH_IS_FINITE(x)) {
+        *re = y - y;
+        *im = x == 0 ? 0 : _Basic_Complex_MakeNan();
+    } else if (_BASIC_MATH_IS_INF(x) && _BASIC_MATH_IS_FINITE(y)) {
+        *re = _EXACT_INFINITY;
+        if (y == 0) {
+            *im = x < 0 ? -y : y;
+        } else {
+            _Basic_Complex_TakeSinCos(y, &s, &c);
+            *re = __basic_math_copysignl(_EXACT_INFINITY, c);
+            *im = __basic_math_copysignl(_EXACT_INFINITY, s);
+            *im = x < 0 ? -*im : *im;
+        }
+    } else if (_BASIC_MATH_IS_INF(x)) {
+        *re = _EXACT_INFINITY;
+        *im = y - y;
+    } else {
+        *re = _Basic_Complex_MakeNan();
+        *im = y == 0 ? y : *re;
+    }
+}
+
+// Take the hyperbolic tangent of x + iy, by sinh x, cosh x, sin y and cos y.
+void _Basic_Complex_TakeTanh(long double x, long double y, long double *re, long double *im)
+{
+    long double a = __basic_math_fabsl(x);
+    long double sh;
+    long double ch;
+    long double s;
+    long double c;
+    long double r;
+    long double den;
+    int n;
+
+    if (_BASIC_MATH_IS_FINITE(x) && _BASIC_MATH_IS_FINITE(y)) {
+        _Basic_Complex_TakeSinCos(y, &s, &c);
+        if (a > _BASIC_MATH_HYPERBOLIC_WIDE) {
+            if (a > _BASIC_MATH_HALF * _BASIC_MATH_EXP_CLAMP) {
+                a = _BASIC_MATH_HALF * _BASIC_MATH_EXP_CLAMP;
+            }
+            n = _Basic_Math_ReduceExp(-2 * a, _BASIC_MATH_BASE_E, &r);
+            *re = __basic_math_copysignl(1, x);
+            *im = _Basic_Math_ScaleLDouble(4 * s * c * (1 + _Basic_Math_SumExp(r)), n);
+            return;
+        }
+        _Basic_Complex_TakeSinhCosh(a, &sh, &ch);
+        den = c * c;
+        if (sh >= __basic_math_fabsl(c) * _BASIC_COMPLEX_RATIO_TINY) {
+            den += sh * sh;
+        }
+        *re = __basic_math_copysignl(sh * ch / den, x);
+        *im = s * c / den;
+    } else if (_BASIC_MATH_IS_INF(x)) {
+        *re = __basic_math_copysignl(1, x);
+        if (_BASIC_MATH_IS_FINITE(y) && __basic_math_fabsl(y) > 1) {
+            _Basic_Complex_TakeSinCos(y, &s, &c);
+            *im = __basic_math_copysignl(0, s * c);
+        } else {
+            *im = __basic_math_copysignl(0, y);
+        }
+    } else if (y == 0) {
+        *re = x;
+        *im = y;
+    } else {
+        *re = x == 0 ? x : _Basic_Complex_MakeNan();
+        *im = _Basic_Complex_MakeNan();
+        if (_BASIC_MATH_IS_INF(y)) {
+            _Fpu_RaiseFlags(_FPU_INVALID);
+        }
+    }
+}
+
+// Take half of h less b, h the hypotenuse of a and b, without cancellation.
+long double _Basic_Complex_TakeHalfExcess(long double a, long double b, long double h)
+{
+    if (b < 0) {
+        return _BASIC_MATH_HALF * (h - b);
+    }
+    if (b == 0) {
+        return _BASIC_MATH_HALF * a;
+    }
+    return _BASIC_MATH_HALF * (a * a / (h + b));
+}
+
+// Take casinh's real part of x + iy, x, y >= 0, and its angle's two sides.
+long double _Basic_Complex_TakeArcParts(long double x, long double y, long double *top, long double *side)
+{
+    long double gap = __basic_math_fabsl(y - 1);
+    long double r = _Basic_Complex_TakeAbs(x, y + 1, x > y + 1 ? x : y + 1);
+    long double b = x > gap ? x : gap;
+    long double s = b < _BASIC_COMPLEX_ROOT_TINY ? b : _Basic_Complex_TakeAbs(x, y - 1, b);
+    long double a = _BASIC_MATH_HALF * (r + s);
+    long double am1;
+    long double re;
+
+    if (a < 1) {
+        a = 1;
+    }
+    if (a >= _BASIC_COMPLEX_ARC_CROSS_A) {
+        re = _Basic_Math_TakeLog(a + _Basic_Math_IterateRoot(a * a - 1), _BASIC_MATH_BASE_E);
+    } else if (y == 1 && x < _BASIC_COMPLEX_ARC_NEAR) {
+        re = _Basic_Math_IterateRoot(x);
+    } else if (x >= _BASIC_COMPLEX_LDBL_EPS * gap) {
+        am1 = _Basic_Complex_TakeHalfExcess(x, 1 + y, r) + _Basic_Complex_TakeHalfExcess(x, 1 - y, s);
+        re = _Basic_Math_TakeLog1p(am1 + _Basic_Math_IterateRoot(am1 * (a + 1)));
+    } else if (y < 1) {
+        re = x / _Basic_Math_IterateRoot((1 - y) * (1 + y));
+    } else {
+        re = _Basic_Math_TakeLog1p((y - 1) + _Basic_Math_IterateRoot((y - 1) * (y + 1)));
+    }
+    *top = y;
+    if (y < _BASIC_COMPLEX_ARC_FLOOR) {
+        *top = y * _BASIC_COMPLEX_ARC_LIFT;
+        *side = a * _BASIC_COMPLEX_ARC_LIFT;
+    } else if (y / a <= _BASIC_COMPLEX_ARC_CROSS_B) {
+        *top = y / a;
+        *side = _Basic_Math_IterateRoot((1 - *top) * (1 + *top));
+    } else if (y == 1 && x < _BASIC_COMPLEX_ARC_NEAR_SIDE) {
+        *side = _Basic_Math_IterateRoot(x) * _Basic_Math_IterateRoot(_BASIC_MATH_HALF * (a + y));
+    } else if (x >= _BASIC_COMPLEX_LDBL_EPS * gap) {
+        am1 = _Basic_Complex_TakeHalfExcess(x, y + 1, r) + _Basic_Complex_TakeHalfExcess(x, y - 1, s);
+        *side = _Basic_Math_IterateRoot(am1 * (a + y));
+    } else if (y > 1) {
+        *side = x * _BASIC_COMPLEX_ARC_LIFT_TWICE * y / _Basic_Math_IterateRoot((y + 1) * (y - 1));
+        *top = y * _BASIC_COMPLEX_ARC_LIFT_TWICE;
+    } else {
+        *side = _Basic_Math_IterateRoot((1 - y) * (1 + y));
+    }
+    return re;
+}
+
+// Take the inverse hyperbolic sine of x + iy, by Hull's A and B.
+void _Basic_Complex_TakeAsinh(long double x, long double y, long double *re, long double *im)
+{
+    long double a = __basic_math_fabsl(x);
+    long double b = __basic_math_fabsl(y);
+    long double top;
+    long double side;
+    long double u;
+    long double v;
+
+    if (_BASIC_MATH_IS_INF(y)) {
+        *re = __basic_math_copysignl(_EXACT_INFINITY, x);
+        if (_BASIC_MATH_IS_NAN(x)) {
+            *im = _Basic_Complex_MakeNan();
+        } else {
+            *im = __basic_math_copysignl(_BASIC_MATH_IS_INF(x) ? _BASIC_COMPLEX_QUARTER_PI : _BASIC_MATH_HALF_PI_HIGH + _BASIC_MATH_HALF_PI_LOW, y);
+        }
+    } else if (! _BASIC_MATH_IS_FINITE(x)) {
+        *re = x;
+        if ((_BASIC_MATH_IS_INF(x) && _BASIC_MATH_IS_FINITE(y)) || y == 0) {
+            *im = __basic_math_copysignl(0, y);
+        } else {
+            *im = _Basic_Complex_MakeNan();
+        }
+    } else if (_BASIC_MATH_IS_NAN(y)) {
+        *re = _Basic_Complex_MakeNan();
+        *im = *re;
+    } else if (a > _BASIC_COMPLEX_ARC_HUGE || b > _BASIC_COMPLEX_ARC_HUGE) {
+        _Basic_Complex_TakeLog(a, b, &u, &v);
+        *re = __basic_math_copysignl(u + _BASIC_MATH_LN2, x);
+        *im = __basic_math_copysignl(v, y);
+    } else if (a < _BASIC_COMPLEX_ARC_TINY && b < _BASIC_COMPLEX_ARC_TINY) {
+        *re = x;
+        *im = y;
+    } else {
+        u = _Basic_Complex_TakeArcParts(a, b, &top, &side);
+        *re = __basic_math_copysignl(u, x);
+        *im = __basic_math_copysignl(_Basic_Math_TakeAtan2(top, side), y);
+    }
+}
+
+// Take the arc sine of x + iy, as -i casinh(iz).
+void _Basic_Complex_TakeAsin(long double x, long double y, long double *re, long double *im)
+{
+    long double u;
+    long double v;
+
+    if (_BASIC_MATH_IS_NAN(x)) {
+        *re = _BASIC_MATH_IS_INF(y) ? x : _Basic_Complex_MakeNan();
+        *im = _BASIC_MATH_IS_INF(y) ? y : *re;
+        return;
+    }
+    _Basic_Complex_TakeAsinh(-y, x, &u, &v);
+    *re = v;
+    *im = -u;
+}
+
+// Take the arc cosine of x + iy, by Hull's A and B.
+void _Basic_Complex_TakeAcos(long double x, long double y, long double *re, long double *im)
+{
+    long double a = __basic_math_fabsl(x);
+    long double b = __basic_math_fabsl(y);
+    long double top;
+    long double side;
+    long double u;
+    long double v;
+
+    if (! _BASIC_MATH_IS_FINITE(x) || ! _BASIC_MATH_IS_FINITE(y) || (x == 0 && y == 0)) {
+        _Basic_Complex_TakeAsin(x, y, &u, &v);
+        *re = (_BASIC_MATH_HALF_PI_HIGH + _BASIC_MATH_HALF_PI_LOW) - u;
+        *im = -v;
+    } else if (a > _BASIC_COMPLEX_ARC_HUGE || b > _BASIC_COMPLEX_ARC_HUGE) {
+        _Basic_Complex_TakeLog(x, y, &u, &v);
+        *re = __basic_math_fabsl(v);
+        *im = _BASIC_MATH_SIGNBIT(y) != 0 ? u + _BASIC_MATH_LN2 : -(u + _BASIC_MATH_LN2);
+    } else if (x == 1 && y == 0) {
+        *re = 0;
+        *im = -y;
+    } else if (a < _BASIC_COMPLEX_ARC_TINY && b < _BASIC_COMPLEX_ARC_TINY) {
+        *re = _BASIC_MATH_HALF_PI_HIGH - (x - _BASIC_MATH_HALF_PI_LOW);
+        *im = -y;
+    } else {
+        u = _Basic_Complex_TakeArcParts(b, a, &top, &side);
+        *re = _Basic_Math_TakeAtan2(side, x < 0 ? -top : top);
+        *im = _BASIC_MATH_SIGNBIT(y) != 0 ? u : -u;
+    }
+}
+
+// Take the inverse hyperbolic cosine of x + iy, by its arc cosine.
+void _Basic_Complex_TakeAcosh(long double x, long double y, long double *re, long double *im)
+{
+    long double half_pi = _BASIC_MATH_HALF_PI_HIGH + _BASIC_MATH_HALF_PI_LOW;
+    long double u;
+    long double v;
+
+    if (_BASIC_MATH_IS_INF(y)) {
+        *re = _EXACT_INFINITY;
+        if (_BASIC_MATH_IS_NAN(x)) {
+            *im = _Basic_Complex_MakeNan();
+        } else if (_BASIC_MATH_IS_INF(x)) {
+            *im = __basic_math_copysignl(x < 0 ? _BASIC_COMPLEX_THREE_QUARTER_PI : _BASIC_COMPLEX_QUARTER_PI, y);
+        } else {
+            *im = __basic_math_copysignl(half_pi, y);
+        }
+    } else if (_BASIC_MATH_IS_INF(x)) {
+        *re = _EXACT_INFINITY;
+        if (_BASIC_MATH_IS_FINITE(y)) {
+            *im = __basic_math_copysignl(x < 0 ? _BASIC_MATH_PI_HIGH + _BASIC_MATH_PI_LOW : 0, y);
+        } else {
+            *im = _Basic_Complex_MakeNan();
+        }
+    } else if (_BASIC_MATH_IS_NAN(x) || _BASIC_MATH_IS_NAN(y)) {
+        *re = _Basic_Complex_MakeNan();
+        *im = x == 0 ? half_pi : *re;
+    } else if (x == 0 && y == 0) {
+        *re = 0;
+        *im = __basic_math_copysignl(half_pi, y);
+    } else {
+        _Basic_Complex_TakeAcos(x, y, &u, &v);
+        *re = __basic_math_fabsl(v);
+        *im = __basic_math_copysignl(u, y);
+    }
+}
+
+// Take the real part of 1 / (x + iy), past 2^63 in magnitude.
+long double _Basic_Complex_TakeInverseReal(long double x, long double y)
+{
+    long double a = __basic_math_fabsl(x);
+    long double b = __basic_math_fabsl(y);
+    int k;
+
+    if (b < a * _BASIC_COMPLEX_RATIO_TINY) {
+        return 1 / x;
+    }
+    if (a < b * _BASIC_COMPLEX_RATIO_TINY) {
+        return x / y / y;
+    }
+    k = __basic_math_ilogbl(a > b ? a : b);
+    x = _Basic_Math_ScaleLDouble(x, -k);
+    y = _Basic_Math_ScaleLDouble(y, -k);
+    return _Basic_Math_ScaleLDouble(x / (x * x + y * y), -k);
+}
+
+// Take the inverse hyperbolic tangent of x + iy, by log1p and atan2.
+void _Basic_Complex_TakeAtanh(long double x, long double y, long double *re, long double *im)
+{
+    long double half_pi = _BASIC_MATH_HALF_PI_HIGH + _BASIC_MATH_HALF_PI_LOW;
+    long double a = __basic_math_fabsl(x);
+    long double b = __basic_math_fabsl(y);
+    long double t;
+    long double p;
+    long double q;
+    long double low;
+
+    if (_BASIC_MATH_IS_INF(y)) {
+        *re = __basic_math_copysignl(0, x);
+        *im = __basic_math_copysignl(half_pi, y);
+    } else if (! _BASIC_MATH_IS_FINITE(x) || _BASIC_MATH_IS_NAN(y)) {
+        if (_BASIC_MATH_IS_INF(x) || x == 0) {
+            *re = __basic_math_copysignl(0, x);
+            *im = _BASIC_MATH_IS_FINITE(y) ? __basic_math_copysignl(half_pi, y) : _Basic_Complex_MakeNan();
+        } else {
+            *re = _Basic_Complex_MakeNan();
+            *im = *re;
+        }
+    } else if (y == 0 && a <= 1) {
+        if (a == 1) {
+            *re = __basic_math_copysignl(_EXACT_INFINITY, x);
+            _Fpu_RaiseFlags(_FPU_DIVBYZERO);
+        } else {
+            *re = x == 0 ? x : _Basic_Math_TakeArcHyperbolic(x, _BASIC_MATH_TRIG_TAN);
+        }
+        *im = y;
+    } else if (x == 0) {
+        *re = x;
+        *im = _Basic_Math_TakeAtan2(y, 1);
+    } else if (a > _BASIC_COMPLEX_ARC_HUGE || b > _BASIC_COMPLEX_ARC_HUGE) {
+        *re = _Basic_Complex_TakeInverseReal(x, y);
+        *im = __basic_math_copysignl(half_pi, y);
+    } else if (a < _BASIC_COMPLEX_ARC_TINY && b < _BASIC_COMPLEX_ARC_TINY) {
+        *re = x;
+        *im = y;
+    } else {
+        if (a == 1 && b < _BASIC_COMPLEX_LDBL_EPS) {
+            *re = _BASIC_MATH_HALF * (_BASIC_MATH_LN2 - _Basic_Math_TakeLog(b, _BASIC_MATH_BASE_E));
+        } else {
+            t = a - 1;
+            p = t * t;
+            q = _Basic_Complex_SquareParts(b, __basic_math_fabsl(t) * _BASIC_COMPLEX_RATIO_TINY, &low);
+            *re = _BASIC_MATH_HALF * _BASIC_MATH_HALF * _Basic_Math_TakeLog1p(4 * a / (p + q));
+        }
+        t = a > b ? _Basic_Complex_SumUnitGap(a, b, _BASIC_COMPLEX_LOG_SQUARE) : _Basic_Complex_SumUnitGap(b, a, _BASIC_COMPLEX_LOG_SQUARE);
+        *re = __basic_math_copysignl(*re, x);
+        *im = __basic_math_copysignl(_BASIC_MATH_HALF * _Basic_Math_TakeAtan2(2 * b, -t), y);
+    }
+}
+
 // Compute the absolute value of z, the hypotenuse of its parts.
 double __basic_complex_cabs(double _Complex z)
 {
@@ -550,6 +984,66 @@ long double __basic_complex_cabsl(long double _Complex z)
     return __basic_math_hypotl(__basic_complex_creall(z), __basic_complex_cimagl(z));
 }
 
+// Compute the arc cosine of z, in long double.
+double _Complex __basic_complex_cacos(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAcos(__basic_complex_creal(z), __basic_complex_cimag(z), &re, &im);
+    return _Basic_Complex_RoundDouble(re, im);
+}
+
+// Compute the arc cosine of z, in long double.
+float _Complex __basic_complex_cacosf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAcos(__basic_complex_crealf(z), __basic_complex_cimagf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(re, im);
+}
+
+// Compute the arc cosine of z.
+long double _Complex __basic_complex_cacosl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAcos(__basic_complex_creall(z), __basic_complex_cimagl(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(re, im);
+}
+
+// Compute the inverse hyperbolic cosine of z, in long double.
+double _Complex __basic_complex_cacosh(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAcosh(__basic_complex_creal(z), __basic_complex_cimag(z), &re, &im);
+    return _Basic_Complex_RoundDouble(re, im);
+}
+
+// Compute the inverse hyperbolic cosine of z, in long double.
+float _Complex __basic_complex_cacoshf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAcosh(__basic_complex_crealf(z), __basic_complex_cimagf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(re, im);
+}
+
+// Compute the inverse hyperbolic cosine of z.
+long double _Complex __basic_complex_cacoshl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAcosh(__basic_complex_creall(z), __basic_complex_cimagl(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(re, im);
+}
+
 // Compute the argument of z, the arc tangent of its parts.
 double __basic_complex_carg(double _Complex z)
 {
@@ -566,6 +1060,186 @@ float __basic_complex_cargf(float _Complex z)
 long double __basic_complex_cargl(long double _Complex z)
 {
     return __basic_math_atan2l(__basic_complex_cimagl(z), __basic_complex_creall(z));
+}
+
+// Compute the arc sine of z, in long double.
+double _Complex __basic_complex_casin(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAsin(__basic_complex_creal(z), __basic_complex_cimag(z), &re, &im);
+    return _Basic_Complex_RoundDouble(re, im);
+}
+
+// Compute the arc sine of z, in long double.
+float _Complex __basic_complex_casinf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAsin(__basic_complex_crealf(z), __basic_complex_cimagf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(re, im);
+}
+
+// Compute the arc sine of z.
+long double _Complex __basic_complex_casinl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAsin(__basic_complex_creall(z), __basic_complex_cimagl(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(re, im);
+}
+
+// Compute the inverse hyperbolic sine of z, in long double.
+double _Complex __basic_complex_casinh(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAsinh(__basic_complex_creal(z), __basic_complex_cimag(z), &re, &im);
+    return _Basic_Complex_RoundDouble(re, im);
+}
+
+// Compute the inverse hyperbolic sine of z, in long double.
+float _Complex __basic_complex_casinhf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAsinh(__basic_complex_crealf(z), __basic_complex_cimagf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(re, im);
+}
+
+// Compute the inverse hyperbolic sine of z.
+long double _Complex __basic_complex_casinhl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAsinh(__basic_complex_creall(z), __basic_complex_cimagl(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(re, im);
+}
+
+// Compute the arc tangent of z, as -i catanh(iz), in long double.
+double _Complex __basic_complex_catan(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAtanh(-__basic_complex_cimag(z), __basic_complex_creal(z), &re, &im);
+    return _Basic_Complex_RoundDouble(im, -re);
+}
+
+// Compute the arc tangent of z, as -i catanh(iz), in long double.
+float _Complex __basic_complex_catanf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAtanh(-__basic_complex_cimagf(z), __basic_complex_crealf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(im, -re);
+}
+
+// Compute the arc tangent of z, as -i catanh(iz).
+long double _Complex __basic_complex_catanl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAtanh(-__basic_complex_cimagl(z), __basic_complex_creall(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(im, -re);
+}
+
+// Compute the inverse hyperbolic tangent of z, in long double.
+double _Complex __basic_complex_catanh(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAtanh(__basic_complex_creal(z), __basic_complex_cimag(z), &re, &im);
+    return _Basic_Complex_RoundDouble(re, im);
+}
+
+// Compute the inverse hyperbolic tangent of z, in long double.
+float _Complex __basic_complex_catanhf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAtanh(__basic_complex_crealf(z), __basic_complex_cimagf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(re, im);
+}
+
+// Compute the inverse hyperbolic tangent of z.
+long double _Complex __basic_complex_catanhl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeAtanh(__basic_complex_creall(z), __basic_complex_cimagl(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(re, im);
+}
+
+// Compute the cosine of z, as ccosh(iz), in long double.
+double _Complex __basic_complex_ccos(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeCosh(-__basic_complex_cimag(z), __basic_complex_creal(z), &re, &im);
+    return _Basic_Complex_RoundDouble(re, im);
+}
+
+// Compute the cosine of z, as ccosh(iz), in long double.
+float _Complex __basic_complex_ccosf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeCosh(-__basic_complex_cimagf(z), __basic_complex_crealf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(re, im);
+}
+
+// Compute the cosine of z, as ccosh(iz).
+long double _Complex __basic_complex_ccosl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeCosh(-__basic_complex_cimagl(z), __basic_complex_creall(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(re, im);
+}
+
+// Compute the hyperbolic cosine of z, in long double.
+double _Complex __basic_complex_ccosh(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeCosh(__basic_complex_creal(z), __basic_complex_cimag(z), &re, &im);
+    return _Basic_Complex_RoundDouble(re, im);
+}
+
+// Compute the hyperbolic cosine of z, in long double.
+float _Complex __basic_complex_ccoshf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeCosh(__basic_complex_crealf(z), __basic_complex_cimagf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(re, im);
+}
+
+// Compute the hyperbolic cosine of z.
+long double _Complex __basic_complex_ccoshl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeCosh(__basic_complex_creall(z), __basic_complex_cimagl(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(re, im);
 }
 
 // Compute e to z, in long double.
@@ -745,6 +1419,66 @@ long double __basic_complex_creall(long double _Complex z)
     return ((long double *) &z)[0];
 }
 
+// Compute the sine of z, as -i csinh(iz), in long double.
+double _Complex __basic_complex_csin(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeSinh(-__basic_complex_cimag(z), __basic_complex_creal(z), &re, &im);
+    return _Basic_Complex_RoundDouble(im, -re);
+}
+
+// Compute the sine of z, as -i csinh(iz), in long double.
+float _Complex __basic_complex_csinf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeSinh(-__basic_complex_cimagf(z), __basic_complex_crealf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(im, -re);
+}
+
+// Compute the sine of z, as -i csinh(iz).
+long double _Complex __basic_complex_csinl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeSinh(-__basic_complex_cimagl(z), __basic_complex_creall(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(im, -re);
+}
+
+// Compute the hyperbolic sine of z, in long double.
+double _Complex __basic_complex_csinh(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeSinh(__basic_complex_creal(z), __basic_complex_cimag(z), &re, &im);
+    return _Basic_Complex_RoundDouble(re, im);
+}
+
+// Compute the hyperbolic sine of z, in long double.
+float _Complex __basic_complex_csinhf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeSinh(__basic_complex_crealf(z), __basic_complex_cimagf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(re, im);
+}
+
+// Compute the hyperbolic sine of z.
+long double _Complex __basic_complex_csinhl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeSinh(__basic_complex_creall(z), __basic_complex_cimagl(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(re, im);
+}
+
 // Compute the square root of z, in the right half-plane, in long double.
 double _Complex __basic_complex_csqrt(double _Complex z)
 {
@@ -772,6 +1506,66 @@ long double _Complex __basic_complex_csqrtl(long double _Complex z)
     long double im = 0;
 
     _Basic_Complex_TakeSqrt(__basic_complex_creall(z), __basic_complex_cimagl(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(re, im);
+}
+
+// Compute the tangent of z, as -i ctanh(iz), in long double.
+double _Complex __basic_complex_ctan(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeTanh(-__basic_complex_cimag(z), __basic_complex_creal(z), &re, &im);
+    return _Basic_Complex_RoundDouble(im, -re);
+}
+
+// Compute the tangent of z, as -i ctanh(iz), in long double.
+float _Complex __basic_complex_ctanf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeTanh(-__basic_complex_cimagf(z), __basic_complex_crealf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(im, -re);
+}
+
+// Compute the tangent of z, as -i ctanh(iz).
+long double _Complex __basic_complex_ctanl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeTanh(-__basic_complex_cimagl(z), __basic_complex_creall(z), &re, &im);
+    return _Basic_Complex_RoundLDouble(im, -re);
+}
+
+// Compute the hyperbolic tangent of z, in long double.
+double _Complex __basic_complex_ctanh(double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeTanh(__basic_complex_creal(z), __basic_complex_cimag(z), &re, &im);
+    return _Basic_Complex_RoundDouble(re, im);
+}
+
+// Compute the hyperbolic tangent of z, in long double.
+float _Complex __basic_complex_ctanhf(float _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeTanh(__basic_complex_crealf(z), __basic_complex_cimagf(z), &re, &im);
+    return _Basic_Complex_RoundFloat(re, im);
+}
+
+// Compute the hyperbolic tangent of z.
+long double _Complex __basic_complex_ctanhl(long double _Complex z)
+{
+    long double re = 0;
+    long double im = 0;
+
+    _Basic_Complex_TakeTanh(__basic_complex_creall(z), __basic_complex_cimagl(z), &re, &im);
     return _Basic_Complex_RoundLDouble(re, im);
 }
 

@@ -30,6 +30,222 @@
 // Includes.
 #include <_basic_complex.h>
 
+// Compute the arc cosine of z.
+double complex cacos(double complex z)
+{
+    return __basic_complex_cacos(z);
+}
+
+// Compute the arc cosine of z.
+float complex cacosf(float complex z)
+{
+    return __basic_complex_cacosf(z);
+}
+
+// Compute the arc cosine of z.
+long double complex cacosl(long double complex z)
+{
+    return __basic_complex_cacosl(z);
+}
+
+// Compute the arc sine of z.
+double complex casin(double complex z)
+{
+    return __basic_complex_casin(z);
+}
+
+// Compute the arc sine of z.
+float complex casinf(float complex z)
+{
+    return __basic_complex_casinf(z);
+}
+
+// Compute the arc sine of z.
+long double complex casinl(long double complex z)
+{
+    return __basic_complex_casinl(z);
+}
+
+// Compute the arc tangent of z.
+double complex catan(double complex z)
+{
+    return __basic_complex_catan(z);
+}
+
+// Compute the arc tangent of z.
+float complex catanf(float complex z)
+{
+    return __basic_complex_catanf(z);
+}
+
+// Compute the arc tangent of z.
+long double complex catanl(long double complex z)
+{
+    return __basic_complex_catanl(z);
+}
+
+// Compute the cosine of z.
+double complex ccos(double complex z)
+{
+    return __basic_complex_ccos(z);
+}
+
+// Compute the cosine of z.
+float complex ccosf(float complex z)
+{
+    return __basic_complex_ccosf(z);
+}
+
+// Compute the cosine of z.
+long double complex ccosl(long double complex z)
+{
+    return __basic_complex_ccosl(z);
+}
+
+// Compute the sine of z.
+double complex csin(double complex z)
+{
+    return __basic_complex_csin(z);
+}
+
+// Compute the sine of z.
+float complex csinf(float complex z)
+{
+    return __basic_complex_csinf(z);
+}
+
+// Compute the sine of z.
+long double complex csinl(long double complex z)
+{
+    return __basic_complex_csinl(z);
+}
+
+// Compute the tangent of z.
+double complex ctan(double complex z)
+{
+    return __basic_complex_ctan(z);
+}
+
+// Compute the tangent of z.
+float complex ctanf(float complex z)
+{
+    return __basic_complex_ctanf(z);
+}
+
+// Compute the tangent of z.
+long double complex ctanl(long double complex z)
+{
+    return __basic_complex_ctanl(z);
+}
+
+// Compute the inverse hyperbolic cosine of z.
+double complex cacosh(double complex z)
+{
+    return __basic_complex_cacosh(z);
+}
+
+// Compute the inverse hyperbolic cosine of z.
+float complex cacoshf(float complex z)
+{
+    return __basic_complex_cacoshf(z);
+}
+
+// Compute the inverse hyperbolic cosine of z.
+long double complex cacoshl(long double complex z)
+{
+    return __basic_complex_cacoshl(z);
+}
+
+// Compute the inverse hyperbolic sine of z.
+double complex casinh(double complex z)
+{
+    return __basic_complex_casinh(z);
+}
+
+// Compute the inverse hyperbolic sine of z.
+float complex casinhf(float complex z)
+{
+    return __basic_complex_casinhf(z);
+}
+
+// Compute the inverse hyperbolic sine of z.
+long double complex casinhl(long double complex z)
+{
+    return __basic_complex_casinhl(z);
+}
+
+// Compute the inverse hyperbolic tangent of z.
+double complex catanh(double complex z)
+{
+    return __basic_complex_catanh(z);
+}
+
+// Compute the inverse hyperbolic tangent of z.
+float complex catanhf(float complex z)
+{
+    return __basic_complex_catanhf(z);
+}
+
+// Compute the inverse hyperbolic tangent of z.
+long double complex catanhl(long double complex z)
+{
+    return __basic_complex_catanhl(z);
+}
+
+// Compute the hyperbolic cosine of z.
+double complex ccosh(double complex z)
+{
+    return __basic_complex_ccosh(z);
+}
+
+// Compute the hyperbolic cosine of z.
+float complex ccoshf(float complex z)
+{
+    return __basic_complex_ccoshf(z);
+}
+
+// Compute the hyperbolic cosine of z.
+long double complex ccoshl(long double complex z)
+{
+    return __basic_complex_ccoshl(z);
+}
+
+// Compute the hyperbolic sine of z.
+double complex csinh(double complex z)
+{
+    return __basic_complex_csinh(z);
+}
+
+// Compute the hyperbolic sine of z.
+float complex csinhf(float complex z)
+{
+    return __basic_complex_csinhf(z);
+}
+
+// Compute the hyperbolic sine of z.
+long double complex csinhl(long double complex z)
+{
+    return __basic_complex_csinhl(z);
+}
+
+// Compute the hyperbolic tangent of z.
+double complex ctanh(double complex z)
+{
+    return __basic_complex_ctanh(z);
+}
+
+// Compute the hyperbolic tangent of z.
+float complex ctanhf(float complex z)
+{
+    return __basic_complex_ctanhf(z);
+}
+
+// Compute the hyperbolic tangent of z.
+long double complex ctanhl(long double complex z)
+{
+    return __basic_complex_ctanhl(z);
+}
+
 // Compute e to z.
 double complex cexp(double complex z)
 {

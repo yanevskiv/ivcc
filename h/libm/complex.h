@@ -40,6 +40,72 @@
 // [C99:7.3.4p2]: CX_LIMITED_RANGE, on to allow the usual formulas, off by default
 // Taken and ignored, * and / keeping G.5.1's infinities in either state.
 
+// Trigonometric functions
+// [C99:7.3.5.1p2]: cacos, branch cuts outside [-1, +1] along the real axis
+// [C99:7.3.5.1p3]: cacos, in [0, pi] along the real axis
+// [C99:7.3.5.2p2]: casin, branch cuts outside [-1, +1] along the real axis
+// [C99:7.3.5.2p3]: casin, in [-pi/2, +pi/2] along the real axis
+// [C99:7.3.5.3p2]: catan, branch cuts outside [-i, +i] along the imaginary axis
+// [C99:7.3.5.3p3]: catan, in [-pi/2, +pi/2] along the real axis
+// [C99:7.3.5.4p2]: ccos, the complex cosine
+// [C99:7.3.5.5p2]: csin, the complex sine
+// [C99:7.3.5.6p2]: ctan, the complex tangent
+// [C99:G.6p7]:     casin, catan, ccos, csin, ctan as the hyperbolic ones of iz
+// [C99:G.6.1.1p1]: cacos of the zeros, infinities and NaNs
+double complex      cacos(double complex z);
+float complex       cacosf(float complex z);
+long double complex cacosl(long double complex z);
+double complex      casin(double complex z);
+float complex       casinf(float complex z);
+long double complex casinl(long double complex z);
+double complex      catan(double complex z);
+float complex       catanf(float complex z);
+long double complex catanl(long double complex z);
+double complex      ccos(double complex z);
+float complex       ccosf(float complex z);
+long double complex ccosl(long double complex z);
+double complex      csin(double complex z);
+float complex       csinf(float complex z);
+long double complex csinl(long double complex z);
+double complex      ctan(double complex z);
+float complex       ctanf(float complex z);
+long double complex ctanl(long double complex z);
+
+// Hyperbolic functions
+// [C99:7.3.6.1p2]: cacosh, a branch cut below 1 along the real axis
+// [C99:7.3.6.1p3]: cacosh, non-negative along the real axis, in [-ipi, +ipi]
+// [C99:7.3.6.2p2]: casinh, branch cuts outside [-i, +i] on the imaginary axis
+// [C99:7.3.6.2p3]: casinh, in [-ipi/2, +ipi/2] along the imaginary axis
+// [C99:7.3.6.3p2]: catanh, branch cuts outside [-1, +1] along the real axis
+// [C99:7.3.6.3p3]: catanh, in [-ipi/2, +ipi/2] along the imaginary axis
+// [C99:7.3.6.4p2]: ccosh, the complex hyperbolic cosine
+// [C99:7.3.6.5p2]: csinh, the complex hyperbolic sine
+// [C99:7.3.6.6p2]: ctanh, the complex hyperbolic tangent
+// [C99:G.6.2.1p1]: cacosh of the zeros, infinities and NaNs
+// [C99:G.6.2.2p1]: casinh of the zeros, infinities and NaNs
+// [C99:G.6.2.3p1]: catanh of the zeros, infinities and NaNs, a pole at 1
+// [C99:G.6.2.4p1]: ccosh of the zeros, infinities and NaNs
+// [C99:G.6.2.5p1]: csinh of the zeros, infinities and NaNs
+// [C99:G.6.2.6p1]: ctanh of the zeros, infinities and NaNs
+double complex      cacosh(double complex z);
+float complex       cacoshf(float complex z);
+long double complex cacoshl(long double complex z);
+double complex      casinh(double complex z);
+float complex       casinhf(float complex z);
+long double complex casinhl(long double complex z);
+double complex      catanh(double complex z);
+float complex       catanhf(float complex z);
+long double complex catanhl(long double complex z);
+double complex      ccosh(double complex z);
+float complex       ccoshf(float complex z);
+long double complex ccoshl(long double complex z);
+double complex      csinh(double complex z);
+float complex       csinhf(float complex z);
+long double complex csinhl(long double complex z);
+double complex      ctanh(double complex z);
+float complex       ctanhf(float complex z);
+long double complex ctanhl(long double complex z);
+
 // Exponential and logarithmic functions
 // [C99:7.3.7.1]: cexp, the complex base-e exponential
 // [C99:7.3.7.2]: clog, in [-ipi, +ipi], a branch cut along the negative real axis

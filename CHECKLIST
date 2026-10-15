@@ -327,8 +327,8 @@ Checklist toward ISO C99: the language, then the standard library of clause 7.
             - [x] manipulation: `carg`, `cimag`, `conj`, `cproj`, `creal`
             - [x] exponential and logarithmic: `cexp`, `clog`
             - [x] power: `cpow`, `csqrt`
-            - [ ] trigonometric: `cacos`, `casin`, `catan`, `ccos`, `csin`, `ctan`
-            - [ ] hyperbolic: `cacosh`, `casinh`, `catanh`, `ccosh`, `csinh`, `ctanh`
+            - [x] trigonometric: `cacos`, `casin`, `catan`, `ccos`, `csin`, `ctan`
+            - [x] hyperbolic: `cacosh`, `casinh`, `catanh`, `ccosh`, `csinh`, `ctanh`
 
         `<tgmath.h>` (7.22)
 
