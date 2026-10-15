@@ -332,6 +332,6 @@ Checklist toward ISO C99: the language, then the standard library of clause 7.
 
         `<tgmath.h>` (7.22)
 
-            - [ ] real or complex by the argument: `acos`, `asin`, `atan`, `acosh`, `asinh`, `atanh`, `cos`, `sin`, `tan`, `cosh`, `sinh`, `tanh`, `exp`, `log`, `pow`, `sqrt`, and `fabs`, choosing `cabs`
-            - [ ] real only: every other unsuffixed `<math.h>` function but `modf`
-            - [ ] complex only: `carg`, `cimag`, `conj`, `cproj`, `creal`
+            - [x] real or complex by the argument: `acos`, `asin`, `atan`, `acosh`, `asinh`, `atanh`, `cos`, `sin`, `tan`, `cosh`, `sinh`, `tanh`, `exp`, `log`, `pow`, `sqrt`, and `fabs`, choosing `cabs`
+            - [x] real only: every other unsuffixed `<math.h>` function but `modf`
+            - [x] complex only: `carg`, `cimag`, `conj`, `cproj`, `creal`
