@@ -131,6 +131,7 @@ Checklist toward ISO C99: the language, then the standard library of clause 7.
             - [x] `__builtin_inf`, `__builtin_inff`, `__builtin_infl`, constant infinities for `HUGE_VAL` and `INFINITY`
             - [x] `__builtin_nan`, `__builtin_nanf`, `__builtin_nanl`, constant quiet NaNs for `NAN`, their payloads `nan`'s of a narrow tag
             - [x] `__STDC_IEC_559__` 1: conversions out of an integer's range raising invalid as gcc's, `-x` a sign flip, `strtod`, `scanf` and `printf` in the rounding direction
+            - [x] `_Complex`: `va_arg` of the three types and of structs holding them, as gcc's
             - [ ] target macros predefined from `-mtarget` (`__linux__`, `__unix__`, ...)
             - [ ] `_start` hands `main` its `argc`, `argv` and `envp`, and a return from `main` calls `exit`
             - [ ] `ivar`, which builds `libc.a`
@@ -138,7 +139,6 @@ Checklist toward ISO C99: the language, then the standard library of clause 7.
             - [ ] the system layer: one syscall stub, and the syscalls libc needs answered by `ivemu`
             - [ ] signal delivery in `ivemu`: a handler, its frame and `rt_sigreturn`
             - [ ] the floating-point control and status instructions, and `ivemu`'s rounding modes and exception flags
-            - [ ] `_Complex`: `va_arg` of the three types
             - [ ] `_Generic`, for `<tgmath.h>`
             - [ ] `__STDC_HOSTED__` is 1
 

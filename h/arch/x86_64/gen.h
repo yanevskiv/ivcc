@@ -164,6 +164,7 @@ void Gen_x86_64_SysV_EmitCall(Ast_Node *node);
 
 // SysV variadic arguments
 // [C99:7.15]: variable arguments
+// [Amd64-SysV:3.5.7]: va_arg of a complex type by its classes, as a struct's
 void Gen_x86_64_SysV_EmitVaSaveArea(void);
 void Gen_x86_64_SysV_CountNamedArgs(const Ast_Func *func, Gen_x86_64_SysV_Cursor *cur);
 void Gen_x86_64_SysV_EmitVaStart(void);

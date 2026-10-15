@@ -649,7 +649,7 @@ void Gen_x86_64_SysV_EmitVaOverflow(const Ast_Type *type)
     Asm_x86_64_EmitMovStore(ASM_X86_64_REG_RCX, ASM_X86_64_REG_RDI, GEN_X86_64_SYSV_VA_OVERFLOW, ASM_X86_64_WIDTH_64);
 }
 
-// Gather into a frame temporary the next struct or union argument.
+// Gather into a frame temporary the next struct, union or complex argument.
 void Gen_x86_64_SysV_EmitVaAggregate(const Ast_Node *node)
 {
     Gen_x86_64_SysV_Class classes[GEN_X86_64_SYSV_MAX_EIGHTBYTES];
@@ -704,7 +704,7 @@ void Gen_x86_64_SysV_EmitVaArg(const Ast_Node *node)
     const Ast_Type *type = node->an_type;
 
     Asm_x86_64_EmitMovRR(ASM_X86_64_REG_RAX, ASM_X86_64_REG_RDI);
-    if (Sem_IsAggregate(type)) {
+    if (Sem_IsAggregate(type) || Ast_IsComplex(type)) {
         Gen_x86_64_SysV_EmitVaAggregate(node);
         return;
     }
@@ -2247,7 +2247,7 @@ bool Gen_x86_64_NeedsTemp(const Ast_Node *node)
             return true;
         } break;
         case AST_NODE_KIND_VA_ARG: {
-            return Sem_IsAggregate(node->an_type);
+            return Sem_IsAggregate(node->an_type) || Ast_IsComplex(node->an_type);
         } break;
         case AST_NODE_KIND_FNUM:
         case AST_NODE_KIND_CAST:
