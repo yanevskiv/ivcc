@@ -30,6 +30,114 @@
 // Includes.
 #include <_basic_complex.h>
 
+// Compute the absolute value of z.
+double cabs(double complex z)
+{
+    return __basic_complex_cabs(z);
+}
+
+// Compute the absolute value of z.
+float cabsf(float complex z)
+{
+    return __basic_complex_cabsf(z);
+}
+
+// Compute the absolute value of z.
+long double cabsl(long double complex z)
+{
+    return __basic_complex_cabsl(z);
+}
+
+// Compute the argument of z.
+double carg(double complex z)
+{
+    return __basic_complex_carg(z);
+}
+
+// Compute the argument of z.
+float cargf(float complex z)
+{
+    return __basic_complex_cargf(z);
+}
+
+// Compute the argument of z.
+long double cargl(long double complex z)
+{
+    return __basic_complex_cargl(z);
+}
+
+// Read the imaginary part of z.
+double cimag(double complex z)
+{
+    return __basic_complex_cimag(z);
+}
+
+// Read the imaginary part of z.
+float cimagf(float complex z)
+{
+    return __basic_complex_cimagf(z);
+}
+
+// Read the imaginary part of z.
+long double cimagl(long double complex z)
+{
+    return __basic_complex_cimagl(z);
+}
+
+// Compute the conjugate of z.
+double complex conj(double complex z)
+{
+    return __basic_complex_conj(z);
+}
+
+// Compute the conjugate of z.
+float complex conjf(float complex z)
+{
+    return __basic_complex_conjf(z);
+}
+
+// Compute the conjugate of z.
+long double complex conjl(long double complex z)
+{
+    return __basic_complex_conjl(z);
+}
+
+// Project z onto the Riemann sphere.
+double complex cproj(double complex z)
+{
+    return __basic_complex_cproj(z);
+}
+
+// Project z onto the Riemann sphere.
+float complex cprojf(float complex z)
+{
+    return __basic_complex_cprojf(z);
+}
+
+// Project z onto the Riemann sphere.
+long double complex cprojl(long double complex z)
+{
+    return __basic_complex_cprojl(z);
+}
+
+// Read the real part of z.
+double creal(double complex z)
+{
+    return __basic_complex_creal(z);
+}
+
+// Read the real part of z.
+float crealf(float complex z)
+{
+    return __basic_complex_crealf(z);
+}
+
+// Read the real part of z.
+long double creall(long double complex z)
+{
+    return __basic_complex_creall(z);
+}
+
 // Multiply a + ib by c + id, the compiler's helper for float.
 float _Complex __mulsc3(float a, float b, float c, float d)
 {

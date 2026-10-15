@@ -260,6 +260,129 @@ void _Basic_Complex_DivideLDouble(long double a, long double b, long double c, l
     }
 }
 
+// Compute the absolute value of z, the hypotenuse of its parts.
+double __basic_complex_cabs(double _Complex z)
+{
+    return __basic_math_hypot(__basic_complex_creal(z), __basic_complex_cimag(z));
+}
+
+// Compute the absolute value of z, the hypotenuse of its parts.
+float __basic_complex_cabsf(float _Complex z)
+{
+    return __basic_math_hypotf(__basic_complex_crealf(z), __basic_complex_cimagf(z));
+}
+
+// Compute the absolute value of z, the hypotenuse of its parts.
+long double __basic_complex_cabsl(long double _Complex z)
+{
+    return __basic_math_hypotl(__basic_complex_creall(z), __basic_complex_cimagl(z));
+}
+
+// Compute the argument of z, the arc tangent of its parts.
+double __basic_complex_carg(double _Complex z)
+{
+    return __basic_math_atan2(__basic_complex_cimag(z), __basic_complex_creal(z));
+}
+
+// Compute the argument of z, the arc tangent of its parts.
+float __basic_complex_cargf(float _Complex z)
+{
+    return __basic_math_atan2f(__basic_complex_cimagf(z), __basic_complex_crealf(z));
+}
+
+// Compute the argument of z, the arc tangent of its parts.
+long double __basic_complex_cargl(long double _Complex z)
+{
+    return __basic_math_atan2l(__basic_complex_cimagl(z), __basic_complex_creall(z));
+}
+
+// Read the imaginary part of z, its second element.
+double __basic_complex_cimag(double _Complex z)
+{
+    return ((double *) &z)[1];
+}
+
+// Read the imaginary part of z, its second element.
+float __basic_complex_cimagf(float _Complex z)
+{
+    return ((float *) &z)[1];
+}
+
+// Read the imaginary part of z, its second element.
+long double __basic_complex_cimagl(long double _Complex z)
+{
+    return ((long double *) &z)[1];
+}
+
+// Compute the conjugate of z, its imaginary part's sign flipped.
+double _Complex __basic_complex_conj(double _Complex z)
+{
+    return _Basic_Complex_JoinDouble(__basic_complex_creal(z), -__basic_complex_cimag(z));
+}
+
+// Compute the conjugate of z, its imaginary part's sign flipped.
+float _Complex __basic_complex_conjf(float _Complex z)
+{
+    return _Basic_Complex_JoinFloat(__basic_complex_crealf(z), -__basic_complex_cimagf(z));
+}
+
+// Compute the conjugate of z, its imaginary part's sign flipped.
+long double _Complex __basic_complex_conjl(long double _Complex z)
+{
+    return _Basic_Complex_JoinLDouble(__basic_complex_creall(z), -__basic_complex_cimagl(z));
+}
+
+// Project z onto the Riemann sphere, each infinity to +inf + i(+-0).
+double _Complex __basic_complex_cproj(double _Complex z)
+{
+    double y = __basic_complex_cimag(z);
+
+    if (_BASIC_MATH_IS_INF(__basic_complex_creal(z)) || _BASIC_MATH_IS_INF(y)) {
+        return _Basic_Complex_JoinDouble((double) _EXACT_INFINITY, __basic_math_copysign(0.0, y));
+    }
+    return z;
+}
+
+// Project z onto the Riemann sphere, each infinity to +inf + i(+-0).
+float _Complex __basic_complex_cprojf(float _Complex z)
+{
+    float y = __basic_complex_cimagf(z);
+
+    if (_BASIC_MATH_IS_INF(__basic_complex_crealf(z)) || _BASIC_MATH_IS_INF(y)) {
+        return _Basic_Complex_JoinFloat((float) _EXACT_INFINITY, __basic_math_copysignf(0.0f, y));
+    }
+    return z;
+}
+
+// Project z onto the Riemann sphere, each infinity to +inf + i(+-0).
+long double _Complex __basic_complex_cprojl(long double _Complex z)
+{
+    long double y = __basic_complex_cimagl(z);
+
+    if (_BASIC_MATH_IS_INF(__basic_complex_creall(z)) || _BASIC_MATH_IS_INF(y)) {
+        return _Basic_Complex_JoinLDouble(_EXACT_INFINITY, __basic_math_copysignl(0.0L, y));
+    }
+    return z;
+}
+
+// Read the real part of z, its first element.
+double __basic_complex_creal(double _Complex z)
+{
+    return ((double *) &z)[0];
+}
+
+// Read the real part of z, its first element.
+float __basic_complex_crealf(float _Complex z)
+{
+    return ((float *) &z)[0];
+}
+
+// Read the real part of z, its first element.
+long double __basic_complex_creall(long double _Complex z)
+{
+    return ((long double *) &z)[0];
+}
+
 // Multiply a + ib by c + id, float's helper, recovering lost infinities.
 float _Complex __basic_complex_mulsc3(float a, float b, float c, float d)
 {

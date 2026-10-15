@@ -72,6 +72,26 @@ void _Basic_Complex_RecoverLDouble(long double a, long double b, long double c, 
 void _Basic_Complex_DivideDouble(double a, double b, double c, double d, double *x, double *y);
 void _Basic_Complex_DivideLDouble(long double a, long double b, long double c, long double d, long double *x, long double *y);
 
+// The bodies of <complex.h>'s absolute value and manipulation functions.
+double               __basic_complex_cabs(double _Complex z);
+float                __basic_complex_cabsf(float _Complex z);
+long double          __basic_complex_cabsl(long double _Complex z);
+double               __basic_complex_carg(double _Complex z);
+float                __basic_complex_cargf(float _Complex z);
+long double          __basic_complex_cargl(long double _Complex z);
+double               __basic_complex_cimag(double _Complex z);
+float                __basic_complex_cimagf(float _Complex z);
+long double          __basic_complex_cimagl(long double _Complex z);
+double _Complex      __basic_complex_conj(double _Complex z);
+float _Complex       __basic_complex_conjf(float _Complex z);
+long double _Complex __basic_complex_conjl(long double _Complex z);
+double _Complex      __basic_complex_cproj(double _Complex z);
+float _Complex       __basic_complex_cprojf(float _Complex z);
+long double _Complex __basic_complex_cprojl(long double _Complex z);
+double               __basic_complex_creal(double _Complex z);
+float                __basic_complex_crealf(float _Complex z);
+long double          __basic_complex_creall(long double _Complex z);
+
 // The compiler's helpers for * and / of two complex values, as libgcc's.
 float _Complex       __basic_complex_mulsc3(float a, float b, float c, float d);
 double _Complex      __basic_complex_muldc3(double a, double b, double c, double d);

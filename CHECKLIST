@@ -321,13 +321,14 @@ Checklist toward ISO C99: the language, then the standard library of clause 7.
 
         `<complex.h>` (7.3), each function in `double`, `float` (`f`) and `long double` (`l`)
 
-            - [ ] `complex`, `_Complex_I`, `I`
-            - [ ] `#pragma STDC CX_LIMITED_RANGE`
+            - [x] `complex`, `_Complex_I`, `I`
+            - [x] `#pragma STDC CX_LIMITED_RANGE`, taken and ignored
+            - [x] absolute value: `cabs`
+            - [x] manipulation: `carg`, `cimag`, `conj`, `cproj`, `creal`
             - [ ] trigonometric: `cacos`, `casin`, `catan`, `ccos`, `csin`, `ctan`
             - [ ] hyperbolic: `cacosh`, `casinh`, `catanh`, `ccosh`, `csinh`, `ctanh`
             - [ ] exponential and logarithmic: `cexp`, `clog`
-            - [ ] power and absolute value: `cabs`, `cpow`, `csqrt`
-            - [ ] manipulation: `carg`, `cimag`, `conj`, `cproj`, `creal`
+            - [ ] power: `cpow`, `csqrt`
 
         `<tgmath.h>` (7.22)
 
