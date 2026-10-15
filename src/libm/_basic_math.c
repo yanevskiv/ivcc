@@ -870,6 +870,15 @@ long double _Basic_Math_SumCos(long double r, long double low)
     return 1 + (square * sum - r * low);
 }
 
+// Take a over b >= a, or 0 where it is below 2^-70, raising no underflow.
+long double _Basic_Math_TakeRatio(long double a, long double b)
+{
+    if (b > 1 ? a < b * _BASIC_MATH_ATAN_FAR : a * _BASIC_MATH_ATAN_FAR_INVERSE < b) {
+        return 0;
+    }
+    return a / b;
+}
+
 // Sum the arc tangent of a t in [0, 1] by its nearest step and a series.
 long double _Basic_Math_SumAtan(long double t)
 {
@@ -927,6 +936,7 @@ long double _Basic_Math_TakeAtan2(long double y, long double x)
     long double a = __basic_math_fabsl(y);
     long double b = __basic_math_fabsl(x);
     long double angle;
+    long double t;
 
     if (x != x || y != y) {
         return x + y;
@@ -941,13 +951,14 @@ long double _Basic_Math_TakeAtan2(long double y, long double x)
         a = 1;
         b = 1;
     }
-    if (a < b * _BASIC_MATH_ATAN_TINY && x > 0) {
-        return y / b;
-    }
     if (a <= b) {
-        angle = _Basic_Math_SumAtan(a / b);
+        t = _Basic_Math_TakeRatio(a, b);
+        if (t < _BASIC_MATH_ATAN_TINY && x > 0) {
+            return y / b;
+        }
+        angle = _Basic_Math_SumAtan(t);
     } else {
-        angle = _BASIC_MATH_HALF_PI_HIGH + (_BASIC_MATH_HALF_PI_LOW - _Basic_Math_SumAtan(b / a));
+        angle = _BASIC_MATH_HALF_PI_HIGH + (_BASIC_MATH_HALF_PI_LOW - _Basic_Math_SumAtan(_Basic_Math_TakeRatio(b, a)));
     }
     if (x < 0) {
         angle = _BASIC_MATH_PI_HIGH + (_BASIC_MATH_PI_LOW - angle);

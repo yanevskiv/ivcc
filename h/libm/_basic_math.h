@@ -150,6 +150,11 @@
 #define _BASIC_MATH_ATAN_STEP_COUNT 17
 #define _BASIC_MATH_ATAN_TINY       0x1p-33L
 
+// The ratio of the smaller part to the larger below which its arc tangent is
+// lost beside pi/2 and pi, and its inverse.
+#define _BASIC_MATH_ATAN_FAR         0x1p-70L
+#define _BASIC_MATH_ATAN_FAR_INVERSE 0x1p70L
+
 // The magnitude past which a hyperbolic function's smaller exponential is
 // lost, and past which an inverse's 1 is lost.
 #define _BASIC_MATH_HYPERBOLIC_WIDE     0x1p5L
@@ -371,6 +376,7 @@ long double  _Basic_Math_IterateRoot(long double x);
 unsigned int _Basic_Math_ReduceTrig(long double x, long double *r, long double *low);
 long double  _Basic_Math_SumSin(long double r, long double low);
 long double  _Basic_Math_SumCos(long double r, long double low);
+long double  _Basic_Math_TakeRatio(long double a, long double b);
 long double  _Basic_Math_SumAtan(long double t);
 long double  _Basic_Math_TakeTrig(long double x, _Basic_Math_Trig which);
 long double  _Basic_Math_TakeAtan2(long double y, long double x);
