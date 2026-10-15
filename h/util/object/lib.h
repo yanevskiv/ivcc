@@ -40,7 +40,7 @@
 // The two bytes that close every member header.
 #define LIB_AR_FMAG "`\n"
 
-// Names of the special members: the symbol index, its 64-bit form and the long-name table.
+// The special members' names: the symbol index, its 64-bit form, long names.
 #define LIB_AR_NAME_INDEX   "/"
 #define LIB_AR_NAME_INDEX64 "/SYM64/"
 #define LIB_AR_NAME_LONGS   "//"

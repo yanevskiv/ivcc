@@ -32,10 +32,11 @@
 // The bits a working value keeps, the rest truncated.
 #define _PREC_MATH_WORK_BITS 160
 
-// A constant's limbs, 192 bits, the least significant first, each
-// constant's limbs, and the exponent of its lowest bit.
-#define _PREC_MATH_CONSTANTS         6
-#define _PREC_MATH_CONST_LIMBS       6
+// The constants, and each one's limbs, 192 bits, the least significant first.
+#define _PREC_MATH_CONSTANTS   6
+#define _PREC_MATH_CONST_LIMBS 6
+
+// Each constant's limbs, and the exponent of its lowest bit.
 #define _PREC_MATH_LN2_LIMBS         0x7298B62DU, 0x40F34326U, 0x03F2F6AFU, 0xC9E3B398U, 0xD1CF79ABU, 0xB17217F7U
 #define _PREC_MATH_LN2_UNIT          (-192)
 #define _PREC_MATH_LOG2E_LIMBS       0xDD695A58U, 0xEB577AA8U, 0x691D3E88U, 0xBE87FED0U, 0x5C17F0BBU, 0xB8AA3B29U
@@ -49,24 +50,21 @@
 #define _PREC_MATH_LN_ROOT_2PI_LIMBS 0x13458B4DU, 0xCFB08F8DU, 0x44192023U, 0x94BC9001U, 0x25F5A534U, 0xEB3F8E43U
 #define _PREC_MATH_LN_ROOT_2PI_UNIT  (-192)
 
-// The magnitude past which every exponential overflows or underflows, and
-// its exponent.
+// The magnitude past which every exponential is out of range, its exponent.
 #define _PREC_MATH_EXP_CLAMP     0x1p15L
 #define _PREC_MATH_EXP_CLAMP_EXP 15
 
 // The power pow takes as a square root.
 #define _PREC_MATH_POW_ROOT 0.5L
 
-// The halvings of an exponential's reduced argument, and the greatest
-// divisor of its series.
+// The halvings of an exponential's reduced argument, and its series' terms.
 #define _PREC_MATH_EXP_HALVINGS 8
 #define _PREC_MATH_EXP_TERMS    15
 
 // The terms of a logarithm's series.
 #define _PREC_MATH_LOG_TERMS 34
 
-// The greatest exponents of a negative and a positive argument log1p takes
-// without forming 1 plus it.
+// The greatest exponents of an argument log1p takes without forming 1 plus it.
 #define _PREC_MATH_LOG1P_LOW_EXP  (-3)
 #define _PREC_MATH_LOG1P_HIGH_EXP (-2)
 
@@ -79,13 +77,11 @@
 #define _PREC_MATH_ROOT_GUESSES 6
 #define _PREC_MATH_ROOT_STEPS   2
 
-// The magnitude below which a function is its argument or 1, nudged, and its
-// exponent.
+// The magnitude below which a function is its argument or 1, its exponent.
 #define _PREC_MATH_TINY     0x1p-60L
 #define _PREC_MATH_TINY_EXP (-60)
 
-// A reduced argument's quadrant's bit of an odd quarter turn and its bit of
-// a half turn.
+// A reduced argument's quadrant's odd quarter turn bit and half turn bit.
 #define _PREC_MATH_QUADRANT_ODD  1U
 #define _PREC_MATH_QUADRANT_HALF 2U
 
@@ -103,8 +99,7 @@
 #define _PREC_MATH_WHOLE_PI         4U
 #define _PREC_MATH_QUARTER_EXP      (-2)
 
-// The magnitude below which erf takes its series, and the series' terms, a
-// base and more for each unit of the magnitude.
+// The magnitude below which erf takes its series, its terms' base and step.
 #define _PREC_MATH_ERF_SPLIT      6.0L
 #define _PREC_MATH_ERF_TERMS_BASE 20U
 #define _PREC_MATH_ERF_TERMS_STEP 25U
@@ -112,8 +107,7 @@
 // The terms of erfc's continued fraction from the split on.
 #define _PREC_MATH_ERFC_TERMS 80
 
-// The fraction of an x past which sin(pi x) is taken as a cosine, and the
-// half its distance to the nearest integer reaches.
+// The fraction past which sin(pi x) is a cosine, and its greatest distance.
 #define _PREC_MATH_SINE_TURN 0.25L
 #define _PREC_MATH_HALF      0.5L
 
@@ -159,8 +153,7 @@ enum _Prec_Math_Parity {
     _PREC_MATH_PARITY_ODD   // an odd integer
 };
 
-// The magnitudes of Stirling's coefficients, B2k over 2k(2k - 1), as limbs
-// of constants, and their units; the first is positive, and signs alternate.
+// The magnitudes of Stirling's alternating coefficients as limbs, and units.
 extern const unsigned int _Prec_Math_Stirling[_PREC_MATH_STIRLING_TERMS][_PREC_MATH_CONST_LIMBS];
 extern const int          _Prec_Math_StirlingUnits[_PREC_MATH_STIRLING_TERMS];
 

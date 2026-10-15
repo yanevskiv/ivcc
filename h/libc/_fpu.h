@@ -29,8 +29,7 @@
 // What a function returns when it does not do what it was asked.
 #define _FPU_FAILED 1
 
-// The exception flags, the same bits in the x87 status word and MXCSR, the
-// five C99 names, and all six with the denormal flag.
+// The exception flags of the x87 and MXCSR, C99's five and all six.
 #define _FPU_INVALID   0x01
 #define _FPU_DIVBYZERO 0x04
 #define _FPU_OVERFLOW  0x08

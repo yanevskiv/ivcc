@@ -30,14 +30,14 @@
 // The parts of a complex value, its real and its imaginary one.
 #define _BASIC_COMPLEX_PARTS 2
 
-// The bounds a double's and a long double's division scales its operands
-// by, as libgcc's: half the largest value, the least normal one, the
-// epsilon and its inverse, and half the largest value times the epsilon.
-#define _BASIC_COMPLEX_DBL_BIG      0x1.fffffffffffffp+1022
-#define _BASIC_COMPLEX_DBL_MIN      0x1p-1022
-#define _BASIC_COMPLEX_DBL_EPS      0x1p-52
-#define _BASIC_COMPLEX_DBL_SCALE    0x1p52
-#define _BASIC_COMPLEX_DBL_BIG_EPS  0x1.fffffffffffffp+970
+// The bounds a double's division scales its operands by, as libgcc's.
+#define _BASIC_COMPLEX_DBL_BIG     0x1.fffffffffffffp+1022
+#define _BASIC_COMPLEX_DBL_MIN     0x1p-1022
+#define _BASIC_COMPLEX_DBL_EPS     0x1p-52
+#define _BASIC_COMPLEX_DBL_SCALE   0x1p52
+#define _BASIC_COMPLEX_DBL_BIG_EPS 0x1.fffffffffffffp+970
+
+// The bounds a long double's division scales its operands by, as libgcc's.
 #define _BASIC_COMPLEX_LDBL_BIG     0xf.fffffffffffffffp+16379L
 #define _BASIC_COMPLEX_LDBL_MIN     0x1p-16382L
 #define _BASIC_COMPLEX_LDBL_EPS     0x1p-63L
@@ -50,18 +50,18 @@
 // The magnitude below which the sine of y is y and its cosine 1.
 #define _BASIC_COMPLEX_TRIG_TINY 0x1p-33L
 
-// The ratio of the parts below which the smaller one's square is lost
-// beside the larger one's, and so is its share of ln |z|.
+// The ratio of the parts below which the smaller one's square is lost in |z|.
 #define _BASIC_COMPLEX_RATIO_TINY 0x1p-40L
 
-// The band of the larger part's magnitude in which ln |z| is half log1p of
-// x^2 + y^2 - 1, the magnitude of that sum below which it is summed
-// exactly, and the magnitude of the smaller part below which its square is
-// lost in it but where the larger is 1.
+// The band of the larger part in which ln |z| is half log1p of x^2 + y^2 - 1.
 #define _BASIC_COMPLEX_LOG_NEAR_LOW  0.5L
 #define _BASIC_COMPLEX_LOG_NEAR_HIGH 2.0L
-#define _BASIC_COMPLEX_LOG_EXACT     0x1p-40L
-#define _BASIC_COMPLEX_LOG_SQUARE    0x1p-8000L
+
+// The magnitude of x^2 + y^2 - 1 below which it is summed exactly.
+#define _BASIC_COMPLEX_LOG_EXACT 0x1p-40L
+
+// The smaller part below which its square is lost but where the larger is 1.
+#define _BASIC_COMPLEX_LOG_SQUARE 0x1p-8000L
 
 // The magnitudes between which a square root's parts are squared unscaled.
 #define _BASIC_COMPLEX_ROOT_HUGE 0x1p8000L
@@ -71,32 +71,31 @@
 #define _BASIC_COMPLEX_QUARTER_PI       0xc.90fdaa22168c235p-4L
 #define _BASIC_COMPLEX_THREE_QUARTER_PI 0x9.6cbe3f9990e91a8p-2L
 
-// The magnitudes above which casinh(z) is ln 2z and below which it is z, as
-// catanh(z) is z and cacos(z) is pi/2 - z.
+// The magnitudes above which casinh(z) is ln 2z and below which it is z.
 #define _BASIC_COMPLEX_ARC_HUGE 0x1p63L
 #define _BASIC_COMPLEX_ARC_TINY 0x1p-33L
 
-// Hull's crossovers: A below which A - 1 is summed of its parts, and B above
-// which the arc sine of B is taken of its angle's sides.
+// Hull's crossovers for A - 1 summed of its parts and the angle from its sides.
 #define _BASIC_COMPLEX_ARC_CROSS_A 10.0L
 #define _BASIC_COMPLEX_ARC_CROSS_B 0.6417L
 
-// Hull's bounds: y below which y / A would underflow, the factors that lift
-// an angle's sides from it, and x below which A - 1 and A - y at y = 1 are
-// of the order of the root of x.
-#define _BASIC_COMPLEX_ARC_FLOOR      0x1p-8189L
+// Hull's y below which y / A would underflow.
+#define _BASIC_COMPLEX_ARC_FLOOR 0x1p-8189L
+
+// The factors that lift an angle's sides from Hull's floor.
 #define _BASIC_COMPLEX_ARC_LIFT       0x1p64L
 #define _BASIC_COMPLEX_ARC_LIFT_TWICE 0x1p128L
-#define _BASIC_COMPLEX_ARC_NEAR       0x1p-133L
-#define _BASIC_COMPLEX_ARC_NEAR_SIDE  0x1p-70L
+
+// Hull's x below which A - 1 and A - y at y = 1 are of the order of root x.
+#define _BASIC_COMPLEX_ARC_NEAR      0x1p-133L
+#define _BASIC_COMPLEX_ARC_NEAR_SIDE 0x1p-70L
 
 // A complex value of each type made of its two parts.
 float _Complex       _Basic_Complex_JoinFloat(float x, float y);
 double _Complex      _Basic_Complex_JoinDouble(double x, double y);
 long double _Complex _Basic_Complex_JoinLDouble(long double x, long double y);
 
-// The parts of a product's or quotient's operands, an infinity boxed to 1
-// and a NaN cleared to 0, each keeping its sign.
+// An operand's part of * or /, an infinity boxed to 1 or a NaN cleared to 0.
 long double _Basic_Complex_BoxInfinity(long double x);
 long double _Basic_Complex_ClearNan(long double x);
 
@@ -104,39 +103,36 @@ long double _Basic_Complex_ClearNan(long double x);
 void _Basic_Complex_ScaleDouble(double *a, double *b, double *c, double *d, double by);
 void _Basic_Complex_ScaleLDouble(long double *a, long double *b, long double *c, long double *d, long double by);
 
-// The quotient of a + ib by c + id, x + iy, both NaN, made the infinity or
-// zero G.5.1 asks for where the operands give one.
+// A NaN quotient x + iy made the infinity or zero G.5.1 asks for.
 void _Basic_Complex_RecoverFloat(float a, float b, float c, float d, float *x, float *y);
 void _Basic_Complex_RecoverDouble(double a, double b, double c, double d, double *x, double *y);
 void _Basic_Complex_RecoverLDouble(long double a, long double b, long double c, long double d, long double *x, long double *y);
 
-// The quotient of a + ib by c + id, x + iy, by Smith's ratio of c and d,
-// the operands scaled first where its terms would overflow or underflow.
+// The quotient of a + ib by c + id by Smith's ratio, scaled where it must be.
 void _Basic_Complex_DivideDouble(double a, double b, double c, double d, double *x, double *y);
 void _Basic_Complex_DivideLDouble(long double a, long double b, long double c, long double d, long double *x, long double *y);
 
-// A complex value of each type rounded from long double parts, underflow
-// raised for a tiny part.
+// A complex value of each type rounded from long double parts, tiny checked.
 void                 _Basic_Complex_CheckTiny(long double x, long double least);
 float _Complex       _Basic_Complex_RoundFloat(long double x, long double y);
 double _Complex      _Basic_Complex_RoundDouble(long double x, long double y);
 long double _Complex _Basic_Complex_RoundLDouble(long double x, long double y);
 
-// The exponential, logarithm, square root and power of x + iy, each in
-// long double, into re + i im.
+// The cores' shared steps: a NaN, a square's parts, x^2 + y^2 - 1, |z|, cis y.
 long double _Basic_Complex_MakeNan(void);
 long double _Basic_Complex_SquareParts(long double x, long double least, long double *low);
 long double _Basic_Complex_SumUnitGap(long double a, long double b, long double least);
 long double _Basic_Complex_TakeAbs(long double x, long double y, long double a);
 void        _Basic_Complex_TakeSinCos(long double y, long double *s, long double *c);
+
+// The exponential, logarithm, square root and power of x + iy in long double.
 void        _Basic_Complex_TakeExp(long double x, long double y, long double *re, long double *im);
 long double _Basic_Complex_TakeLogAbs(long double x, long double y);
 void        _Basic_Complex_TakeLog(long double x, long double y, long double *re, long double *im);
 void        _Basic_Complex_TakeSqrt(long double x, long double y, long double *re, long double *im);
 void        _Basic_Complex_TakePow(long double x, long double y, long double c, long double d, long double *re, long double *im);
 
-// The hyperbolic functions of x + iy and their inverses, each in long
-// double, into re + i im; the trigonometric ones are theirs of iz.
+// The hyperbolic functions of x + iy and their inverses in long double.
 int         _Basic_Complex_TakeSinhCosh(long double a, long double *sh, long double *ch);
 void        _Basic_Complex_TakeSinh(long double x, long double y, long double *re, long double *im);
 void        _Basic_Complex_TakeCosh(long double x, long double y, long double *re, long double *im);
@@ -150,8 +146,7 @@ void        _Basic_Complex_TakeAcosh(long double x, long double y, long double *
 long double _Basic_Complex_TakeInverseReal(long double x, long double y);
 void        _Basic_Complex_TakeAtanh(long double x, long double y, long double *re, long double *im);
 
-// The bodies of <complex.h>'s trigonometric, hyperbolic, exponential,
-// logarithmic, power, absolute value and manipulation functions.
+// The bodies of <complex.h>'s functions.
 double               __basic_complex_cabs(double _Complex z);
 float                __basic_complex_cabsf(float _Complex z);
 long double          __basic_complex_cabsl(long double _Complex z);

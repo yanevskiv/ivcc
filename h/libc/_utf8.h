@@ -41,8 +41,7 @@
 #define _UTF8_TAG_FIRST 0xE0000
 #define _UTF8_TAG_LAST  0xE007F
 
-// The least lead byte of a longer sequence, past the overlong 0xC0 and 0xC1,
-// and the greatest, which leads the last code's sequence.
+// The least and the greatest lead byte of a sequence of two bytes or more.
 #define _UTF8_LEAD_MIN 0xC2U
 #define _UTF8_LEAD_MAX 0xF4U
 

@@ -40,11 +40,12 @@
 #define _BASIC_MATH_SIGN_BIT   0x80
 #define _BASIC_MATH_SIGN_SHIFT 7
 
-// A float's and a double's biased exponent, its field's place and its
-// largest value, that of the infinities and NaNs, and its fraction below it.
-#define _BASIC_MATH_FLOAT_EXP_SHIFT  23
-#define _BASIC_MATH_FLOAT_EXP_MAX    0xFFU
-#define _BASIC_MATH_FLOAT_FRAC_MASK  0x7FFFFFU
+// A float's exponent's place, its largest value, and its fraction's mask.
+#define _BASIC_MATH_FLOAT_EXP_SHIFT 23
+#define _BASIC_MATH_FLOAT_EXP_MAX   0xFFU
+#define _BASIC_MATH_FLOAT_FRAC_MASK 0x7FFFFFU
+
+// A double's exponent's place, its largest value, and its fraction's mask.
 #define _BASIC_MATH_DOUBLE_EXP_SHIFT 52
 #define _BASIC_MATH_DOUBLE_EXP_MAX   0x7FFU
 #define _BASIC_MATH_DOUBLE_FRAC_MASK 0xFFFFFFFFFFFFFULL
@@ -80,24 +81,28 @@
 // The exponent of a fraction in [1/2, 1).
 #define _BASIC_MATH_FRACTION_EXP (-1)
 
-// The terms of the exponential's and the logarithm's series, and the
-// magnitude past which e or 2 to x is an infinity or a zero in each type.
+// The terms of the exponential's and the logarithm's series.
 #define _BASIC_MATH_EXP_TERMS 15
 #define _BASIC_MATH_LOG_TERMS 13
+
+// The magnitude past which e or 2 to x is an infinity or a zero in each type.
 #define _BASIC_MATH_EXP_CLAMP 0x1p15L
 
-// The magnitude past which expm1 of a negative x is -1, the power of 2
-// past which its 1 is lost, and the magnitude below which log1p of x is x,
-// in long double.
+// The magnitude past which expm1 of a negative x is -1.
 #define _BASIC_MATH_EXPM1_FLOOR 0x1p6L
-#define _BASIC_MATH_EXPM1_WIDE  64
-#define _BASIC_MATH_LOG1P_TINY  0x1p-64L
 
-// ln 2, its top 48 bits and the rest, log2 e, log10 2, log10 e and the
-// square root of 2.
+// The power of 2 past which expm1's 1 is lost in long double.
+#define _BASIC_MATH_EXPM1_WIDE 64
+
+// The magnitude below which log1p of x is x in long double.
+#define _BASIC_MATH_LOG1P_TINY 0x1p-64L
+
+// ln 2, its top 48 bits and the rest.
 #define _BASIC_MATH_LN2      0xb.17217f7d1cf79acp-4L
 #define _BASIC_MATH_LN2_HIGH 0xb.17217f7d1cfp-4L
 #define _BASIC_MATH_LN2_LOW  0xf.35793c7673007e6p-53L
+
+// log2 e, log10 2, log10 e and the square root of 2.
 #define _BASIC_MATH_LOG2E    0xb.8aa3b295c17f0bcp-3L
 #define _BASIC_MATH_LOG10_2  0x9.a209a84fbcff799p-5L
 #define _BASIC_MATH_LOG10E   0xd.e5bd8a937287195p-5L
@@ -109,24 +114,25 @@
 // 2 to 32 plus 1, which splits a long double into two halves of 32 bits.
 #define _BASIC_MATH_SPLIT 0x1.00000001p32L
 
-// The steps of the logarithm's table, j/32 for j from 23 to 45, the terms
-// of its series pow takes, and the magnitude past which x to y is an
-// infinity or a zero for every x but 1 and -1.
+// The steps of the logarithm's table, j/32 for j from 23 to 45.
 #define _BASIC_MATH_LOG_STEPS      32
 #define _BASIC_MATH_LOG_STEP_FIRST 23
 #define _BASIC_MATH_LOG_STEP_COUNT 23
-#define _BASIC_MATH_POW_TERMS      6
-#define _BASIC_MATH_POW_CLAMP      0x1p80L
 
-// The magnitude below which the trigonometric functions reduce x by four
-// parts of pi/2, those parts, 2/pi and pi/4.
-#define _BASIC_MATH_TRIG_NEAR    0x1p30L
-#define _BASIC_MATH_HALF_PI_1    0xc.90fdaa2p-3L
-#define _BASIC_MATH_HALF_PI_2    0x8.5a308d3p-37L
-#define _BASIC_MATH_HALF_PI_3    0x9.8cc51701b839a25p-72L
-#define _BASIC_MATH_HALF_PI_4    0x8.127044533e63a01p-138L
-#define _BASIC_MATH_TWO_OVER_PI  0xa.2f9836e4e44152ap-4L
-#define _BASIC_MATH_QUARTER_PI   0xc.90fdaa22168c235p-4L
+// The terms of the logarithm's series pow takes.
+#define _BASIC_MATH_POW_TERMS 6
+
+// The magnitude past which x to y is an infinity or a zero but at x = ±1.
+#define _BASIC_MATH_POW_CLAMP 0x1p80L
+
+// The magnitude below which the trigonometric functions reduce by pi/2.
+#define _BASIC_MATH_TRIG_NEAR 0x1p30L
+
+// The four parts of pi/2 that reduction subtracts.
+#define _BASIC_MATH_HALF_PI_1 0xc.90fdaa2p-3L
+#define _BASIC_MATH_HALF_PI_2 0x8.5a308d3p-37L
+#define _BASIC_MATH_HALF_PI_3 0x9.8cc51701b839a25p-72L
+#define _BASIC_MATH_HALF_PI_4 0x8.127044533e63a01p-138L
 
 // pi/2 and pi, each its nearest long double and the rest.
 #define _BASIC_MATH_HALF_PI_HIGH 0xc.90fdaa22168c235p-3L
@@ -134,86 +140,102 @@
 #define _BASIC_MATH_PI_HIGH      0xc.90fdaa22168c235p-2L
 #define _BASIC_MATH_PI_LOW       (-0xe.ce675d1fc8f8cbbp-68L)
 
-// A reduced argument's quadrant's mask, its bit of an odd quarter turn and
-// its bit of a half turn.
+// 2/pi and pi/4.
+#define _BASIC_MATH_TWO_OVER_PI 0xa.2f9836e4e44152ap-4L
+#define _BASIC_MATH_QUARTER_PI  0xc.90fdaa22168c235p-4L
+
+// A reduced argument's quadrant's mask, odd quarter turn bit and half turn bit.
 #define _BASIC_MATH_QUADRANT_MASK 3U
 #define _BASIC_MATH_QUADRANT_ODD  1U
 #define _BASIC_MATH_QUADRANT_HALF 2U
 
-// The terms of the sine's and the cosine's series, of the arc tangent's, the
-// steps of its table, j/16 for j from 0 to 16, and the ratio below which the
-// arc tangent of y over a positive x is y over x.
-#define _BASIC_MATH_SIN_TERMS       9
-#define _BASIC_MATH_COS_TERMS       10
+// The terms of the sine's and the cosine's series.
+#define _BASIC_MATH_SIN_TERMS 9
+#define _BASIC_MATH_COS_TERMS 10
+
+// The terms of the arc tangent's series, and its table's steps, j/16 to 1.
 #define _BASIC_MATH_ATAN_TERMS      6
 #define _BASIC_MATH_ATAN_STEPS      16
 #define _BASIC_MATH_ATAN_STEP_COUNT 17
-#define _BASIC_MATH_ATAN_TINY       0x1p-33L
 
-// The ratio of the smaller part to the larger below which its arc tangent is
-// lost beside pi/2 and pi, and its inverse.
+// The ratio below which the arc tangent of y over a positive x is y over x.
+#define _BASIC_MATH_ATAN_TINY 0x1p-33L
+
+// The ratio of the parts below which atan2 is lost beside pi/2, and inverse.
 #define _BASIC_MATH_ATAN_FAR         0x1p-70L
 #define _BASIC_MATH_ATAN_FAR_INVERSE 0x1p70L
 
-// The magnitude past which a hyperbolic function's smaller exponential is
-// lost, and past which an inverse's 1 is lost.
-#define _BASIC_MATH_HYPERBOLIC_WIDE     0x1p5L
+// The magnitude past which a hyperbolic function's smaller exponential is lost.
+#define _BASIC_MATH_HYPERBOLIC_WIDE 0x1p5L
+
+// The magnitude past which an inverse hyperbolic function's 1 is lost.
 #define _BASIC_MATH_ARC_HYPERBOLIC_WIDE 0x1p32L
 
-// The first guess of 1/sqrt(m) for m in [1, 4), a quadratic's coefficients,
-// and Newton's steps from it.
+// The quadratic first guess of 1/sqrt(m) for m in [1, 4), and Newton's steps.
 #define _BASIC_MATH_ROOT_GUESS_0 0x1.5078p+0L
 #define _BASIC_MATH_ROOT_GUESS_1 (-0x1.9126p-2L)
 #define _BASIC_MATH_ROOT_GUESS_2 0x1.85efp-5L
 #define _BASIC_MATH_ROOT_STEPS   4
 
-// The terms of erf's Maclaurin series below 1/2, 2/sqrt(pi), its nearest
-// long double and the rest, and 1/sqrt(pi).
-#define _BASIC_MATH_ERF_TERMS             13
+// The terms of erf's Maclaurin series below 1/2.
+#define _BASIC_MATH_ERF_TERMS 13
+
+// 2/sqrt(pi), its nearest long double and the rest, and 1/sqrt(pi).
 #define _BASIC_MATH_TWO_OVER_ROOT_PI_HIGH 0x9.06eba8214db688dp-3L
 #define _BASIC_MATH_TWO_OVER_ROOT_PI_LOW  0xe.3a914fed7fd8688p-68L
 #define _BASIC_MATH_INV_ROOT_PI           0x9.06eba8214db688dp-4L
 
-// The nodes of erfc's table, j/4 for j from 2 to 16, the terms of e to x^2
-// times erfc's Taylor series at each, the magnitude from which it takes
-// Laplace's continued fraction, that fraction's terms, the magnitude past
-// which erf is 1, and the one past which erfc is 0 in every type.
-#define _BASIC_MATH_ERFC_NODES        4
-#define _BASIC_MATH_ERFC_NODE_FIRST   2
-#define _BASIC_MATH_ERFC_NODE_COUNT   15
-#define _BASIC_MATH_ERFC_TAYLOR_TERMS 17
-#define _BASIC_MATH_ERFC_FRACTION     0x8.4p-1L
-#define _BASIC_MATH_ERFC_TERMS        32
-#define _BASIC_MATH_ERF_ONE           0x1p3L
-#define _BASIC_MATH_ERFC_CLAMP        0x1p7L
+// The nodes of erfc's table, j/4 for j from 2 to 16.
+#define _BASIC_MATH_ERFC_NODES      4
+#define _BASIC_MATH_ERFC_NODE_FIRST 2
+#define _BASIC_MATH_ERFC_NODE_COUNT 15
 
-// The point lgamma's Taylor series is taken at, its terms, the least x
-// Stirling's series takes, its terms, the magnitude past which lgamma of x
-// is x(ln x - 1), and ln sqrt(2 pi), its nearest long double and the rest.
-#define _BASIC_MATH_GAMMA_CENTER     2
-#define _BASIC_MATH_GAMMA_TERMS      35
-#define _BASIC_MATH_STIRLING_FROM    10
-#define _BASIC_MATH_STIRLING_TERMS   10
-#define _BASIC_MATH_STIRLING_WIDE    0x1p64L
+// The terms of e to x^2 times erfc's Taylor series at each node.
+#define _BASIC_MATH_ERFC_TAYLOR_TERMS 17
+
+// The magnitude from which erfc takes Laplace's continued fraction, its terms.
+#define _BASIC_MATH_ERFC_FRACTION 0x8.4p-1L
+#define _BASIC_MATH_ERFC_TERMS    32
+
+// The magnitudes past which erf is 1 and erfc is 0 in every type.
+#define _BASIC_MATH_ERF_ONE    0x1p3L
+#define _BASIC_MATH_ERFC_CLAMP 0x1p7L
+
+// The point lgamma's Taylor series is taken at, and its terms.
+#define _BASIC_MATH_GAMMA_CENTER 2
+#define _BASIC_MATH_GAMMA_TERMS  35
+
+// The least x Stirling's series takes, and its terms.
+#define _BASIC_MATH_STIRLING_FROM  10
+#define _BASIC_MATH_STIRLING_TERMS 10
+
+// The magnitude past which lgamma of x is x(ln x - 1).
+#define _BASIC_MATH_STIRLING_WIDE 0x1p64L
+
+// ln sqrt(2 pi), its nearest long double and the rest.
 #define _BASIC_MATH_LN_ROOT_2PI_HIGH 0xe.b3f8e4325f5a535p-4L
 #define _BASIC_MATH_LN_ROOT_2PI_LOW  (-0xd.686dffd77cdbfb8p-69L)
 
-// The first unit interval (-n - 1, -n) of lgamma's zeros' table, the count
-// of its zeros, two an interval, and the x from which lgamma takes them.
+// The first interval (-n - 1, -n) of lgamma's zeros' table, and its zeros.
 #define _BASIC_MATH_GAMMA_ZERO_FIRST 2
 #define _BASIC_MATH_GAMMA_ZERO_COUNT 44
-#define _BASIC_MATH_GAMMA_REFLECT    (-24)
 
-// The greatest integer whose gamma is a product, its last factor rounded
-// alone, the magnitude past which gamma of x is an infinity in every type,
-// the one below which it is 1/x, the power of 2 a huge or tiny result is
-// scaled by, ln pi, and a quarter turn of pi times x.
+// The x from which lgamma takes its zeros' table.
+#define _BASIC_MATH_GAMMA_REFLECT (-24)
+
+// The greatest integer whose gamma is a product, its last factor rounded alone.
 #define _BASIC_MATH_FACTORIAL_MAX 27
-#define _BASIC_MATH_GAMMA_CLAMP   0x1p11L
-#define _BASIC_MATH_GAMMA_TINY    0x1p-64L
-#define _BASIC_MATH_GAMMA_SHIFT   64
-#define _BASIC_MATH_LN_PI         0x9.28682473d0de85fp-3L
-#define _BASIC_MATH_QUARTER       0.25L
+
+// The magnitudes past which gamma of x is an infinity, and below which 1/x.
+#define _BASIC_MATH_GAMMA_CLAMP 0x1p11L
+#define _BASIC_MATH_GAMMA_TINY  0x1p-64L
+
+// The power of 2 gamma scales a huge or tiny result by.
+#define _BASIC_MATH_GAMMA_SHIFT 64
+
+// ln pi, and a quarter turn of pi times x.
+#define _BASIC_MATH_LN_PI   0x9.28682473d0de85fp-3L
+#define _BASIC_MATH_QUARTER 0.25L
 
 // The classes fpclassify gives, and ilogb's results of a zero and a NaN.
 #define _BASIC_MATH_FP_INFINITE  1
@@ -278,46 +300,36 @@ enum _Basic_Math_Trig {
     _BASIC_MATH_TRIG_TAN  // the tangent's, or its inverse's
 };
 
-// The terms of e to r less 1 over r, 1/k! from k = 1, and of the
-// logarithm's series, 1/(2k + 1) from k = 1.
+// The terms of e to r less 1 over r and of the logarithm's series.
 extern const long double _Basic_Math_ExpTerms[_BASIC_MATH_EXP_TERMS];
 extern const long double _Basic_Math_LogTerms[_BASIC_MATH_LOG_TERMS];
 
-// The natural logarithm of each step of the logarithm's table, its top 64
-// bits and the rest.
+// The logarithm of each step of the logarithm's table, high and low.
 extern const long double _Basic_Math_LogStepHigh[_BASIC_MATH_LOG_STEP_COUNT];
 extern const long double _Basic_Math_LogStepLow[_BASIC_MATH_LOG_STEP_COUNT];
 
-// The terms of the sine's series, (-1)^k/(2k + 1)! from k = 1, and of the
-// cosine's, (-1)^k/(2k)! from k = 1.
+// The terms of the sine's and the cosine's series.
 extern const long double _Basic_Math_SinTerms[_BASIC_MATH_SIN_TERMS];
 extern const long double _Basic_Math_CosTerms[_BASIC_MATH_COS_TERMS];
 
-// The arc tangent of each step of the arc tangent's table, its top 64 bits
-// and the rest.
+// The arc tangent of each step of the arc tangent's table, high and low.
 extern const long double _Basic_Math_AtanStepHigh[_BASIC_MATH_ATAN_STEP_COUNT];
 extern const long double _Basic_Math_AtanStepLow[_BASIC_MATH_ATAN_STEP_COUNT];
 
-// The terms of erf's Maclaurin series, 2/sqrt(pi) (-1)^k/(k!(2k + 1)) from
-// k = 1.
+// The terms of erf's Maclaurin series.
 extern const long double _Basic_Math_ErfTerms[_BASIC_MATH_ERF_TERMS];
 
-// e to x^2 times erfc of each node of erfc's table, its top 64 bits and the
-// rest, and its slope, 2x times it less 2/sqrt(pi), its top 64 bits and the
-// rest.
+// e to x^2 times erfc at each node of erfc's table, its slope, high and low.
 extern const long double _Basic_Math_ErfcValueHigh[_BASIC_MATH_ERFC_NODE_COUNT];
 extern const long double _Basic_Math_ErfcValueLow[_BASIC_MATH_ERFC_NODE_COUNT];
 extern const long double _Basic_Math_ErfcSlopeHigh[_BASIC_MATH_ERFC_NODE_COUNT];
 extern const long double _Basic_Math_ErfcSlopeLow[_BASIC_MATH_ERFC_NODE_COUNT];
 
-// The terms of lgamma's Taylor series at 2, 1 less Euler's constant, then
-// (-1)^k (zeta(k) - 1)/k from k = 2, and of Stirling's series, B2k/(2k(2k
-// - 1)) from k = 1.
+// The terms of lgamma's Taylor series at 2 and of Stirling's series.
 extern const long double _Basic_Math_GammaTerms[_BASIC_MATH_GAMMA_TERMS];
 extern const long double _Basic_Math_StirlingTerms[_BASIC_MATH_STIRLING_TERMS];
 
-// lgamma's zeros from -2 to -24, the one above and the one below each
-// interval's middle in turn, their top 64 bits and the rest.
+// lgamma's zeros from -2 to -24, two an interval, high and low.
 extern const long double _Basic_Math_GammaZeroHigh[_BASIC_MATH_GAMMA_ZERO_COUNT];
 extern const long double _Basic_Math_GammaZeroLow[_BASIC_MATH_GAMMA_ZERO_COUNT];
 
@@ -370,9 +382,10 @@ long double        _Basic_Math_TakeLogParts(long double x, long double *low);
 _Basic_Math_Parity _Basic_Math_ReadParity(long double y);
 long double        _Basic_Math_TakePow(long double x, long double y);
 
-// The trigonometric and hyperbolic functions and their inverses, each by a
-// series in long double.
-long double  _Basic_Math_IterateRoot(long double x);
+// The square root by Newton's steps in long double.
+long double _Basic_Math_IterateRoot(long double x);
+
+// The trigonometric and hyperbolic functions and their inverses in long double.
 unsigned int _Basic_Math_ReduceTrig(long double x, long double *r, long double *low);
 long double  _Basic_Math_SumSin(long double r, long double low);
 long double  _Basic_Math_SumCos(long double r, long double low);

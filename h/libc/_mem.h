@@ -30,8 +30,7 @@
 // A pointer to nothing, of any type.
 #define _MEM_NULL ((void *) 0)
 
-// The alignment of the memory an allocation gives, any object's, as glibc's,
-// and the smallest block, a header and that much memory.
+// An allocation's alignment, as glibc's, and the smallest block.
 #define _MEM_ALIGN     16
 #define _MEM_BLOCK_MIN 32
 

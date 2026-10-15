@@ -105,13 +105,11 @@
 #define CPU_X86_64_MXCSR_DAZ      0x0040
 #define CPU_X86_64_MXCSR_FZ       0x8000
 
-// The x87 control word FNINIT leaves: every exception masked, rounding to
-// nearest, at double-extended precision.
+// The x87 control word FNINIT leaves: all masked, to nearest, 64 bits.
 // [Amd64-Vol1:6.2.3]: the x87 control word's fields, and 037Fh
 #define CPU_X86_64_FCW_INIT 0x037F
 
-// The x87 control word's bits a load sets, and its reserved bit that reads
-// as one, as in 037Fh; the other reserved bits read as zero.
+// The x87 control word's bits a load sets, and its reserved bit read as one.
 // [Amd64-Vol1:6.2.3]: all bits but the reserved can be read and written
 #define CPU_X86_64_FCW_WRITABLE 0x1F3F
 #define CPU_X86_64_FCW_FIXED    0x0040
@@ -128,8 +126,7 @@
 #define CPU_X86_64_FCW_PC_24 0
 #define CPU_X86_64_FCW_PC_53 2
 
-// The exception flags of the x87 status word, and their masks in the
-// control word.
+// The x87 status word's exception flags, and their masks in the control word.
 // [Amd64-Vol1:6.2.2]: the x87 status word's fields
 #define CPU_X86_64_X87_EXCEPTIONS 0x3F
 
@@ -142,33 +139,28 @@
 #define CPU_X86_64_FSW_UE 0x10
 #define CPU_X86_64_FSW_PE 0x20
 
-// The condition code an x87 operation sets: a rounding up, or a push onto a
-// full register beside a stack fault.
+// The x87 condition code C1: a rounding up, or a stack fault's overflow.
 // [Amd64-Vol1:6.2.2.10]: C1, bit 9, the last rounding's direction
 // [Amd64-Vol1:6.2.2.7]:  C1 = 1 for a stack overflow, 0 for an underflow
 #define CPU_X86_64_FSW_C1 0x0200
 
-// The bits of an x87 register: its significand, and its sign and exponent
-// at bits 64 to 79, stored as FXSAVE and FSTP m80 store them.
+// An x87 register's bytes, its sign and exponent's offset, and their masks.
 // [Amd64-Vol1:6.3.2.1]: Figure 6-8, the double-extended-precision format
 #define CPU_X86_64_X87_REG_SIZE 10
 #define CPU_X86_64_X87_TOP_OFF  8
 #define CPU_X86_64_X87_EXP_MASK 0x7FFF
 #define CPU_X86_64_X87_SIGN_BIT 0x8000
 
-// The x87 floating-point indefinite: a negative QNaN, its fraction's top bit
-// alone set beside the integer bit.
+// The x87 floating-point indefinite, a negative quiet NaN with no payload.
 // [Amd64-Vol1:6.3.4.3]: Table 6-10, the indefinite of each data type
 #define CPU_X86_64_X87_INDEFINITE_HI 0xFFFF
 #define CPU_X86_64_X87_INDEFINITE_LO 0xC000000000000000
 
-// The power of two an x87 result too large or too small for a register is
-// scaled by when OE or UE is unmasked.
+// The power of 2 an out-of-range x87 result is scaled by, OE or UE unmasked.
 // [Amd64-Vol1:6.8.6.2]: Table 6-22, the unmasked responses, 2^24576
 #define CPU_X86_64_X87_SCALE 24576
 
-// The flags of the x87 status word FNCLEX clears beside the exceptions: the
-// stack fault, the exception summary and busy.
+// The x87 status flags FNCLEX clears beside the exceptions: SF, ES and B.
 // [Amd64-Vol5:FCLEX]: the flags FNCLEX clears
 #define CPU_X86_64_FSW_SF 0x0040
 #define CPU_X86_64_FSW_ES 0x0080
@@ -183,8 +175,7 @@
 #define CPU_X86_64_TAG_BITS 2
 #define CPU_X86_64_TAG_MASK 3
 
-// The layout of the x87 environment FNSTENV and FLDENV move, its pointers
-// and opcode stored as zero, since the CPU does not keep them.
+// The layout of the x87 environment FNSTENV and FLDENV move, pointers zero.
 // [Amd64-Vol5:FSTENV]:   a 28-byte area at 32- and 64-bit operand sizes
 // [Amd64-Vol2:11.4.4.2]: the environment, laid out as the FNSAVE image opens
 // [Amd64-Vol2:11.4.4.1]: Figure 11-4, the FNSAVE image in protected mode

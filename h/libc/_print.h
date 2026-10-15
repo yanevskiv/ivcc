@@ -64,8 +64,7 @@
 // The width or precision a directive leaves to an argument, until it is taken.
 #define _PRINT_COUNT_ARGUMENT (-2)
 
-// The lengths a conversion allows, each a bit: none alone, an integer's,
-// a floating number's, and the l of a wide character or string.
+// The lengths a conversion allows, a bit each: none, integer, real, wide.
 #define _PRINT_LENGTHS_NONE    (1 << _PRINT_LENGTH_NONE)
 #define _PRINT_LENGTHS_INTEGER (~(1 << _PRINT_LENGTH_LDOUBLE))
 #define _PRINT_LENGTHS_REAL    (1 << _PRINT_LENGTH_NONE | 1 << _PRINT_LENGTH_LONG | 1 << _PRINT_LENGTH_LDOUBLE)

@@ -26,14 +26,12 @@
 #ifndef _EXACT_H
 #define _EXACT_H
 
-// The bytes of a long double that hold its significand, its integer bit
-// explicit at the top, and the two above them, its sign and exponent.
+// A long double's significand's byte, sign and exponent's byte, integer bit.
 #define _EXACT_LDOUBLE_SIGNIFICAND 0
 #define _EXACT_LDOUBLE_TOP         8
 #define _EXACT_LDOUBLE_INT_SHIFT   63
 
-// A long double's integer bit, its fraction below it, its exponent bias,
-// its largest biased exponent and its least normal exponent.
+// A long double's integer bit, fraction, bias, largest and least exponents.
 #define _EXACT_LDOUBLE_INT_BIT   0x8000000000000000ULL
 #define _EXACT_LDOUBLE_FRAC_MASK 0x7FFFFFFFFFFFFFFFULL
 #define _EXACT_LDOUBLE_BIAS      16383
@@ -62,8 +60,7 @@
 // The bits of a sum kept exact below its top, the rest sticky.
 #define _EXACT_SUM_WINDOW 320
 
-// The limbs of 2/pi past its point, the most significant first, as many as
-// the largest long double's reduction reads, and the limbs one reads.
+// The limbs of 2/pi past its point, and the limbs one reduction reads.
 #define _EXACT_TWO_OVER_PI_LIMBS 519
 #define _EXACT_TRIG_WINDOW       10
 

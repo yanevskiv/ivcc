@@ -26,8 +26,7 @@
 // Module header.
 #include <_fpu.h>
 
-// The control words a program starts with: every exception masked, to
-// nearest, and the x87 at 64 bits.
+// The control words a program starts with: all masked, to nearest, 64 bits.
 #define _FPU_DEFAULT_CONTROL 0x037F
 #define _FPU_DEFAULT_MXCSR   0x1F80
 

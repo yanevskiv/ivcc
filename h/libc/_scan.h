@@ -48,8 +48,7 @@
 // The width of a directive that gives none.
 #define _SCAN_WIDTH_NONE 0
 
-// The lengths a conversion allows, each a bit: none alone, an integer's,
-// a floating number's, and the l of wide characters.
+// The lengths a conversion allows, a bit each: none, integer, real, wide.
 #define _SCAN_LENGTHS_NONE    (1 << _SCAN_LENGTH_NONE)
 #define _SCAN_LENGTHS_INTEGER (~(1 << _SCAN_LENGTH_LDOUBLE))
 #define _SCAN_LENGTHS_REAL    (1 << _SCAN_LENGTH_NONE | 1 << _SCAN_LENGTH_LONG | 1 << _SCAN_LENGTH_LDOUBLE)
@@ -71,8 +70,7 @@
 #define _SCAN_NIL       "(nil)"
 #define _SCAN_NIL_WIDTH 5
 
-// A floating number's characters: a sign, a digit of either base, the point,
-// either exponent's mark, the words, and what a NaN's parentheses hold.
+// The characters and words a floating number is read from.
 #define _SCAN_SIGNS    "+-"
 #define _SCAN_DECIMALS "0123456789"
 #define _SCAN_HEXES    "0123456789abcdef"

@@ -46,8 +46,7 @@
 #define PAR_ASM_VOLATILE_NAME "volatile"
 #define PAR_ASM_INLINE_NAME   "inline"
 
-// The texts the builtins' constants read as: a positive infinity, and a
-// quiet NaN whose payload its tag gives, as nan's.
+// The texts the builtins' infinity and tagged quiet NaN read as.
 // [C99:7.12.11.2p2]: nan(tag), strtod of "NAN(tag)", its n-char-sequence
 #define PAR_INF        "INF"
 #define PAR_NAN_TAGGED "NAN(%s)"

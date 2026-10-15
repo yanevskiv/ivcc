@@ -56,8 +56,7 @@
 #define GEN_X86_64_FLOAT_TWO_TO_63 0x5F000000
 #define GEN_X86_64_FLOAT_TWO_TO_64 0x5F800000
 
-// The shift that brings MXCSR's rounding control down to bits 2:1, and those
-// bits, the control doubled.
+// The shift of MXCSR's rounding control to bits 2:1, and those bits.
 // [Amd64-Vol1:4.2.2]: RC, bits 14:13, 00 nearest, 01 down, 10 up, 11 toward zero
 #define GEN_X86_64_MXCSR_RC_SHIFT 12
 #define GEN_X86_64_MXCSR_RC_TWICE 6

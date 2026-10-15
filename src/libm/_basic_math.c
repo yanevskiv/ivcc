@@ -51,8 +51,7 @@ const long double _Basic_Math_LogTerms[_BASIC_MATH_LOG_TERMS] = {
     0x9.7b425ed097b425fp-8L
 };
 
-// The natural logarithm of each step of the logarithm's table, its top 64
-// bits.
+// The natural logarithm of each step of the logarithm's table, its top 64 bits.
 const long double _Basic_Math_LogStepHigh[_BASIC_MATH_LOG_STEP_COUNT] = {
     -0xa.9157039c51ebe71p-5L, -0x9.34b1089a6dc93c2p-5L, -0xf.cc8e3659d9bcbedp-6L, -0xd.49f69e456cf1b79p-6L,
     -0xa.dfa035aa1ed8fdcp-6L, -0x8.8bc74113f23def2p-6L, -0xc.99af2eaca4c4571p-7L, -0x8.42cc5acf1d03445p-7L,
@@ -102,8 +101,7 @@ const long double _Basic_Math_AtanStepLow[_BASIC_MATH_ATAN_STEP_COUNT] = {
     0xa.392f179f290385p-71L, -0xd.3496ab7bd6eef0bp-70L, -0xe.c453a7722da0bb6p-69L, -0xe.ce675d1fc8f8cbbp-70L
 };
 
-// The terms of erf's Maclaurin series, 2/sqrt(pi) (-1)^k/(k!(2k + 1)) from
-// k = 1.
+// The terms of erf's Maclaurin series, 2/sqrt(pi) (-1)^k/(k!(2k + 1)).
 const long double _Basic_Math_ErfTerms[_BASIC_MATH_ERF_TERMS] = {
     -0xc.093a3581bcf3612p-5L,  0xe.71790d0215f0dafp-7L,   -0xd.c167189445a86fp-9L,   0xa.b2de6873529f72cp-11L,
     -0xe.016da00205c2c4dp-14L, 0xf.cd1937cdc4dbbd3p-17L,  -0xf.a692e1f06175af3p-20L, 0xd.cf364ee328d1404p-23L,
@@ -143,8 +141,7 @@ const long double _Basic_Math_ErfcSlopeLow[_BASIC_MATH_ERFC_NODE_COUNT] = {
     -0xe.72ce7c892569c9cp-73L, -0xa.0546834b10186eep-73L, 0xb.fcd34c6e82843d1p-74L
 };
 
-// The terms of lgamma's Taylor series at 2, 1 less Euler's constant, then
-// (-1)^k (zeta(k) - 1)/k from k = 2.
+// lgamma's Taylor terms at 2: 1 less Euler's, then (-1)^k (zeta(k) - 1)/k.
 const long double _Basic_Math_GammaTerms[_BASIC_MATH_GAMMA_TERMS] = {
     0xd.8773039049e70b6p-5L,   0xa.51a6625307d3231p-5L,   -0x8.9f000d2abb03409p-7L,  0xa.8991563ec241b6p-9L,
     -0xf.2027e10c7af8c37p-11L, 0xb.d6eb756db617ea5p-12L,  -0x9.c562e15fc703e76p-13L, 0x8.59b57c31cb745f3p-14L,

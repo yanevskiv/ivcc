@@ -50,8 +50,7 @@
 // Offset of the sign and exponent after the significand's bytes.
 #define FP_EXTENDED_TOP_OFF 8
 
-// The extended format's significand bits, the integer bit among them, as
-// a host's LDBL_MANT_DIG gives them when its long double is the x87's.
+// The extended format's significand bits, its integer bit among them.
 #define FP_EXTENDED_MANT_DIG 64
 
 // The extended format's exponent bias and its all-ones exponent.
@@ -135,8 +134,7 @@ enum Fp_RoundRest {
     FP_ROUND_REST_ABOVE  // more than half
 };
 
-// The flags an operation raises: IEEE 754's five, tininess and the rounding's
-// direction.
+// The flags an operation raises: IEEE 754's five, tininess and rounding up.
 typedef enum Fp_Flag Fp_Flag;
 enum Fp_Flag {
     FP_FLAG_INVALID    = 0x01, // no useful result: a NaN, 0/0, inf-inf, 0*inf
