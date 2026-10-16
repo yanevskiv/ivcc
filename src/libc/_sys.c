@@ -27,7 +27,7 @@
 #include <_sys.h>
 
 #ifndef __linux__
-#error "_sys.c: the system layer is Linux's alone"
+    #error "_sys.c: the system layer is Linux's alone"
 #endif
 
 // Linux's syscall numbers.
@@ -85,7 +85,7 @@ __asm__(
     "  ret\n"
 );
 #else
-#error "_sys.c: no system calls for this architecture"
+    #error "_sys.c: no system calls for this architecture"
 #endif
 
 // Invoke read to read up to len bytes from the descriptor fd into buf.
@@ -206,5 +206,5 @@ __asm__(
     "  syscall\n"
 );
 #else
-#error "_sys.c: no signal handlers for this architecture"
+    #error "_sys.c: no signal handlers for this architecture"
 #endif

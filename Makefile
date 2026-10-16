@@ -17,11 +17,12 @@
 
 TARGET      := iv
 TARGET_ARCH := x86_64
+TARGET_OS   := linux
 
 OUT     := out
 BUILD   := build
 
-LINUX_DIR := $(BUILD)/lib/$(TARGET_ARCH)/linux
+LINUX_DIR := $(BUILD)/lib/$(TARGET_ARCH)/$(TARGET_OS)
 EMU_DIR   := $(BUILD)/lib/$(TARGET_ARCH)/ivemu
 RUNTIME   := $(LINUX_DIR)/crt0.o $(LINUX_DIR)/libc.a $(LINUX_DIR)/libm.a $(EMU_DIR)/crt0.o
 
@@ -49,14 +50,17 @@ AR_OBJS := $(OUT)/ar.o $(ELF_OBJS) $(OUT)/util/object/lib.o
 EMU_OBJS := $(OUT)/emu.o $(ELF_OBJS) $(OUT)/util/fp.o $(OUT)/arch/$(TARGET_ARCH)/cpu.o $(OUT)/util/object/load.o
 LD_OBJS := $(OUT)/ld.o $(ELF_OBJS) $(OUT)/util/object/lib.o $(OUT)/util/object/link.o
 
+TARGET_DIRS   = $(1) $(1)/arch/$(TARGET_ARCH) $(1)/os/$(TARGET_OS) $(1)/arch/$(TARGET_ARCH)/$(TARGET_OS)
+TARGET_SRCS   = $(foreach dir,$(call TARGET_DIRS,$(1)),$(wildcard $(dir)/*.c))
+
 LIBC_HEADERS := $(shell find h/libc -name '*.h')
 LIBC_FLAGS   := -I h/libc
-LIBC_SRCS    := $(filter-out src/libc/_crt.c,$(wildcard src/libc/*.c))
-LIBC_OBJS    := $(patsubst src/libc/%.c,$(OUT)/libc/linux/%.o,$(LIBC_SRCS))
+LIBC_SRCS    := $(filter-out %/_crt.c,$(call TARGET_SRCS,src/libc))
+LIBC_OBJS    := $(patsubst src/libc/%.c,$(OUT)/libc/$(TARGET_OS)/%.o,$(LIBC_SRCS))
 LIBM_HEADERS := $(shell find h/libm -name '*.h')
 LIBM_FLAGS   := -I h/libm -I h/libc
-LIBM_SRCS    := $(wildcard src/libm/*.c)
-LIBM_OBJS    := $(patsubst src/libm/%.c,$(OUT)/libm/linux/%.o,$(LIBM_SRCS))
+LIBM_SRCS    := $(call TARGET_SRCS,src/libm)
+LIBM_OBJS    := $(patsubst src/libm/%.c,$(OUT)/libm/$(TARGET_OS)/%.o,$(LIBM_SRCS))
 SYS_HEADERS  := $(patsubst h/libc/%,$(BUILD)/include/%,$(LIBC_HEADERS)) \
                 $(patsubst h/libm/%,$(BUILD)/include/%,$(LIBM_HEADERS))
 
@@ -148,15 +152,15 @@ $(OUT)/%.o: src/%.c $(OUT)/c.tab.h | $(OUT)
 
 # --- runtime recipes ---
 $(LINUX_DIR)/crt0.o: src/libc/_crt.c $(CC_BIN) $(LIBC_HEADERS) | $(LINUX_DIR)
-	$(CC_BIN) -mtarget=linux $(LIBC_FLAGS) -c $< -o $@
+	$(CC_BIN) -mtarget=$(TARGET_OS) $(LIBC_FLAGS) -c $< -o $@
 
-$(OUT)/libc/linux/%.o: src/libc/%.c $(CC_BIN) $(LIBC_HEADERS)
+$(OUT)/libc/$(TARGET_OS)/%.o: src/libc/%.c $(CC_BIN) $(LIBC_HEADERS)
 	@mkdir -p $(dir $@)
-	$(CC_BIN) -mtarget=linux $(LIBC_FLAGS) -c $< -o $@
+	$(CC_BIN) -mtarget=$(TARGET_OS) $(LIBC_FLAGS) -c $< -o $@
 
-$(OUT)/libm/linux/%.o: src/libm/%.c $(CC_BIN) $(LIBC_HEADERS) $(LIBM_HEADERS)
+$(OUT)/libm/$(TARGET_OS)/%.o: src/libm/%.c $(CC_BIN) $(LIBC_HEADERS) $(LIBM_HEADERS)
 	@mkdir -p $(dir $@)
-	$(CC_BIN) -mtarget=linux $(LIBM_FLAGS) -c $< -o $@
+	$(CC_BIN) -mtarget=$(TARGET_OS) $(LIBM_FLAGS) -c $< -o $@
 
 $(LINUX_DIR)/libc.a: $(LIBC_OBJS) $(AR_BIN) | $(LINUX_DIR)
 	rm -f $@

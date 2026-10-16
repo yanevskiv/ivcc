@@ -68,5 +68,5 @@ __asm__(
     "  ret\n"
 );
 #else
-#error "setjmp.c: no nonlocal jumps for this architecture"
+    #error "setjmp.c: no nonlocal jumps for this architecture"
 #endif

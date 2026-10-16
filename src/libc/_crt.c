@@ -39,7 +39,7 @@ char **_Crt_Envp;
 int (*_Crt_FlushStreams)(void);
 
 #ifdef __x86_64__
-#if defined(__linux__)
+    #if defined(__linux__)
 // Keep the program's name and environment, run main, and exit with its status.
 __asm__(
     "  .text\n"
@@ -62,7 +62,7 @@ __asm__(
     "  mov %rax, %rdi\n"
     "  call exit\n"
 );
-#elif defined(__ivemu__)
+    #elif defined(__ivemu__)
 // Call main, then halt the machine with its status.
 __asm__(
     "  .text\n"
@@ -74,9 +74,9 @@ __asm__(
     ".Lhang:\n"
     "  jmp .Lhang\n"
 );
+    #else
+        #error "_crt.c: no startup for this target"
+    #endif
 #else
-#error "_crt.c: no startup for this target"
-#endif
-#else
-#error "_crt.c: no startup for this architecture"
+    #error "_crt.c: no startup for this architecture"
 #endif

@@ -39,9 +39,9 @@
 // The assert macro
 // [C99:7.2.1.1]: assert
 #ifdef NDEBUG
-#define assert(ignore) ((void) 0)
+    #define assert(ignore) ((void) 0)
 #else
-#define assert(expression) ((expression) ? (void) 0 : _Assert_ReportFailure(#expression, __FILE__, __LINE__, __func__))
+    #define assert(expression) ((expression) ? (void) 0 : _Assert_ReportFailure(#expression, __FILE__, __LINE__, __func__))
 #endif
 
 // Failed assertions

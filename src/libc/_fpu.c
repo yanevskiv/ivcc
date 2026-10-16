@@ -68,7 +68,7 @@ __asm__(
     "  ret\n"
 );
 #else
-#error "_fpu.c: no floating-point environment for this architecture"
+    #error "_fpu.c: no floating-point environment for this architecture"
 #endif
 
 // Clear the flags of flags in both units.
