@@ -64,7 +64,7 @@ void _Assert_ReportFailure(const char *expr, const char *file, unsigned int line
 // Write the string str to standard error.
 void _Assert_WriteString(const char *str)
 {
-    _Sys_InvokeWrite(_ASSERT_STDERR, str, strlen(str));
+    _Sys_WriteFile(_ASSERT_STDERR, str, strlen(str));
 }
 
 // Write the line number line to standard error.

@@ -120,16 +120,16 @@ _File_Stream *_File_MakeStream(void);
 _Bool         _File_IsMode(const char *mode);
 int           _File_ToMode(const char *mode);
 void          _File_AttachDescriptor(_File_Stream *stream, int fd, int flags);
+void          _File_DropDescriptor(int fd);
 int           _File_OpenFile(_File_Stream *stream, const char *filename, const char *mode);
 int           _File_ResetStream(_File_Stream *stream);
 void          _File_FreeStream(_File_Stream *stream);
 int           _File_OrientStream(_File_Stream *stream, int mode);
 
 // Buffering
-void  _File_SetupBuffer(_File_Stream *stream);
-_Bool _File_IsTerminal(int fd);
-int   _File_LendBuffer(_File_Stream *stream, unsigned char *buf, unsigned long size);
-int   _File_ReclaimBuffer(_File_Stream *stream);
+void _File_SetupBuffer(_File_Stream *stream);
+int  _File_LendBuffer(_File_Stream *stream, unsigned char *buf, unsigned long size);
+int  _File_ReclaimBuffer(_File_Stream *stream);
 
 // Input
 int           _File_PrepareInput(_File_Stream *stream);

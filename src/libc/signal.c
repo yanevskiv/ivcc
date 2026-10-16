@@ -35,34 +35,20 @@
 // Install func as the handler of the signal sig.
 void (*signal(int sig, void (*func)(int)))(int)
 {
-    _Sys_Sigaction act;
-    _Sys_Sigaction old;
-    long ret;
+    void (*old)(int);
 
-    if (sig < _SYS_SIGNAL_FIRST || sig > _SYS_SIGNAL_LAST || func == SIG_ERR) {
+    if (func == SIG_ERR) {
         errno = _SYS_EINVAL;
         return SIG_ERR;
     }
-    act.sa_handler = func;
-    act.sa_flags = _SYS_SA_RESTORER | _SYS_SA_RESTART;
-    act.sa_restorer = _Sys_InvokeRtSigreturn;
-    act.sa_mask = 1UL << (sig - _SYS_SIGNAL_FIRST);
-    ret = _Sys_InvokeRtSigaction(sig, &act, &old);
-    if (ret < 0) {
-        errno = (int) -ret;
+    if (_Sys_SetSignal(sig, func, &old) < 0) {
         return SIG_ERR;
     }
-    return old.sa_handler;
+    return old;
 }
 
 // Send the signal sig to the program.
 int raise(int sig)
 {
-    long ret = _Sys_InvokeKill(_Sys_InvokeGetpid(), sig);
-
-    if (ret < 0) {
-        errno = (int) -ret;
-        return -1;
-    }
-    return 0;
+    return _Sys_RaiseSignal(sig) < 0 ? -1 : 0;
 }

@@ -131,7 +131,7 @@ void _Mem_ReleaseBlock(_Mem_Block *block)
 // Grow the heap by at least size bytes, moving the break, or return 0.
 int _Mem_GrowHeap(unsigned long size)
 {
-    char *start = _Sys_InvokeBrk(_MEM_NULL);
+    char *start = _Sys_MoveBreak(_MEM_NULL);
     _Mem_Block *block;
     char *end;
 
@@ -140,7 +140,7 @@ int _Mem_GrowHeap(unsigned long size)
         size = _MEM_GROW;
     }
     end = start + size;
-    if (_Sys_InvokeBrk(end) != end) {
+    if (_Sys_MoveBreak(end) != end) {
         return 0;
     }
     block = (_Mem_Block *) start;

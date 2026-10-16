@@ -441,7 +441,7 @@ clock_t clock(void)
 {
     _Sys_Timespec spec;
 
-    if (_Sys_InvokeClockGettime(_SYS_CLOCK_PROCESS_CPUTIME_ID, &spec) != 0) {
+    if (_Sys_ReadClock(_SYS_CLOCK_PROCESS_CPUTIME_ID, &spec) != 0) {
         return (clock_t) -1;
     }
     return spec.tv_sec * CLOCKS_PER_SEC + spec.tv_nsec / _TIME_NSECS_PER_CLOCK;
@@ -478,7 +478,7 @@ time_t time(time_t *timer)
     _Sys_Timespec spec;
     time_t value = (time_t) -1;
 
-    if (_Sys_InvokeClockGettime(_SYS_CLOCK_REALTIME, &spec) == 0) {
+    if (_Sys_ReadClock(_SYS_CLOCK_REALTIME, &spec) == 0) {
         value = spec.tv_sec;
     }
     if (timer != NULL) {

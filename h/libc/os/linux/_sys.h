@@ -237,7 +237,7 @@ long  _Sys_InvokeClose(int fd);
 long  _Sys_InvokeLstat(const char *path, _Sys_Stat *info);
 long  _Sys_InvokeLseek(int fd, long offset, int whence);
 void *_Sys_InvokeBrk(void *addr);
-long  _Sys_InvokeRtSigaction(int sig, const _Sys_Sigaction *act, _Sys_Sigaction *oact);
+long  _Sys_InvokeRtSigaction(int sig, void (*func)(int), unsigned long flags, unsigned long mask, void (**old)(int));
 long  _Sys_InvokeRtSigprocmask(int how, const unsigned long *set, unsigned long *oset);
 long  _Sys_InvokeIoctl(int fd, unsigned long request, void *arg);
 long  _Sys_InvokeDup2(int fd, int as);
@@ -251,5 +251,8 @@ void  _Sys_InvokeExitGroup(int status);
 
 // Signal handlers
 void _Sys_InvokeRtSigreturn(void);
+
+// Results
+long _Sys_CheckResult(long ret);
 
 #endif // _OS_LINUX_SYS_H

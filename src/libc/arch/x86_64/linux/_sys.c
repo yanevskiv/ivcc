@@ -116,10 +116,22 @@ void *_Sys_InvokeBrk(void *addr)
     return (void *) _Sys_InvokeSyscall(_SYS_X86_64_LINUX_NR_BRK, (long) addr, 0, 0, 0, 0, 0);
 }
 
-// Invoke rt_sigaction to install act for the signal sig, the old one in oact.
-long _Sys_InvokeRtSigaction(int sig, const _Sys_Sigaction *act, _Sys_Sigaction *oact)
+// Invoke rt_sigaction to install func for sig, the old handler in old.
+long _Sys_InvokeRtSigaction(int sig, void (*func)(int), unsigned long flags, unsigned long mask, void (**old)(int))
 {
-    return _Sys_InvokeSyscall(_SYS_X86_64_LINUX_NR_RT_SIGACTION, sig, (long) act, (long) oact, _SYS_X86_64_LINUX_SIGSET_SIZE, 0, 0);
+    _Sys_Sigaction act;
+    _Sys_Sigaction prev;
+    long ret;
+
+    act.sa_handler = func;
+    act.sa_flags = flags | _SYS_SA_RESTORER;
+    act.sa_restorer = _Sys_InvokeRtSigreturn;
+    act.sa_mask = mask;
+    ret = _Sys_InvokeSyscall(_SYS_X86_64_LINUX_NR_RT_SIGACTION, sig, (long) &act, (long) &prev, _SYS_X86_64_LINUX_SIGSET_SIZE, 0, 0);
+    if (ret == 0) {
+        *old = prev.sa_handler;
+    }
+    return ret;
 }
 
 // Invoke rt_sigprocmask to change the mask by how and set, the old in oset.

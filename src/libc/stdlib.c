@@ -373,13 +373,11 @@ void *realloc(void *ptr, size_t size)
 // End the program by SIGABRT past a returning handler or a block, as glibc's.
 void abort(void)
 {
-    unsigned long set = 1UL << (SIGABRT - _SYS_SIGNAL_FIRST);
-
     raise(SIGABRT);
     signal(SIGABRT, SIG_DFL);
-    _Sys_InvokeRtSigprocmask(_SYS_SIG_UNBLOCK, &set, NULL);
+    _Sys_UnblockSignal(SIGABRT);
     raise(SIGABRT);
-    _Sys_InvokeExitGroup(_STDLIB_ABORT_STATUS);
+    _Sys_ExitProgram(_STDLIB_ABORT_STATUS);
 }
 
 // Register func for exit to call, or return -1 out of memory, as glibc's.
@@ -418,7 +416,7 @@ void exit(int status)
 // End the program with status, calling nothing atexit registered.
 void _Exit(int status)
 {
-    _Sys_InvokeExitGroup(status);
+    _Sys_ExitProgram(status);
 }
 
 // Return the value of the environment variable name, or NULL, as glibc's.

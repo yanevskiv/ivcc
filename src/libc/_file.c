@@ -129,10 +129,19 @@ void _File_AttachDescriptor(_File_Stream *stream, int fd, int flags)
     }
 }
 
+// Close the descriptor fd, errno left as it was.
+void _File_DropDescriptor(int fd)
+{
+    int saved = _Err_Errno;
+
+    _Sys_CloseFile(fd);
+    _Err_Errno = saved;
+}
+
 // Open the file filename for the stream, to read or write as the mode says.
 int _File_OpenFile(_File_Stream *stream, const char *filename, const char *mode)
 {
-    long fd;
+    int fd;
     int flags;
 
     if (! _File_IsMode(mode)) {
@@ -140,12 +149,11 @@ int _File_OpenFile(_File_Stream *stream, const char *filename, const char *mode)
         return _FILE_END;
     }
     flags = _File_ToMode(mode);
-    fd = _Sys_InvokeOpen(filename, flags, _SYS_DEFFILEMODE);
+    fd = _Sys_OpenFile(filename, flags, _SYS_DEFFILEMODE);
     if (fd < 0) {
-        _Err_Errno = (int) -fd;
         return _FILE_END;
     }
-    _File_AttachDescriptor(stream, (int) fd, flags);
+    _File_AttachDescriptor(stream, fd, flags);
     return 0;
 }
 
@@ -205,7 +213,7 @@ void _File_SetupBuffer(_File_Stream *stream)
         return;
     }
     if (stream->fs_mode == _FILE_AUTO) {
-        stream->fs_mode = _File_IsTerminal(stream->fs_fd) ? _FILE_LINE : _FILE_FULL;
+        stream->fs_mode = _Sys_IsTerminal(stream->fs_fd) ? _FILE_LINE : _FILE_FULL;
     }
     if (stream->fs_mode != _FILE_NONE && stream->fs_buf == _FILE_NULL) {
         stream->fs_buf = _Mem_AllocateMemory(size);
@@ -221,14 +229,6 @@ void _File_SetupBuffer(_File_Stream *stream)
         stream->fs_size = 1;
     }
     stream->fs_flags |= _FILE_SETUP;
-}
-
-// Return whether the descriptor fd is a terminal, which answers TCGETS.
-_Bool _File_IsTerminal(int fd)
-{
-    _Sys_Termios term;
-
-    return _Sys_InvokeIoctl(fd, _SYS_TCGETS, &term) == 0;
 }
 
 // Lend an unbuffered stream buf for a call, the stream readied for output.
@@ -328,9 +328,8 @@ unsigned long _File_ReadDescriptor(_File_Stream *stream, unsigned char *data, un
     if (stream->fs_mode != _FILE_FULL) {
         _File_FlushLines();
     }
-    done = _Sys_InvokeRead(stream->fs_fd, data, len);
+    done = _Sys_ReadFile(stream->fs_fd, data, len);
     if (done < 0) {
-        _Err_Errno = (int) -done;
         stream->fs_flags |= _FILE_ERROR;
         return 0;
     }
@@ -454,10 +453,12 @@ unsigned long _File_PutBytes(_File_Stream *stream, const void *data, unsigned lo
 int _File_WriteDescriptor(_File_Stream *stream, const unsigned char *data, unsigned long len)
 {
     while (len > 0) {
-        long done = _Sys_InvokeWrite(stream->fs_fd, data, len);
+        long done = _Sys_WriteFile(stream->fs_fd, data, len);
 
+        if (done == 0) {
+            _Err_Errno = _SYS_EIO;
+        }
         if (done <= 0) {
-            _Err_Errno = done < 0 ? (int) -done : _SYS_EIO;
             stream->fs_flags |= _FILE_ERROR;
             return _FILE_END;
         }
@@ -527,9 +528,8 @@ int _File_SeekStream(_File_Stream *stream, long offset, int whence)
     if (whence == _SYS_SEEK_CUR) {
         offset -= _File_CountReadAhead(stream);
     }
-    pos = _Sys_InvokeLseek(stream->fs_fd, offset, whence);
+    pos = _Sys_SeekFile(stream->fs_fd, offset, whence);
     if (pos < 0) {
-        _Err_Errno = (int) -pos;
         return _FILE_END;
     }
     stream->fs_backs = 0;
@@ -551,7 +551,7 @@ unsigned long _File_MakeTempSeed(void)
 {
     _Sys_Timespec now = {0, 0};
 
-    _Sys_InvokeClockGettime(_SYS_CLOCK_REALTIME, &now);
+    _Sys_ReadClock(_SYS_CLOCK_REALTIME, &now);
     return (unsigned long) now.tv_sec ^ (unsigned long) now.tv_nsec ^ (unsigned long) &now;
 }
 

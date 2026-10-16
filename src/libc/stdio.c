@@ -56,53 +56,37 @@
 // Remove the file filename, or the empty directory of that name.
 int remove(const char *filename)
 {
-    long status = _Sys_InvokeUnlink(filename);
-
-    if (status == -_SYS_EISDIR) {
-        status = _Sys_InvokeRmdir(filename);
-    }
-    if (status < 0) {
-        errno = (int) -status;
-        return EOF;
-    }
-    return 0;
+    return _Sys_RemoveFile(filename) < 0 ? EOF : 0;
 }
 
 // Give the file old the name new, replacing a file that has it as Linux does.
 int rename(const char *old, const char *new)
 {
-    long status = _Sys_InvokeRename(old, new);
-
-    if (status < 0) {
-        errno = (int) -status;
-        return EOF;
-    }
-    return 0;
+    return _Sys_RenameFile(old, new) < 0 ? EOF : 0;
 }
 
 // Open a file of no name for update, which goes when its stream is closed.
 FILE *tmpfile(void)
 {
-    int tries;
+    int tries = 0;
     char name[L_tmpnam];
-    long fd = -_SYS_EEXIST;
+    int fd;
     FILE *stream = _File_MakeStream();
     int flags = _SYS_O_RDWR | _SYS_O_CREAT | _SYS_O_EXCL;
 
     if (stream == NULL) {
         return NULL;
     }
-    for (tries = 0; tries < TMP_MAX && fd == -_SYS_EEXIST; tries++) {
+    do {
         _File_WriteTempName(name);
-        fd = _Sys_InvokeOpen(name, flags, _SYS_S_IRUSR | _SYS_S_IWUSR);
-    }
+        fd = _Sys_OpenFile(name, flags, _SYS_S_IRUSR | _SYS_S_IWUSR);
+    } while (fd < 0 && errno == _SYS_EEXIST && ++tries < TMP_MAX);
     if (fd < 0) {
-        errno = (int) -fd;
         _File_FreeStream(stream);
         return NULL;
     }
-    _Sys_InvokeUnlink(name);
-    _File_AttachDescriptor(stream, (int) fd, flags);
+    _Sys_RemoveFile(name);
+    _File_AttachDescriptor(stream, fd, flags);
     return stream;
 }
 
@@ -110,14 +94,13 @@ FILE *tmpfile(void)
 char *tmpnam(char *str)
 {
     int tries;
-    _Sys_Stat info;
 
     if (str == NULL) {
         str = _File_TempBuffer;
     }
     for (tries = 0; tries < TMP_MAX; tries++) {
         _File_WriteTempName(str);
-        if (_Sys_InvokeLstat(str, &info) == -_SYS_ENOENT) {
+        if (_Sys_IsNameUnused(str)) {
             return str;
         }
     }
@@ -128,10 +111,8 @@ char *tmpnam(char *str)
 int fclose(FILE *stream)
 {
     int result = _File_ResetStream(stream);
-    long status = _Sys_InvokeClose(stream->fs_fd);
 
-    if (status < 0) {
-        errno = (int) -status;
+    if (_Sys_CloseFile(stream->fs_fd) < 0) {
         result = EOF;
     }
     _File_FreeStream(stream);
@@ -171,15 +152,15 @@ FILE *freopen(const char *restrict filename, const char *restrict mode, FILE *re
     }
     _File_ResetStream(stream);
     if (_File_OpenFile(stream, filename, mode) != 0) {
-        _Sys_InvokeClose(fd);
+        _File_DropDescriptor(fd);
         _File_FreeStream(stream);
         return NULL;
     }
-    if (_Sys_InvokeDup2(stream->fs_fd, fd) == fd) {
-        _Sys_InvokeClose(stream->fs_fd);
+    if (_Sys_CopyDescriptor(stream->fs_fd, fd) == fd) {
+        _File_DropDescriptor(stream->fs_fd);
         stream->fs_fd = fd;
     } else {
-        _Sys_InvokeClose(fd);
+        _File_DropDescriptor(fd);
     }
     return stream;
 }
@@ -512,9 +493,8 @@ long ftell(FILE *stream)
     if (_File_FlushBuffer(stream) != 0) {
         return EOF;
     }
-    pos = _Sys_InvokeLseek(stream->fs_fd, 0, _SYS_SEEK_CUR);
+    pos = _Sys_SeekFile(stream->fs_fd, 0, _SYS_SEEK_CUR);
     if (pos < 0) {
-        errno = (int) -pos;
         return EOF;
     }
     return pos - _File_CountReadAhead(stream);
