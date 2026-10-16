@@ -1,0 +1,255 @@
+/*
+ * C header file for the system layer on Linux.
+ *
+ * Copyright (C) 2026 Ivan Janevski
+ *
+ * ivcc is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at
+ * your option) any later version.
+ *
+ * ivcc is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * for more details.
+ *
+ * Under Section 7 of GPL version 3, you are granted additional
+ * permissions described in the GCC Runtime Library Exception, version
+ * 3.1, as published by the Free Software Foundation.
+ *
+ * You should have received a copy of the GNU General Public License and
+ * a copy of the GCC Runtime Library Exception along with ivcc; see
+ * the files LICENSE and COPYING.RUNTIME respectively.  If not, see
+ * <https://www.gnu.org/licenses/>.
+ */
+
+#ifndef _OS_LINUX_SYS_H
+#define _OS_LINUX_SYS_H
+
+#if defined(__x86_64__)
+    #include <arch/x86_64/linux/_sys.h>
+#else
+    #error "_sys.h: no Linux system layer for this architecture"
+#endif
+
+// The descriptors of a program's standard input, output and error.
+#define _SYS_STDIN_FILENO  0
+#define _SYS_STDOUT_FILENO 1
+#define _SYS_STDERR_FILENO 2
+
+// Linux's open flags.
+#define _SYS_O_RDONLY  00
+#define _SYS_O_WRONLY  01
+#define _SYS_O_RDWR    02
+#define _SYS_O_ACCMODE 03
+#define _SYS_O_CREAT   0100
+#define _SYS_O_EXCL    0200
+#define _SYS_O_TRUNC   01000
+#define _SYS_O_APPEND  02000
+
+// Linux's permission bits for a file's owner, to read and to write.
+#define _SYS_S_IRUSR 0400
+#define _SYS_S_IWUSR 0200
+
+// The permissions open asks for a file it creates.
+#define _SYS_DEFFILEMODE 0666
+
+// Linux's lseek origins.
+#define _SYS_SEEK_SET 0
+#define _SYS_SEEK_CUR 1
+#define _SYS_SEEK_END 2
+
+// Linux's ioctl that reads a terminal's settings, and its control characters.
+#define _SYS_TCGETS 0x5401
+#define _SYS_NCCS   19
+
+// Linux's clocks.
+#define _SYS_CLOCK_REALTIME           0
+#define _SYS_CLOCK_PROCESS_CPUTIME_ID 2
+
+// Linux's error numbers.
+#define _SYS_EPERM           1
+#define _SYS_ENOENT          2
+#define _SYS_ESRCH           3
+#define _SYS_EINTR           4
+#define _SYS_EIO             5
+#define _SYS_ENXIO           6
+#define _SYS_E2BIG           7
+#define _SYS_ENOEXEC         8
+#define _SYS_EBADF           9
+#define _SYS_ECHILD          10
+#define _SYS_EAGAIN          11
+#define _SYS_ENOMEM          12
+#define _SYS_EACCES          13
+#define _SYS_EFAULT          14
+#define _SYS_ENOTBLK         15
+#define _SYS_EBUSY           16
+#define _SYS_EEXIST          17
+#define _SYS_EXDEV           18
+#define _SYS_ENODEV          19
+#define _SYS_ENOTDIR         20
+#define _SYS_EISDIR          21
+#define _SYS_EINVAL          22
+#define _SYS_ENFILE          23
+#define _SYS_EMFILE          24
+#define _SYS_ENOTTY          25
+#define _SYS_ETXTBSY         26
+#define _SYS_EFBIG           27
+#define _SYS_ENOSPC          28
+#define _SYS_ESPIPE          29
+#define _SYS_EROFS           30
+#define _SYS_EMLINK          31
+#define _SYS_EPIPE           32
+#define _SYS_EDOM            33
+#define _SYS_ERANGE          34
+#define _SYS_EDEADLK         35
+#define _SYS_ENAMETOOLONG    36
+#define _SYS_ENOLCK          37
+#define _SYS_ENOSYS          38
+#define _SYS_ENOTEMPTY       39
+#define _SYS_ELOOP           40
+#define _SYS_ENOMSG          42
+#define _SYS_EIDRM           43
+#define _SYS_ECHRNG          44
+#define _SYS_EL2NSYNC        45
+#define _SYS_EL3HLT          46
+#define _SYS_EL3RST          47
+#define _SYS_ELNRNG          48
+#define _SYS_EUNATCH         49
+#define _SYS_ENOCSI          50
+#define _SYS_EL2HLT          51
+#define _SYS_EBADE           52
+#define _SYS_EBADR           53
+#define _SYS_EXFULL          54
+#define _SYS_ENOANO          55
+#define _SYS_EBADRQC         56
+#define _SYS_EBADSLT         57
+#define _SYS_EBFONT          59
+#define _SYS_ENOSTR          60
+#define _SYS_ENODATA         61
+#define _SYS_ETIME           62
+#define _SYS_ENOSR           63
+#define _SYS_ENONET          64
+#define _SYS_ENOPKG          65
+#define _SYS_EREMOTE         66
+#define _SYS_ENOLINK         67
+#define _SYS_EADV            68
+#define _SYS_ESRMNT          69
+#define _SYS_ECOMM           70
+#define _SYS_EPROTO          71
+#define _SYS_EMULTIHOP       72
+#define _SYS_EDOTDOT         73
+#define _SYS_EBADMSG         74
+#define _SYS_EOVERFLOW       75
+#define _SYS_ENOTUNIQ        76
+#define _SYS_EBADFD          77
+#define _SYS_EREMCHG         78
+#define _SYS_ELIBACC         79
+#define _SYS_ELIBBAD         80
+#define _SYS_ELIBSCN         81
+#define _SYS_ELIBMAX         82
+#define _SYS_ELIBEXEC        83
+#define _SYS_EILSEQ          84
+#define _SYS_ERESTART        85
+#define _SYS_ESTRPIPE        86
+#define _SYS_EUSERS          87
+#define _SYS_ENOTSOCK        88
+#define _SYS_EDESTADDRREQ    89
+#define _SYS_EMSGSIZE        90
+#define _SYS_EPROTOTYPE      91
+#define _SYS_ENOPROTOOPT     92
+#define _SYS_EPROTONOSUPPORT 93
+#define _SYS_ESOCKTNOSUPPORT 94
+#define _SYS_EOPNOTSUPP      95
+#define _SYS_EPFNOSUPPORT    96
+#define _SYS_EAFNOSUPPORT    97
+#define _SYS_EADDRINUSE      98
+#define _SYS_EADDRNOTAVAIL   99
+#define _SYS_ENETDOWN        100
+#define _SYS_ENETUNREACH     101
+#define _SYS_ENETRESET       102
+#define _SYS_ECONNABORTED    103
+#define _SYS_ECONNRESET      104
+#define _SYS_ENOBUFS         105
+#define _SYS_EISCONN         106
+#define _SYS_ENOTCONN        107
+#define _SYS_ESHUTDOWN       108
+#define _SYS_ETOOMANYREFS    109
+#define _SYS_ETIMEDOUT       110
+#define _SYS_ECONNREFUSED    111
+#define _SYS_EHOSTDOWN       112
+#define _SYS_EHOSTUNREACH    113
+#define _SYS_EALREADY        114
+#define _SYS_EINPROGRESS     115
+#define _SYS_ESTALE          116
+#define _SYS_EUCLEAN         117
+#define _SYS_ENOTNAM         118
+#define _SYS_ENAVAIL         119
+#define _SYS_EISNAM          120
+#define _SYS_EREMOTEIO       121
+#define _SYS_EDQUOT          122
+#define _SYS_ENOMEDIUM       123
+#define _SYS_EMEDIUMTYPE     124
+#define _SYS_ECANCELED       125
+#define _SYS_ENOKEY          126
+#define _SYS_EKEYEXPIRED     127
+#define _SYS_EKEYREVOKED     128
+#define _SYS_EKEYREJECTED    129
+#define _SYS_EOWNERDEAD      130
+#define _SYS_ENOTRECOVERABLE 131
+#define _SYS_ERFKILL         132
+#define _SYS_EHWPOISON       133
+
+// Linux's first and last signals.
+#define _SYS_SIGNAL_FIRST 1
+#define _SYS_SIGNAL_LAST  64
+
+// Linux's sigaction flag that restarts a call a handler interrupted.
+#define _SYS_SA_RESTART 0x10000000
+
+// Linux's rt_sigprocmask requests.
+#define _SYS_SIG_UNBLOCK 1
+
+// Linux's struct termios, the kernel's and not glibc's.
+typedef struct _Sys_Termios _Sys_Termios;
+struct _Sys_Termios {
+    unsigned int c_iflag;          // the input modes
+    unsigned int c_oflag;          // the output modes
+    unsigned int c_cflag;          // the control modes
+    unsigned int c_lflag;          // the local modes
+    unsigned char c_line;          // the line discipline
+    unsigned char c_cc[_SYS_NCCS]; // the control characters
+};
+
+// Linux's struct timespec.
+typedef struct _Sys_Timespec _Sys_Timespec;
+struct _Sys_Timespec {
+    long tv_sec;  // the seconds
+    long tv_nsec; // the nanoseconds past them
+};
+
+// System calls
+long  _Sys_InvokeSyscall(long number, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6);
+long  _Sys_InvokeRead(int fd, void *buf, unsigned long len);
+long  _Sys_InvokeWrite(int fd, const void *buf, unsigned long len);
+long  _Sys_InvokeOpen(const char *path, int flags, int mode);
+long  _Sys_InvokeClose(int fd);
+long  _Sys_InvokeLstat(const char *path, _Sys_Stat *info);
+long  _Sys_InvokeLseek(int fd, long offset, int whence);
+void *_Sys_InvokeBrk(void *addr);
+long  _Sys_InvokeRtSigaction(int sig, const _Sys_Sigaction *act, _Sys_Sigaction *oact);
+long  _Sys_InvokeRtSigprocmask(int how, const unsigned long *set, unsigned long *oset);
+long  _Sys_InvokeIoctl(int fd, unsigned long request, void *arg);
+long  _Sys_InvokeDup2(int fd, int as);
+int   _Sys_InvokeGetpid(void);
+long  _Sys_InvokeKill(int pid, int sig);
+long  _Sys_InvokeRename(const char *from, const char *to);
+long  _Sys_InvokeRmdir(const char *path);
+long  _Sys_InvokeUnlink(const char *path);
+long  _Sys_InvokeClockGettime(int clock, _Sys_Timespec *spec);
+void  _Sys_InvokeExitGroup(int status);
+
+// Signal handlers
+void _Sys_InvokeRtSigreturn(void);
+
+#endif // _OS_LINUX_SYS_H
