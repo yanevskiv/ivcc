@@ -56,9 +56,6 @@
 // The bytes of Linux's struct termios.
 #define _SYS_TERMIOS_SIZE 36
 
-// Linux's rt_sigreturn number, as the restorer's assembly writes it.
-#define _SYS_NR_RT_SIGRETURN "15"
-
 // The bytes of Linux's sigset_t.
 #define _SYS_SIGSET_SIZE 8
 
@@ -67,26 +64,6 @@ _Static_assert(sizeof(_Sys_Stat) == _SYS_STAT_SIZE, "_Sys_Stat should be the ker
 
 // Check that struct termios is laid out as the kernel's.
 _Static_assert(sizeof(_Sys_Termios) == _SYS_TERMIOS_SIZE, "_Sys_Termios should be the kernel's size");
-
-#ifdef __x86_64__
-// Invoke a syscall by its number, with six arguments.
-__asm__(
-    "  .text\n"
-    "  .globl _Sys_InvokeSyscall\n"
-    "_Sys_InvokeSyscall:\n"
-    "  mov %rdi, %rax\n"
-    "  mov %rsi, %rdi\n"
-    "  mov %rdx, %rsi\n"
-    "  mov %rcx, %rdx\n"
-    "  mov %r8, %r10\n"
-    "  mov %r9, %r8\n"
-    "  mov 8(%rsp), %r9\n"
-    "  syscall\n"
-    "  ret\n"
-);
-#else
-    #error "_sys.c: no system calls for this architecture"
-#endif
 
 // Invoke read to read up to len bytes from the descriptor fd into buf.
 long _Sys_InvokeRead(int fd, void *buf, unsigned long len)
@@ -195,16 +172,3 @@ void _Sys_InvokeExitGroup(int status)
 {
     _Sys_InvokeSyscall(_SYS_NR_EXIT_GROUP, status, 0, 0, 0, 0, 0);
 }
-
-#ifdef __x86_64__
-// Invoke rt_sigreturn to return from a handler to what the signal interrupted.
-__asm__(
-    "  .text\n"
-    "  .globl _Sys_InvokeRtSigreturn\n"
-    "_Sys_InvokeRtSigreturn:\n"
-    "  mov $" _SYS_NR_RT_SIGRETURN ", %rax\n"
-    "  syscall\n"
-);
-#else
-    #error "_sys.c: no signal handlers for this architecture"
-#endif

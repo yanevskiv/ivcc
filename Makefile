@@ -55,7 +55,9 @@ TARGET_SRCS   = $(foreach dir,$(call TARGET_DIRS,$(1)),$(wildcard $(dir)/*.c))
 
 LIBC_HEADERS := $(shell find h/libc -name '*.h')
 LIBC_FLAGS   := -I h/libc
-LIBC_SRCS    := $(filter-out %/_crt.c,$(call TARGET_SRCS,src/libc))
+LIBC_CRT     := src/libc/arch/$(TARGET_ARCH)/$(TARGET_OS)/_crt.c
+EMU_CRT      := src/libc/arch/$(TARGET_ARCH)/ivemu/_crt.c
+LIBC_SRCS    := $(filter-out $(LIBC_CRT),$(call TARGET_SRCS,src/libc))
 LIBC_OBJS    := $(patsubst src/libc/%.c,$(OUT)/libc/$(TARGET_OS)/%.o,$(LIBC_SRCS))
 LIBM_HEADERS := $(shell find h/libm -name '*.h')
 LIBM_FLAGS   := -I h/libm -I h/libc
@@ -151,7 +153,7 @@ $(OUT)/%.o: src/%.c $(OUT)/c.tab.h | $(OUT)
 	$(CC) $(CFLAGS) $(WARN) $(DEPFLAGS) -c $< -o $@
 
 # --- runtime recipes ---
-$(LINUX_DIR)/crt0.o: src/libc/_crt.c $(CC_BIN) $(LIBC_HEADERS) | $(LINUX_DIR)
+$(LINUX_DIR)/crt0.o: $(LIBC_CRT) $(CC_BIN) $(LIBC_HEADERS) | $(LINUX_DIR)
 	$(CC_BIN) -mtarget=$(TARGET_OS) $(LIBC_FLAGS) -c $< -o $@
 
 $(OUT)/libc/$(TARGET_OS)/%.o: src/libc/%.c $(CC_BIN) $(LIBC_HEADERS)
@@ -170,7 +172,7 @@ $(LINUX_DIR)/libm.a: $(LIBM_OBJS) $(AR_BIN) | $(LINUX_DIR)
 	rm -f $@
 	$(AR_BIN) rcs $@ $(LIBM_OBJS)
 
-$(EMU_DIR)/crt0.o: src/libc/_crt.c $(CC_BIN) $(LIBC_HEADERS) | $(EMU_DIR)
+$(EMU_DIR)/crt0.o: $(EMU_CRT) $(CC_BIN) $(LIBC_HEADERS) | $(EMU_DIR)
 	$(CC_BIN) -mtarget=ivemu $(LIBC_FLAGS) -c $< -o $@
 
 # --- system header recipes ---

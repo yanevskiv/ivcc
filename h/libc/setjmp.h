@@ -26,9 +26,15 @@
 #ifndef _SETJMP_H
 #define _SETJMP_H
 
+#if defined(__x86_64__)
+    #include <arch/x86_64/setjmp.h>
+#else
+    #error "setjmp.h: no nonlocal jumps for this architecture"
+#endif
+
 // Nonlocal jumps
 // [C99:7.13]: jmp_buf
-typedef long jmp_buf[8];
+typedef long jmp_buf[_SETJMP_SAVED];
 
 // Save calling environment
 // [C99:7.13.1]: setjmp
