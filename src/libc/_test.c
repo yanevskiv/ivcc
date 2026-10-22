@@ -33,7 +33,7 @@
 #include <_sys.h>
 
 // A long double's format and its fields.
-#include <_long_double.h>
+#include <_fpu.h>
 
 // The status so far.
 int _Test_Result = _TEST_PASSED;
@@ -99,14 +99,14 @@ void _Test_ShowHex(unsigned long long value, unsigned int digits)
 // Show a floating value as _TEST_FLOAT reports it, its fields as hex.
 void _Test_ShowFloat(long double value)
 {
-    unsigned long long top = _Long_Double_x86_64_ReadExponent(value);
+    unsigned long long top = _Fpu_x86_64_ReadExponent(value);
 
-    if (_Long_Double_x86_64_IsNegative(value)) {
-        top |= 1ULL << _LONG_DOUBLE_X86_64_EXP_BITS;
+    if (_Fpu_x86_64_IsNegative(value)) {
+        top |= 1ULL << _FPU_X86_64_LDBL_EXP_BITS;
     }
     _Test_Write(_ERR_TEST_HEX);
-    _Test_ShowHex(top, (_LONG_DOUBLE_X86_64_EXP_BITS + _TEST_HEX_BITS) / _TEST_HEX_BITS);
-    _Test_ShowHex(_Long_Double_x86_64_ReadSignificand(value), (_LONG_DOUBLE_X86_64_MANT + _TEST_HEX_BITS - 1) / _TEST_HEX_BITS);
+    _Test_ShowHex(top, (_FPU_X86_64_LDBL_EXP_BITS + _TEST_HEX_BITS) / _TEST_HEX_BITS);
+    _Test_ShowHex(_Fpu_x86_64_ReadSignificand(value), (_FPU_X86_64_LDBL_MANT + _TEST_HEX_BITS - 1) / _TEST_HEX_BITS);
 }
 
 // Show a string as _TEST_STR reports it, a string literal or none.
@@ -199,7 +199,7 @@ _Bool _Test_Uint(unsigned long got, unsigned long expected, const char *expr, co
 // Check that a floating value has the bytes expected, or neither is a number.
 _Bool _Test_Float(long double got, long double expected, const char *expr, const char *file, unsigned int line, const char *func)
 {
-    _Bool same = _Long_Double_x86_64_IsNegative(got) == _Long_Double_x86_64_IsNegative(expected) && _Long_Double_x86_64_ReadExponent(got) == _Long_Double_x86_64_ReadExponent(expected) && _Long_Double_x86_64_ReadSignificand(got) == _Long_Double_x86_64_ReadSignificand(expected);
+    _Bool same = _Fpu_x86_64_IsNegative(got) == _Fpu_x86_64_IsNegative(expected) && _Fpu_x86_64_ReadExponent(got) == _Fpu_x86_64_ReadExponent(expected) && _Fpu_x86_64_ReadSignificand(got) == _Fpu_x86_64_ReadSignificand(expected);
 
     if (got != got && expected != expected) {
         same = 1;

@@ -31,7 +31,7 @@
 #include <_exact.h>
 
 // A long double's format and its fields.
-#include <_long_double.h>
+#include <_fpu.h>
 
 // The sign bits of a float and a double.
 #define _BASIC_MATH_FLOAT_SIGN  0x80000000U
@@ -54,17 +54,17 @@
 // The least subnormal of each format.
 #define _BASIC_MATH_FLOAT_TINY   0x1p-149f
 #define _BASIC_MATH_DOUBLE_TINY  0x1p-1074
-#define _BASIC_MATH_LDOUBLE_TINY _LONG_DOUBLE_X86_64_TRUE_MIN
+#define _BASIC_MATH_LDOUBLE_TINY _FPU_X86_64_LDBL_TRUE_MIN
 
 // The least magnitude of a long double that is always an integer.
-#define _BASIC_MATH_LDOUBLE_INTEGRAL _LONG_DOUBLE_X86_64_INTEGRAL
+#define _BASIC_MATH_LDOUBLE_INTEGRAL _FPU_X86_64_LDBL_INTEGRAL
 
 // The distance from an integer at which round goes away from zero.
 #define _BASIC_MATH_HALF 0.5L
 
 // A long double's normal exponents and the steps scalbn scales by.
-#define _BASIC_MATH_LDOUBLE_EXP_LOW    _LONG_DOUBLE_X86_64_EXP_MIN
-#define _BASIC_MATH_LDOUBLE_EXP_HIGH   _LONG_DOUBLE_X86_64_EXP_MAX
+#define _BASIC_MATH_LDOUBLE_EXP_LOW    _FPU_X86_64_LDBL_EXP_MIN
+#define _BASIC_MATH_LDOUBLE_EXP_HIGH   _FPU_X86_64_LDBL_EXP_MAX
 #define _BASIC_MATH_LDOUBLE_STEP_DOWN  16318
 #define _BASIC_MATH_LDOUBLE_SCALE_UP   0x1p16383L
 #define _BASIC_MATH_LDOUBLE_SCALE_DOWN 0x1p-16318L
@@ -249,7 +249,7 @@
 // The least normal value of each type.
 #define _BASIC_MATH_FLT_MIN  0x1p-126f
 #define _BASIC_MATH_DBL_MIN  0x1p-1022
-#define _BASIC_MATH_LDBL_MIN _LONG_DOUBLE_X86_64_MIN
+#define _BASIC_MATH_LDBL_MIN _FPU_X86_64_LDBL_MIN
 
 // A value's class and sign by its type, and the tests of its class.
 #define _BASIC_MATH_CLASSIFY(x)                                      \

@@ -39,7 +39,7 @@ static void Test_PrecMathExpm1(void)
     _TEST_FLOAT(__prec_math_expm1f(-0.0f), -0.0f);
     _TEST_FLOAT(__prec_math_expm1l(-inf), -1.0L);
     _TEST_FLOAT(__prec_math_expm1(inf), inf);
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_expm1(dnan)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_expm1(dnan)));
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 
     _TEST_FLOAT(__prec_math_expm1(0x1p-60), 0x1p-60);

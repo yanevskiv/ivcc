@@ -1,5 +1,5 @@
 /*
- * C header file for the x86-64 floating-point units' controls and flags.
+ * C header file for the x86-64 floating-point units and long double's format.
  *
  * Copyright (C) 2026 Ivan Janevski
  *
@@ -57,6 +57,46 @@
 // The environment a program starts with, as an environment's address.
 #define _FPU_X86_64_DEFAULT_ENV ((const _Fpu_x86_64_Env *) -1)
 
+// A long double's significand bits and its biased exponent's bits.
+#define _FPU_X86_64_LDBL_MANT     64
+#define _FPU_X86_64_LDBL_EXP_BITS 15
+
+// A long double's least and greatest exponents, one below C's.
+#define _FPU_X86_64_LDBL_EXP_MIN (-16382)
+#define _FPU_X86_64_LDBL_EXP_MAX 16383
+
+// A long double's least normal, greatest, least subnormal and epsilon.
+#define _FPU_X86_64_LDBL_MIN      0x1p-16382L
+#define _FPU_X86_64_LDBL_MAX      0xf.fffffffffffffffp+16380L
+#define _FPU_X86_64_LDBL_TRUE_MIN 0x1p-16445L
+#define _FPU_X86_64_LDBL_EPSILON  0x1p-63L
+
+// The least magnitude of a long double that is always an integer.
+#define _FPU_X86_64_LDBL_INTEGRAL 0x1p63L
+
+// The bits of a split significand, its top bit's place, and its top bit.
+#define _FPU_SPLIT_BITS  64
+#define _FPU_SPLIT_SHIFT 63
+#define _FPU_SPLIT_TOP   0x8000000000000000ULL
+
+// What a long double's bits make it.
+typedef enum _Fpu_Class _Fpu_Class;
+enum _Fpu_Class {
+    _FPU_CLASS_ZERO,      // a zero of either sign
+    _FPU_CLASS_SUBNORMAL, // below the least normal magnitude
+    _FPU_CLASS_NORMAL,    // a normal number
+    _FPU_CLASS_INFINITE,  // an infinity
+    _FPU_CLASS_NAN,       // not a number
+    _FPU_CLASS_COUNT      // the classes
+};
+
+// Which way a step moves a magnitude.
+typedef enum _Fpu_Step _Fpu_Step;
+enum _Fpu_Step {
+    _FPU_STEP_UP,  // away from zero
+    _FPU_STEP_DOWN // toward zero
+};
+
 // Both units' environments, the x87's image and then MXCSR.
 typedef struct _Fpu_x86_64_Env _Fpu_x86_64_Env;
 struct _Fpu_x86_64_Env {
@@ -88,5 +128,30 @@ int _Fpu_x86_64_WriteRound(int round);
 // The whole environment.
 void _Fpu_x86_64_HoldEnv(_Fpu_x86_64_Env *env);
 void _Fpu_x86_64_WriteEnv(const _Fpu_x86_64_Env *env);
+
+// A long double's fields.
+unsigned long long _Fpu_x86_64_ReadSignificand(long double x);
+unsigned int       _Fpu_x86_64_ReadExponent(long double x);
+_Bool              _Fpu_x86_64_IsNegative(long double x);
+long double        _Fpu_x86_64_MakeValue(_Bool negative, unsigned int exp, unsigned long long sig);
+
+// A long double's class.
+_Fpu_Class _Fpu_x86_64_ReadClass(long double x);
+_Bool      _Fpu_x86_64_IsNan(long double x);
+_Bool      _Fpu_x86_64_IsInf(long double x);
+
+// A long double's sign.
+long double _Fpu_x86_64_ClearSign(long double x);
+long double _Fpu_x86_64_CopySign(long double x, long double y);
+
+// A long double's value, split, joined, stepped or made a NaN.
+unsigned long long _Fpu_x86_64_SplitValue(long double x, int *exp);
+long double        _Fpu_x86_64_JoinValue(int exp, unsigned long long sig);
+long double        _Fpu_x86_64_StepValue(long double x, _Fpu_Step step);
+long double        _Fpu_x86_64_MakeNan(unsigned long long payload);
+
+// The x87's sign and exponent word.
+unsigned int _Fpu_x86_64_ReadTop(long double x);
+long double  _Fpu_x86_64_MakeTop(unsigned int top, unsigned long long sig);
 
 #endif // _FPU_H

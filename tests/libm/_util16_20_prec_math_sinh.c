@@ -40,7 +40,7 @@ static void Test_PrecMathSinh(void)
     _TEST_FLOAT(__prec_math_sinhf(-0.0f), -0.0f);
     _TEST_FLOAT(__prec_math_sinhl(-inf), -_EXACT_INFINITY);
     _TEST_FLOAT(__prec_math_sinh(inf), inf);
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_sinh(dnan)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_sinh(dnan)));
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 
     _Err_Errno = 0;

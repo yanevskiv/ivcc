@@ -39,16 +39,16 @@ static void Test_PrecMathAcosh(void)
     _TEST_FLOAT(__prec_math_acoshf(1.0f), 0.0f);
     _TEST_FLOAT(__prec_math_acoshl(1.0L), 0.0L);
     _TEST_FLOAT(__prec_math_acosh(inf), inf);
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_acosh(dnan)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_acosh(dnan)));
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 
     _Err_Errno = 0;
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_acosh(0.5)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_acosh(0.5)));
     _TEST_INT(_Err_Errno, _SYS_LINUX_EDOM);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INVALID);
     _Err_Errno = 0;
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_acoshf((float) -inf)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_acoshf((float) -inf)));
     _TEST_INT(_Err_Errno, _SYS_LINUX_EDOM);
     _Err_Errno = 0;
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);

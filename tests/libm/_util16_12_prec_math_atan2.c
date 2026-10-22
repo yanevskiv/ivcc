@@ -40,8 +40,8 @@ static void Test_PrecMathAtan2(void)
     _TEST_FLOAT(__prec_math_atan2f(-0.0f, 2.0f), -0.0f);
     _TEST_FLOAT(__prec_math_atan2l(0.0L, inf), 0.0L);
     _TEST_FLOAT(__prec_math_atan2(-1.0, inf), -0.0);
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_atan2(dnan, 1.0)));
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_atan2(inf, dnan)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_atan2(dnan, 1.0)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_atan2(inf, dnan)));
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
     _TEST_FLOAT(__prec_math_atan2(0.0, -0.0), 0x1.921fb54442d18p+1);
     _TEST_FLOAT(__prec_math_atan2(-0.0, -0.0), -0x1.921fb54442d18p+1);

@@ -44,7 +44,7 @@ static void Test_PrecMathLog10(void)
     _TEST_FLOAT(__prec_math_log10f(1e10f), 10.0f);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(__prec_math_log10(inf), inf);
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_log10l(dnan)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_log10l(dnan)));
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 
     _Err_Errno = 0;
@@ -53,7 +53,7 @@ static void Test_PrecMathLog10(void)
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_DIVBYZERO);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_log10f(-1.0f)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_log10f(-1.0f)));
     _TEST_INT(_Err_Errno, _SYS_LINUX_EDOM);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INVALID);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);

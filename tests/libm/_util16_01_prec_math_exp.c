@@ -39,7 +39,7 @@ static void Test_PrecMathExp(void)
     _TEST_FLOAT(__prec_math_expf(-0.0f), 1.0f);
     _TEST_FLOAT(__prec_math_expl(-inf), 0.0L);
     _TEST_FLOAT(__prec_math_exp(inf), inf);
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_exp(dnan)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_exp(dnan)));
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 
     _Err_Errno = 0;

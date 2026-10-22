@@ -37,7 +37,7 @@ static void Test_PrecMathAsin(void)
     _TEST_FLOAT(__prec_math_asin(0.0), 0.0);
     _TEST_FLOAT(__prec_math_asinf(-0.0f), -0.0f);
     _TEST_FLOAT(__prec_math_asinl(-0.0L), -0.0L);
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_asin(dnan)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_asin(dnan)));
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
     _TEST_FLOAT(__prec_math_asin(1.0), 0x1.921fb54442d18p+0);
     _TEST_FLOAT(__prec_math_asinf(-1.0f), -0x1.921fb6p+0f);
@@ -45,12 +45,12 @@ static void Test_PrecMathAsin(void)
 
     _Err_Errno = 0;
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_asin(2.0)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_asin(2.0)));
     _TEST_INT(_Err_Errno, _SYS_LINUX_EDOM);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INVALID);
     _Err_Errno = 0;
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_asinl(-1.0000001L)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_asinl(-1.0000001L)));
     _TEST_INT(_Err_Errno, _SYS_LINUX_EDOM);
     _Err_Errno = 0;
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);

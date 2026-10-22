@@ -38,16 +38,16 @@ static void Test_PrecMathCos(void)
     _TEST_FLOAT(__prec_math_cos(0.0), 1.0);
     _TEST_FLOAT(__prec_math_cosf(-0.0f), 1.0f);
     _TEST_FLOAT(__prec_math_cosl(-0.0L), 1.0L);
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_cos(dnan)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_cos(dnan)));
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 
     _Err_Errno = 0;
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_cos(-inf)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_cos(-inf)));
     _TEST_INT(_Err_Errno, _SYS_LINUX_EDOM);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INVALID);
     _Err_Errno = 0;
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_cosl(inf)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_cosl(inf)));
     _TEST_INT(_Err_Errno, _SYS_LINUX_EDOM);
     _Err_Errno = 0;
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);

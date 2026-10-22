@@ -39,7 +39,7 @@ static void Test_PrecMathTanh(void)
     _TEST_FLOAT(__prec_math_tanhf(-0.0f), -0.0f);
     _TEST_FLOAT(__prec_math_tanhl(-inf), -1.0L);
     _TEST_FLOAT(__prec_math_tanh(inf), 1.0);
-    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_tanh(dnan)));
+    _TEST_TRUE(_Fpu_x86_64_IsNan(__prec_math_tanh(dnan)));
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 
     _Err_Errno = 0;
