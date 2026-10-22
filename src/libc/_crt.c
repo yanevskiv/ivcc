@@ -26,6 +26,9 @@
 // Module header.
 #include <_crt.h>
 
+// The ivemu machine's halt register.
+#define _CRT_X86_64_IVEMU_HALT "0x10000008"
+
 // The program's name for diagnostics, or a null pointer where it is unknown.
 char *_Crt_Argv0;
 
@@ -34,3 +37,46 @@ char **_Crt_Envp;
 
 // What exit flushes the streams by, set by stdio so exit names none of it.
 int (*_Crt_FlushStreams)(void);
+
+#ifdef __x86_64__
+    #if defined(__linux__)
+// Keep the program's name and environment, run main, and exit with its status.
+__asm__(
+    "  .text\n"
+    "  .globl _start\n"
+    "_start:\n"
+    "  xor %rbp, %rbp\n"
+    "  mov (%rsp), %rdi\n"
+    "  lea 8(%rsp), %rsi\n"
+    "  mov (%rsi), %rax\n"
+    "  lea _Crt_Argv0(%rip), %rcx\n"
+    "  mov %rax, (%rcx)\n"
+    "  mov %rdi, %rdx\n"
+    "  mov $3, %rcx\n"
+    "  shl %cl, %rdx\n"
+    "  add %rsi, %rdx\n"
+    "  add $8, %rdx\n"
+    "  lea _Crt_Envp(%rip), %rcx\n"
+    "  mov %rdx, (%rcx)\n"
+    "  call main\n"
+    "  mov %rax, %rdi\n"
+    "  call exit\n"
+);
+    #elif defined(__ivemu__)
+// Call main, then halt the machine with its status.
+__asm__(
+    "  .text\n"
+    "  .globl _start\n"
+    "_start:\n"
+    "  call main\n"
+    "  mov $" _CRT_X86_64_IVEMU_HALT ", %rdi\n"
+    "  mov %al, (%rdi)\n"
+    ".Lhang:\n"
+    "  jmp .Lhang\n"
+);
+    #else
+        #error "_crt.c: no startup for this target"
+    #endif
+#else
+    #error "_crt.c: no startup for this architecture"
+#endif
