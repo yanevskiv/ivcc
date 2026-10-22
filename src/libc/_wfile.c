@@ -65,7 +65,7 @@ _Wfile_Status _Wfile_ReadChar(_File_Stream *stream, int *wc)
     if (ch == _FILE_END && (count == 0 || ! (stream->fs_flags & _FILE_EOF))) {
         return stream->fs_flags & _FILE_EOF ? _WFILE_STATUS_END : _WFILE_STATUS_FAILED;
     }
-    _Err_Errno = _SYS_EILSEQ;
+    _Err_Errno = _SYS_LINUX_EILSEQ;
     stream->fs_flags |= _FILE_ERROR;
     return _WFILE_STATUS_FAILED;
 }
@@ -123,7 +123,7 @@ unsigned int _Wfile_PutChar(_File_Stream *stream, int wc)
     _File_OrientStream(stream, _FILE_ORIENT_WIDE);
     len = _Utf8_EncodeChar(wc, buf);
     if (len < 0) {
-        _Err_Errno = _SYS_EILSEQ;
+        _Err_Errno = _SYS_LINUX_EILSEQ;
         return _WFILE_END;
     }
     if (_File_PutBytes(stream, buf, (unsigned long) len) != (unsigned long) len) {

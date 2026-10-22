@@ -48,7 +48,7 @@ static void Test_PrecMathSin(void)
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_sin(inf)));
-    _TEST_INT(_Err_Errno, _SYS_EDOM);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_EDOM);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INVALID);
     _Err_Errno = 0;
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);

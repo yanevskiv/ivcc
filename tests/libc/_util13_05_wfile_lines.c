@@ -12,7 +12,7 @@ static void Test_WfileLines(void)
     int line[8];
 
     _TEST_TRUE(_Wfile_PutString(stream, text) >= 0);
-    _TEST_INT(_File_SeekStream(stream, 0, _SYS_SEEK_SET), 0);
+    _TEST_INT(_File_SeekStream(stream, 0, _SYS_LINUX_SEEK_SET), 0);
     _TEST_TRUE(_Wfile_GetLine(stream, line, 7) == line);
     _TEST_MEM(line, text, 3 * sizeof(int));
     _TEST_INT(line[3], 0);

@@ -49,12 +49,12 @@ static void Test_PrecMathLog10(void)
 
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_log10(-zero), -_EXACT_INFINITY);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_DIVBYZERO);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
     _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_log10f(-1.0f)));
-    _TEST_INT(_Err_Errno, _SYS_EDOM);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_EDOM);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INVALID);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;

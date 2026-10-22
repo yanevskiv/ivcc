@@ -47,17 +47,17 @@ static void Test_PrecMathLgamma(void)
 
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_lgamma(zero), _EXACT_INFINITY);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_DIVBYZERO);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_lgammal(-3.0L), _EXACT_INFINITY);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_DIVBYZERO);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_lgamma(0x1.fffffffffffffp+1023), _EXACT_INFINITY);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_OVERFLOW | _FPU_X86_64_INEXACT);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;

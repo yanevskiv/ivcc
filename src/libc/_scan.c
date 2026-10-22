@@ -644,7 +644,7 @@ void _Scan_PutChar(_Scan_Source *source, _Scan_Target *target, int ch)
     if (source->ss_text == _SCAN_TEXT_WIDE) {
         len = _Utf8_EncodeChar(ch, buf);
         if (len < 0) {
-            _Err_Errno = _SYS_EILSEQ;
+            _Err_Errno = _SYS_LINUX_EILSEQ;
             source->ss_failure = _SCAN_FAILURE_INPUT;
         } else if (target->st_str != _SCAN_NULL) {
             _Str_CopyBytes(target->st_str, buf, (unsigned long) len);
@@ -661,7 +661,7 @@ void _Scan_PutChar(_Scan_Source *source, _Scan_Target *target, int ch)
         }
         target->st_count = 0;
     } else if (target->st_count >= _Utf8_GetCharMax()) {
-        _Err_Errno = _SYS_EILSEQ;
+        _Err_Errno = _SYS_LINUX_EILSEQ;
         source->ss_failure = _SCAN_FAILURE_INPUT;
     }
 }
@@ -672,7 +672,7 @@ void _Scan_EndTarget(_Scan_Source *source, _Scan_Target *target, _Scan_Kind kind
     // Phase: fail a wide character that lacks bytes
     if (source->ss_failure == _SCAN_FAILURE_NONE && target->st_count > 0) {
         source->ss_failure = _SCAN_FAILURE_INPUT;
-        _Err_Errno = _SYS_EILSEQ;
+        _Err_Errno = _SYS_LINUX_EILSEQ;
     }
     if (source->ss_failure != _SCAN_FAILURE_NONE) {
         return;

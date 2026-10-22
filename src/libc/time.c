@@ -118,7 +118,7 @@ struct tm *_Time_BreakDownTime(time_t value, struct tm *tm, const char *zone)
     mon = march < _TIME_MONTHS_PER_YEAR - _TIME_MARCH ? march + _TIME_MARCH : march - (_TIME_MONTHS_PER_YEAR - _TIME_MARCH);
     year = era * _TIME_YEARS_PER_ERA + yoe + (mon < _TIME_MARCH ? 1 : 0);
     if (year - _TIME_YEAR_BASE < INT_MIN || year - _TIME_YEAR_BASE > INT_MAX) {
-        errno = _SYS_EOVERFLOW;
+        errno = _SYS_LINUX_EOVERFLOW;
         return NULL;
     }
     tm->tm_sec = (int) (secs % _TIME_SECS_PER_MIN);
@@ -439,9 +439,9 @@ void _Time_PutFormat(_Time_Text *text, const char *format, const struct tm *tm)
 // Return the processor time the program has used.
 clock_t clock(void)
 {
-    _Sys_Timespec spec;
+    _Sys_Linux_Timespec spec;
 
-    if (_Sys_ReadClock(_SYS_CLOCK_PROCESS_CPUTIME_ID, &spec) != 0) {
+    if (_Sys_Linux_ReadClock(_SYS_LINUX_CLOCK_PROCESS_CPUTIME_ID, &spec) != 0) {
         return (clock_t) -1;
     }
     return spec.tv_sec * CLOCKS_PER_SEC + spec.tv_nsec / _TIME_NSECS_PER_CLOCK;
@@ -475,10 +475,10 @@ time_t mktime(struct tm *timeptr)
 // Return the current calendar time.
 time_t time(time_t *timer)
 {
-    _Sys_Timespec spec;
+    _Sys_Linux_Timespec spec;
     time_t value = (time_t) -1;
 
-    if (_Sys_ReadClock(_SYS_CLOCK_REALTIME, &spec) == 0) {
+    if (_Sys_Linux_ReadClock(_SYS_LINUX_CLOCK_REALTIME, &spec) == 0) {
         value = spec.tv_sec;
     }
     if (timer != NULL) {
@@ -497,7 +497,7 @@ char *asctime(const struct tm *timeptr)
     };
 
     if (timeptr->tm_year > INT_MAX - _TIME_YEAR_BASE) {
-        errno = _SYS_EOVERFLOW;
+        errno = _SYS_LINUX_EOVERFLOW;
         return NULL;
     }
     _Time_PutName(&text, _Time_GetWdayName(timeptr->tm_wday), _TIME_ABBREV_LEN, _TIME_UNKNOWN_ABBREV);

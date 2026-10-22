@@ -131,7 +131,7 @@ void _Mem_ReleaseBlock(_Mem_Block *block)
 // Grow the heap by at least size bytes, moving the break, or return 0.
 int _Mem_GrowHeap(unsigned long size)
 {
-    char *start = _Sys_MoveBreak(_MEM_NULL);
+    char *start = _Sys_Linux_MoveBreak(_MEM_NULL);
     _Mem_Block *block;
     char *end;
 
@@ -140,7 +140,7 @@ int _Mem_GrowHeap(unsigned long size)
         size = _MEM_GROW;
     }
     end = start + size;
-    if (_Sys_MoveBreak(end) != end) {
+    if (_Sys_Linux_MoveBreak(end) != end) {
         return 0;
     }
     block = (_Mem_Block *) start;
@@ -155,7 +155,7 @@ void *_Mem_AllocateObjects(unsigned long nmemb, unsigned long size)
     void *ptr;
 
     if (size != 0 && nmemb > (unsigned long) -1 / size) {
-        _Err_Errno = _SYS_ENOMEM;
+        _Err_Errno = _SYS_LINUX_ENOMEM;
         return _MEM_NULL;
     }
     ptr = _Mem_AllocateMemory(nmemb * size);
@@ -183,7 +183,7 @@ void *_Mem_AllocateMemory(unsigned long size)
         link = _Mem_FindFreeBlock(need);
     }
     if (! link) {
-        _Err_Errno = _SYS_ENOMEM;
+        _Err_Errno = _SYS_LINUX_ENOMEM;
         return _MEM_NULL;
     }
     return _Mem_TakeBlock(link, need);
@@ -205,7 +205,7 @@ void *_Mem_ResizeMemory(void *ptr, unsigned long size)
         return _MEM_NULL;
     }
     if (need == 0) {
-        _Err_Errno = _SYS_ENOMEM;
+        _Err_Errno = _SYS_LINUX_ENOMEM;
         return _MEM_NULL;
     }
     block = (_Mem_Block *) ptr - 1;

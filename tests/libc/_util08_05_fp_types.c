@@ -27,13 +27,13 @@ static void Test_FpTypes(void)
     _TEST_FLOAT(_Fp_ToLongDouble(wide, _FP_TEXT_WIDE, &end), -25.0L);
     _TEST_INT(_Err_Errno, 0);
     _TEST_FLOAT(_Fp_ToFloat("3.5e38", _FP_TEXT_NARROW, &end), 1.0F / 0.0F);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _Err_Errno = 0;
     _TEST_FLOAT(_Fp_ToFloat("1e-50", _FP_TEXT_NARROW, &end), 0.0F);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _Err_Errno = 0;
     _TEST_FLOAT(_Fp_ToLongDouble("1e5000", _FP_TEXT_NARROW, &end), 1.0L / 0.0L);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
 }
 
 int main(void)

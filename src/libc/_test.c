@@ -52,13 +52,13 @@ unsigned long _Test_Length(const char *str)
 // Write the string str to standard error.
 void _Test_Write(const char *str)
 {
-    _Sys_WriteFile(_SYS_STDERR_FILENO, str, _Test_Length(str));
+    _Sys_Linux_WriteFile(_SYS_LINUX_STDERR_FILENO, str, _Test_Length(str));
 }
 
 // Write the character ch to standard error.
 void _Test_WriteChar(char ch)
 {
-    _Sys_WriteFile(_SYS_STDERR_FILENO, &ch, sizeof(ch));
+    _Sys_Linux_WriteFile(_SYS_LINUX_STDERR_FILENO, &ch, sizeof(ch));
 }
 
 // Show a signed number as _TEST_INT reports it, its sign where negative.

@@ -26,30 +26,18 @@
 #ifndef _SIGNAL_H
 #define _SIGNAL_H
 
-#if defined(__linux__)
-    #include <os/linux/_signal.h>
-    #define _SIGNAL_SIGABRT _SIGNAL_LINUX_SIGABRT
-    #define _SIGNAL_SIGFPE  _SIGNAL_LINUX_SIGFPE
-    #define _SIGNAL_SIGILL  _SIGNAL_LINUX_SIGILL
-    #define _SIGNAL_SIGINT  _SIGNAL_LINUX_SIGINT
-    #define _SIGNAL_SIGSEGV _SIGNAL_LINUX_SIGSEGV
-    #define _SIGNAL_SIGTERM _SIGNAL_LINUX_SIGTERM
-#else
-    #error "signal.h: no signals for this OS"
-#endif
-
 // Signal handling
 // [C99:7.14]: sig_atomic_t, SIG_DFL, SIG_ERR, SIG_IGN and the six signals
 #define SIG_DFL ((void (*)(int)) 0)
 #define SIG_ERR ((void (*)(int)) -1)
 #define SIG_IGN ((void (*)(int)) 1)
 
-#define SIGABRT _SIGNAL_SIGABRT
-#define SIGFPE  _SIGNAL_SIGFPE
-#define SIGILL  _SIGNAL_SIGILL
-#define SIGINT  _SIGNAL_SIGINT
-#define SIGSEGV _SIGNAL_SIGSEGV
-#define SIGTERM _SIGNAL_SIGTERM
+#define SIGABRT 6
+#define SIGFPE  8
+#define SIGILL  4
+#define SIGINT  2
+#define SIGSEGV 11
+#define SIGTERM 15
 
 typedef int sig_atomic_t;
 

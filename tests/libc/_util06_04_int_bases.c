@@ -12,13 +12,13 @@ static void Test_IntBases(void)
     _TEST_TRUE(reads("11", 36, 37, 2, _INT_SIGN_PLUS, _INT_RANGE_INSIDE));
     _TEST_INT(_Err_Errno, 0);
     _TEST_TRUE(reads("11", 1, 0, 0, _INT_SIGN_PLUS, _INT_RANGE_INSIDE));
-    _TEST_INT(_Err_Errno, _SYS_EINVAL);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_EINVAL);
     _Err_Errno = 0;
     _TEST_TRUE(reads("11", -1, 0, 0, _INT_SIGN_PLUS, _INT_RANGE_INSIDE));
-    _TEST_INT(_Err_Errno, _SYS_EINVAL);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_EINVAL);
     _Err_Errno = 0;
     _TEST_TRUE(reads("11", 37, 0, 0, _INT_SIGN_PLUS, _INT_RANGE_INSIDE));
-    _TEST_INT(_Err_Errno, _SYS_EINVAL);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_EINVAL);
 }
 
 int main(void)

@@ -49,7 +49,7 @@ static void Test_PrecMathSinh(void)
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(__prec_math_sinh(-800.0), -_EXACT_INFINITY);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_OVERFLOW | _FPU_X86_64_INEXACT);
     _Err_Errno = 0;
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);

@@ -43,7 +43,7 @@
 
 // Standard input, read-only, its buffering picked at its first use.
 _File_Stream _File_Stdin = {
-    .fs_fd    = _SYS_STDIN_FILENO,
+    .fs_fd    = _SYS_LINUX_STDIN_FILENO,
     .fs_flags = _FILE_READ,
     .fs_mode  = _FILE_AUTO,
     .fs_next  = &_File_Stdout
@@ -51,7 +51,7 @@ _File_Stream _File_Stdin = {
 
 // Standard output, write-only, its buffering picked at its first use.
 _File_Stream _File_Stdout = {
-    .fs_fd    = _SYS_STDOUT_FILENO,
+    .fs_fd    = _SYS_LINUX_STDOUT_FILENO,
     .fs_flags = _FILE_WRITE,
     .fs_mode  = _FILE_AUTO,
     .fs_next  = &_File_Stderr
@@ -59,7 +59,7 @@ _File_Stream _File_Stdout = {
 
 // Standard error, write-only and unbuffered, as glibc's.
 _File_Stream _File_Stderr = {
-    .fs_fd    = _SYS_STDERR_FILENO,
+    .fs_fd    = _SYS_LINUX_STDERR_FILENO,
     .fs_flags = _FILE_WRITE,
     .fs_mode  = _FILE_NONE
 };
@@ -103,16 +103,16 @@ _Bool _File_IsMode(const char *mode)
 // Convert fopen's mode into the flags open takes.
 int _File_ToMode(const char *mode)
 {
-    int flags = mode[0] == 'r' ? _SYS_O_RDONLY : _SYS_O_WRONLY | _SYS_O_CREAT;
+    int flags = mode[0] == 'r' ? _SYS_LINUX_O_RDONLY : _SYS_LINUX_O_WRONLY | _SYS_LINUX_O_CREAT;
 
     if (_Str_FindChar(mode, '+') != _FILE_NULL) {
-        flags = (flags & ~_SYS_O_ACCMODE) | _SYS_O_RDWR;
+        flags = (flags & ~_SYS_LINUX_O_ACCMODE) | _SYS_LINUX_O_RDWR;
     }
     if (mode[0] == 'w') {
-        flags |= _SYS_O_TRUNC;
+        flags |= _SYS_LINUX_O_TRUNC;
     }
     if (mode[0] == 'a') {
-        flags |= _SYS_O_APPEND;
+        flags |= _SYS_LINUX_O_APPEND;
     }
     return flags;
 }
@@ -121,10 +121,10 @@ int _File_ToMode(const char *mode)
 void _File_AttachDescriptor(_File_Stream *stream, int fd, int flags)
 {
     stream->fs_fd = fd;
-    if ((flags & _SYS_O_ACCMODE) != _SYS_O_WRONLY) {
+    if ((flags & _SYS_LINUX_O_ACCMODE) != _SYS_LINUX_O_WRONLY) {
         stream->fs_flags |= _FILE_READ;
     }
-    if ((flags & _SYS_O_ACCMODE) != _SYS_O_RDONLY) {
+    if ((flags & _SYS_LINUX_O_ACCMODE) != _SYS_LINUX_O_RDONLY) {
         stream->fs_flags |= _FILE_WRITE;
     }
 }
@@ -134,7 +134,7 @@ void _File_DropDescriptor(int fd)
 {
     int saved = _Err_Errno;
 
-    _Sys_CloseFile(fd);
+    _Sys_Linux_CloseFile(fd);
     _Err_Errno = saved;
 }
 
@@ -145,11 +145,11 @@ int _File_OpenFile(_File_Stream *stream, const char *filename, const char *mode)
     int flags;
 
     if (! _File_IsMode(mode)) {
-        _Err_Errno = _SYS_EINVAL;
+        _Err_Errno = _SYS_LINUX_EINVAL;
         return _FILE_END;
     }
     flags = _File_ToMode(mode);
-    fd = _Sys_OpenFile(filename, flags, _SYS_DEFFILEMODE);
+    fd = _Sys_Linux_OpenFile(filename, flags, _SYS_LINUX_DEFFILEMODE);
     if (fd < 0) {
         return _FILE_END;
     }
@@ -213,7 +213,7 @@ void _File_SetupBuffer(_File_Stream *stream)
         return;
     }
     if (stream->fs_mode == _FILE_AUTO) {
-        stream->fs_mode = _Sys_IsTerminal(stream->fs_fd) ? _FILE_LINE : _FILE_FULL;
+        stream->fs_mode = _Sys_Linux_IsTerminal(stream->fs_fd) ? _FILE_LINE : _FILE_FULL;
     }
     if (stream->fs_mode != _FILE_NONE && stream->fs_buf == _FILE_NULL) {
         stream->fs_buf = _Mem_AllocateMemory(size);
@@ -263,7 +263,7 @@ int _File_PrepareInput(_File_Stream *stream)
     _File_OrientStream(stream, _FILE_ORIENT_BYTE);
     if (! (stream->fs_flags & _FILE_READ)) {
         stream->fs_flags |= _FILE_ERROR;
-        _Err_Errno = _SYS_EBADF;
+        _Err_Errno = _SYS_LINUX_EBADF;
         return _FILE_END;
     }
     if (_File_FlushBuffer(stream) != 0) {
@@ -328,7 +328,7 @@ unsigned long _File_ReadDescriptor(_File_Stream *stream, unsigned char *data, un
     if (stream->fs_mode != _FILE_FULL) {
         _File_FlushLines();
     }
-    done = _Sys_ReadFile(stream->fs_fd, data, len);
+    done = _Sys_Linux_ReadFile(stream->fs_fd, data, len);
     if (done < 0) {
         stream->fs_flags |= _FILE_ERROR;
         return 0;
@@ -403,7 +403,7 @@ int _File_PrepareOutput(_File_Stream *stream)
     _File_OrientStream(stream, _FILE_ORIENT_BYTE);
     if (! (stream->fs_flags & _FILE_WRITE)) {
         stream->fs_flags |= _FILE_ERROR;
-        _Err_Errno = _SYS_EBADF;
+        _Err_Errno = _SYS_LINUX_EBADF;
         return _FILE_END;
     }
     if (stream->fs_state == _FILE_READING) {
@@ -453,10 +453,10 @@ unsigned long _File_PutBytes(_File_Stream *stream, const void *data, unsigned lo
 int _File_WriteDescriptor(_File_Stream *stream, const unsigned char *data, unsigned long len)
 {
     while (len > 0) {
-        long done = _Sys_WriteFile(stream->fs_fd, data, len);
+        long done = _Sys_Linux_WriteFile(stream->fs_fd, data, len);
 
         if (done == 0) {
-            _Err_Errno = _SYS_EIO;
+            _Err_Errno = _SYS_LINUX_EIO;
         }
         if (done <= 0) {
             stream->fs_flags |= _FILE_ERROR;
@@ -525,10 +525,10 @@ int _File_SeekStream(_File_Stream *stream, long offset, int whence)
     if (_File_FlushBuffer(stream) != 0) {
         return _FILE_END;
     }
-    if (whence == _SYS_SEEK_CUR) {
+    if (whence == _SYS_LINUX_SEEK_CUR) {
         offset -= _File_CountReadAhead(stream);
     }
-    pos = _Sys_SeekFile(stream->fs_fd, offset, whence);
+    pos = _Sys_Linux_SeekFile(stream->fs_fd, offset, whence);
     if (pos < 0) {
         return _FILE_END;
     }
@@ -542,16 +542,16 @@ int _File_SeekStream(_File_Stream *stream, long offset, int whence)
 void _File_DiscardReadAhead(_File_Stream *stream)
 {
     if (_File_CountReadAhead(stream) > 0) {
-        _File_SeekStream(stream, 0, _SYS_SEEK_CUR);
+        _File_SeekStream(stream, 0, _SYS_LINUX_SEEK_CUR);
     }
 }
 
 // Make a number that differs from run to run, by the clock and the stack.
 unsigned long _File_MakeTempSeed(void)
 {
-    _Sys_Timespec now = {0, 0};
+    _Sys_Linux_Timespec now = {0, 0};
 
-    _Sys_ReadClock(_SYS_CLOCK_REALTIME, &now);
+    _Sys_Linux_ReadClock(_SYS_LINUX_CLOCK_REALTIME, &now);
     return (unsigned long) now.tv_sec ^ (unsigned long) now.tv_nsec ^ (unsigned long) &now;
 }
 

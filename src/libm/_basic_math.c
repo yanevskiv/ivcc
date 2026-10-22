@@ -357,14 +357,14 @@ unsigned long long _Basic_Math_ReadPayload(const char *tagp)
 // Raise the domain error of x and y.
 long double _Basic_Math_RaiseDomain(long double x, long double y)
 {
-    _Err_Errno = _SYS_EDOM;
+    _Err_Errno = _SYS_LINUX_EDOM;
     return (x * y) / (x * y);
 }
 
 // Raise the pole error, an exact -inf from a finite argument.
 long double _Basic_Math_RaisePole(void)
 {
-    _Err_Errno = _SYS_ERANGE;
+    _Err_Errno = _SYS_LINUX_ERANGE;
     _Fpu_x86_64_RaiseFlags(_FPU_X86_64_DIVBYZERO);
     return -_EXACT_INFINITY;
 }
@@ -373,7 +373,7 @@ long double _Basic_Math_RaisePole(void)
 void _Basic_Math_CheckScaled(long double x, long double y)
 {
     if (x == x && x != 0 && __basic_math_fabsl(x) != _EXACT_INFINITY && (y == 0 || __basic_math_fabsl(y) == _EXACT_INFINITY)) {
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
     }
 }
 
@@ -391,7 +391,7 @@ long double _Basic_Math_CheckRange(long double x, long double y, long double lea
 long double _Basic_Math_CheckOverflow(long double x, long double y)
 {
     if (x == x && __basic_math_fabsl(x) != _EXACT_INFINITY && __basic_math_fabsl(y) == _EXACT_INFINITY) {
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
     }
     return y;
 }
@@ -410,10 +410,10 @@ void _Basic_Math_CheckNext(long double x, int class)
 {
     if (class == _BASIC_MATH_FP_INFINITE) {
         _Fpu_x86_64_RaiseFlags(_FPU_X86_64_OVERFLOW | _FPU_X86_64_INEXACT);
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
     } else if ((class == _BASIC_MATH_FP_SUBNORMAL || class == _BASIC_MATH_FP_ZERO) && x != 0) {
         _Fpu_x86_64_RaiseFlags(_FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT);
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
     } else if (class == _BASIC_MATH_FP_SUBNORMAL) {
         _Fpu_x86_64_RaiseFlags(_FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT);
     }
@@ -465,7 +465,7 @@ long double _Basic_Math_TakeHypot(long double x, long double y, _Exact_Type type
     _Exact_ExtractRoot(&root, &sum, _EXACT_ROOT_SQUARE);
     result = _Exact_RoundValue(&root, type);
     if (_BASIC_MATH_IS_INF(result)) {
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
     }
     return result;
 }
@@ -1771,7 +1771,7 @@ int __basic_math_ilogbl(long double x)
     int class = _BASIC_MATH_CLASSIFY(x);
 
     if (class == _BASIC_MATH_FP_NAN || class == _BASIC_MATH_FP_INFINITE || class == _BASIC_MATH_FP_ZERO) {
-        _Err_Errno = _SYS_EDOM;
+        _Err_Errno = _SYS_LINUX_EDOM;
         _Fpu_x86_64_RaiseFlags(_FPU_X86_64_INVALID);
         return class == _BASIC_MATH_FP_INFINITE ? _BASIC_MATH_INT_MAX : class == _BASIC_MATH_FP_ZERO ? _BASIC_MATH_FP_ILOGB0 : _BASIC_MATH_FP_ILOGBNAN;
     }
@@ -2612,7 +2612,7 @@ double __basic_math_fdim(double x, double y)
     }
     diff = x - y;
     if (_BASIC_MATH_IS_INF(diff) && _BASIC_MATH_IS_FINITE(x) && _BASIC_MATH_IS_FINITE(y)) {
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
     }
     return diff;
 }
@@ -2630,7 +2630,7 @@ float __basic_math_fdimf(float x, float y)
     }
     diff = x - y;
     if (_BASIC_MATH_IS_INF(diff) && _BASIC_MATH_IS_FINITE(x) && _BASIC_MATH_IS_FINITE(y)) {
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
     }
     return diff;
 }
@@ -2648,7 +2648,7 @@ long double __basic_math_fdiml(long double x, long double y)
     }
     diff = x - y;
     if (_BASIC_MATH_IS_INF(diff) && _BASIC_MATH_IS_FINITE(x) && _BASIC_MATH_IS_FINITE(y)) {
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
     }
     return diff;
 }

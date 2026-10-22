@@ -44,15 +44,15 @@ static void Test_PrecMathCosh(void)
 
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_cosh(-800.0), _EXACT_INFINITY);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_OVERFLOW | _FPU_X86_64_INEXACT);
     _Err_Errno = 0;
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(__prec_math_coshf(90.0f), _EXACT_INFINITY);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_coshl(12000.0L), _EXACT_INFINITY);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _Err_Errno = 0;
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
 }

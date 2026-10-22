@@ -12,14 +12,14 @@ static void Test_WfileInvalid(void)
 
     _Err_Errno = 0;
     _TEST_INT(_Wfile_ReadChar(stream, &wc), _WFILE_STATUS_FAILED);
-    _TEST_INT(_Err_Errno, _SYS_EILSEQ);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_EILSEQ);
     _TEST_TRUE((stream->fs_flags & _FILE_ERROR) != 0);
     stream = opened("a\xE2\x82", 3);
     _Err_Errno = 0;
     _TEST_INT(_Wfile_ReadChar(stream, &wc), _WFILE_STATUS_GOOD);
     _TEST_INT(wc, 'a');
     _TEST_INT(_Wfile_ReadChar(stream, &wc), _WFILE_STATUS_FAILED);
-    _TEST_INT(_Err_Errno, _SYS_EILSEQ);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_EILSEQ);
     stream = opened("", 0);
     _Err_Errno = 0;
     _TEST_INT(_Wfile_ReadChar(stream, &wc), _WFILE_STATUS_END);

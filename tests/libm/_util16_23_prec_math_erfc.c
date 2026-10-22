@@ -44,7 +44,7 @@ static void Test_PrecMathErfc(void)
 
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_erfc(30.0), 0.0);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;

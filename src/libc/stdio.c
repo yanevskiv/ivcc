@@ -56,13 +56,13 @@
 // Remove the file filename, or the empty directory of that name.
 int remove(const char *filename)
 {
-    return _Sys_RemoveFile(filename) < 0 ? EOF : 0;
+    return _Sys_Linux_RemoveFile(filename) < 0 ? EOF : 0;
 }
 
 // Give the file old the name new, replacing a file that has it as Linux does.
 int rename(const char *old, const char *new)
 {
-    return _Sys_RenameFile(old, new) < 0 ? EOF : 0;
+    return _Sys_Linux_RenameFile(old, new) < 0 ? EOF : 0;
 }
 
 // Open a file of no name for update, which goes when its stream is closed.
@@ -72,20 +72,20 @@ FILE *tmpfile(void)
     char name[L_tmpnam];
     int fd;
     FILE *stream = _File_MakeStream();
-    int flags = _SYS_O_RDWR | _SYS_O_CREAT | _SYS_O_EXCL;
+    int flags = _SYS_LINUX_O_RDWR | _SYS_LINUX_O_CREAT | _SYS_LINUX_O_EXCL;
 
     if (stream == NULL) {
         return NULL;
     }
     do {
         _File_WriteTempName(name);
-        fd = _Sys_OpenFile(name, flags, _SYS_S_IRUSR | _SYS_S_IWUSR);
-    } while (fd < 0 && errno == _SYS_EEXIST && ++tries < TMP_MAX);
+        fd = _Sys_Linux_OpenFile(name, flags, _SYS_LINUX_S_IRUSR | _SYS_LINUX_S_IWUSR);
+    } while (fd < 0 && errno == _SYS_LINUX_EEXIST && ++tries < TMP_MAX);
     if (fd < 0) {
         _File_FreeStream(stream);
         return NULL;
     }
-    _Sys_RemoveFile(name);
+    _Sys_Linux_RemoveFile(name);
     _File_AttachDescriptor(stream, fd, flags);
     return stream;
 }
@@ -100,7 +100,7 @@ char *tmpnam(char *str)
     }
     for (tries = 0; tries < TMP_MAX; tries++) {
         _File_WriteTempName(str);
-        if (_Sys_IsNameUnused(str)) {
+        if (_Sys_Linux_IsNameUnused(str)) {
             return str;
         }
     }
@@ -112,7 +112,7 @@ int fclose(FILE *stream)
 {
     int result = _File_ResetStream(stream);
 
-    if (_Sys_CloseFile(stream->fs_fd) < 0) {
+    if (_Sys_Linux_CloseFile(stream->fs_fd) < 0) {
         result = EOF;
     }
     _File_FreeStream(stream);
@@ -147,7 +147,7 @@ FILE *freopen(const char *restrict filename, const char *restrict mode, FILE *re
     int fd = stream->fs_fd;
 
     if (filename == NULL) {
-        errno = _SYS_EINVAL;
+        errno = _SYS_LINUX_EINVAL;
         return NULL;
     }
     _File_ResetStream(stream);
@@ -156,7 +156,7 @@ FILE *freopen(const char *restrict filename, const char *restrict mode, FILE *re
         _File_FreeStream(stream);
         return NULL;
     }
-    if (_Sys_CopyDescriptor(stream->fs_fd, fd) == fd) {
+    if (_Sys_Linux_CopyDescriptor(stream->fs_fd, fd) == fd) {
         _File_DropDescriptor(stream->fs_fd);
         stream->fs_fd = fd;
     } else {
@@ -469,7 +469,7 @@ int fgetpos(FILE *restrict stream, fpos_t *restrict pos)
 int fseek(FILE *stream, long offset, int whence)
 {
     if (whence != SEEK_SET && whence != SEEK_CUR && whence != SEEK_END) {
-        errno = _SYS_EINVAL;
+        errno = _SYS_LINUX_EINVAL;
         return EOF;
     }
     if (_File_SeekStream(stream, offset, whence) != 0) {
@@ -493,7 +493,7 @@ long ftell(FILE *stream)
     if (_File_FlushBuffer(stream) != 0) {
         return EOF;
     }
-    pos = _Sys_SeekFile(stream->fs_fd, 0, _SYS_SEEK_CUR);
+    pos = _Sys_Linux_SeekFile(stream->fs_fd, 0, _SYS_LINUX_SEEK_CUR);
     if (pos < 0) {
         return EOF;
     }

@@ -38,10 +38,10 @@ void (*signal(int sig, void (*func)(int)))(int)
     void (*old)(int);
 
     if (func == SIG_ERR) {
-        errno = _SYS_EINVAL;
+        errno = _SYS_LINUX_EINVAL;
         return SIG_ERR;
     }
-    if (_Sys_SetSignal(sig, func, &old) < 0) {
+    if (_Sys_Linux_SetSignal(sig, func, &old) < 0) {
         return SIG_ERR;
     }
     return old;
@@ -50,5 +50,5 @@ void (*signal(int sig, void (*func)(int)))(int)
 // Send the signal sig to the program.
 int raise(int sig)
 {
-    return _Sys_RaiseSignal(sig) < 0 ? -1 : 0;
+    return _Sys_Linux_RaiseSignal(sig) < 0 ? -1 : 0;
 }

@@ -417,14 +417,14 @@ _Bool _Prec_Math_PowerExact(_Exact_Value *value, long double x, long double y)
 // Raise the domain error of x and y.
 long double _Prec_Math_RaiseDomain(long double x, long double y)
 {
-    _Err_Errno = _SYS_EDOM;
+    _Err_Errno = _SYS_LINUX_EDOM;
     return (x * y) / (x * y);
 }
 
 // Raise the pole error, an exact -inf from a finite argument.
 long double _Prec_Math_RaisePole(void)
 {
-    _Err_Errno = _SYS_ERANGE;
+    _Err_Errno = _SYS_LINUX_ERANGE;
     _Fpu_x86_64_RaiseFlags(_FPU_X86_64_DIVBYZERO);
     return -_EXACT_INFINITY;
 }
@@ -435,7 +435,7 @@ long double _Prec_Math_RoundRange(const _Exact_Value *value, _Exact_Type type)
     long double result = _Exact_RoundValue(value, type);
 
     if (_Long_Double_x86_64_IsInf(result) || result == 0) {
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
     }
     return result;
 }

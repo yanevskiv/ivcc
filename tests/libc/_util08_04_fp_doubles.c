@@ -41,13 +41,13 @@ static void Test_FpDoubles(void)
     _TEST_UINT(end, 3);
     _TEST_INT(_Err_Errno, 0);
     _TEST_TRUE(converts("1e400", 1.0 / 0.0, 5));
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _Err_Errno = 0;
     _TEST_TRUE(converts("-1e-400", -0.0, 7));
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _Err_Errno = 0;
     _TEST_TRUE(converts("4.9406564584124654e-324", 0x1p-1074, 23));
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
 }
 
 int main(void)

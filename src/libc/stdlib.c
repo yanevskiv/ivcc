@@ -375,9 +375,9 @@ void abort(void)
 {
     raise(SIGABRT);
     signal(SIGABRT, SIG_DFL);
-    _Sys_UnblockSignal(SIGABRT);
+    _Sys_Linux_UnblockSignal(SIGABRT);
     raise(SIGABRT);
-    _Sys_ExitProgram(_STDLIB_ABORT_STATUS);
+    _Sys_Linux_ExitProgram(_STDLIB_ABORT_STATUS);
 }
 
 // Register func for exit to call, or return -1 out of memory, as glibc's.
@@ -416,7 +416,7 @@ void exit(int status)
 // End the program with status, calling nothing atexit registered.
 void _Exit(int status)
 {
-    _Sys_ExitProgram(status);
+    _Sys_Linux_ExitProgram(status);
 }
 
 // Return the value of the environment variable name, or NULL, as glibc's.
@@ -442,7 +442,7 @@ int system(const char *string)
     if (string == NULL) {
         return 0;
     }
-    errno = _SYS_ENOSYS;
+    errno = _SYS_LINUX_ENOSYS;
     return -1;
 }
 

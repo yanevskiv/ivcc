@@ -48,20 +48,20 @@ static void Test_PrecMathExp2(void)
 
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_exp2(1024.0), _EXACT_INFINITY);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_OVERFLOW | _FPU_X86_64_INEXACT);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_exp2(-1080.0), 0.0);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_exp2f(128.0f), _EXACT_INFINITY);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_exp2l(-16446.0L), 0.0L);
-    _TEST_INT(_Err_Errno, _SYS_ERANGE);
+    _TEST_INT(_Err_Errno, _SYS_LINUX_ERANGE);
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
 }

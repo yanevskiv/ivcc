@@ -366,14 +366,14 @@ void _Fp_RoundReal(const _Fp_Unrounded *value, const _Fp_Format *fmt, _Fp_Real *
     if (part.fu_exp > fmt->ff_max && (round == _FPU_X86_64_TONEAREST || round == _FPU_X86_64_UPWARD)) {
         real->fr_exp = (unsigned int) (2 * fmt->ff_max + 1);
         real->fr_mant = fmt->ff_explicit ? 1ULL << (fmt->ff_mant - 1) : 0;
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
         _Fpu_x86_64_RaiseFlags(_FPU_X86_64_OVERFLOW | _FPU_X86_64_INEXACT);
         return;
     }
     if (part.fu_exp > fmt->ff_max) {
         real->fr_exp = (unsigned int) (2 * fmt->ff_max);
         real->fr_mant = fmt->ff_explicit ? ones : ones >> 1;
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
         _Fpu_x86_64_RaiseFlags(_FPU_X86_64_OVERFLOW | _FPU_X86_64_INEXACT);
         return;
     }
@@ -384,7 +384,7 @@ void _Fp_RoundReal(const _Fp_Unrounded *value, const _Fp_Format *fmt, _Fp_Real *
     }
     real->fr_mant = fmt->ff_explicit ? part.fu_mant : part.fu_mant & ones >> 1;
     if (tiny && part.fu_rest != _FP_REST_NONE) {
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
         _Fpu_x86_64_RaiseFlags(_FPU_X86_64_UNDERFLOW);
     }
     if (part.fu_rest != _FP_REST_NONE) {

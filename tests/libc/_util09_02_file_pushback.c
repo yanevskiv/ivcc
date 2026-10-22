@@ -23,7 +23,7 @@ static void Test_FilePushback(void)
     _TEST_UINT(stream->fs_backs, _FILE_BACKS);
     _TEST_INT(_File_UngetChar(stream, '5'), _FILE_END);
     _TEST_INT(_File_GetChar(stream), '4');
-    _TEST_INT(_File_SeekStream(stream, 1, _SYS_SEEK_SET), 0);
+    _TEST_INT(_File_SeekStream(stream, 1, _SYS_LINUX_SEEK_SET), 0);
     _TEST_UINT(stream->fs_backs, 0);
     _TEST_INT(_File_GetChar(stream), 'b');
     _TEST_INT(_File_GetChar(stream), _FILE_END);

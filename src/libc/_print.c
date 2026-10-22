@@ -88,7 +88,7 @@ void _Print_PutText(_Print_Sink *sink, const char *data, unsigned long len)
         return;
     }
     if (len > (unsigned long) _PRINT_INT_MAX - sink->ps_count) {
-        _Err_Errno = _SYS_EOVERFLOW;
+        _Err_Errno = _SYS_LINUX_EOVERFLOW;
         sink->ps_status = _PRINT_STATUS_FAILED;
         return;
     }
@@ -116,7 +116,7 @@ void _Print_PutWide(_Print_Sink *sink, const _Print_WcharType *data, unsigned lo
         return;
     }
     if (len > (unsigned long) _PRINT_INT_MAX - sink->ps_count) {
-        _Err_Errno = _SYS_EOVERFLOW;
+        _Err_Errno = _SYS_LINUX_EOVERFLOW;
         sink->ps_status = _PRINT_STATUS_FAILED;
         return;
     }
@@ -750,7 +750,7 @@ void _Print_WriteDecodedText(_Print_Sink *sink, int flags, int width, const char
     for (at = 0; count < max && str[at] != '\0'; at += (unsigned long) n, count++) {
         n = _Utf8_DecodeChar(str + at, _UTF8_MAX, &wc);
         if (n < 0) {
-            _Err_Errno = _SYS_EILSEQ;
+            _Err_Errno = _SYS_LINUX_EILSEQ;
             sink->ps_status = _PRINT_STATUS_FAILED;
             return;
         }
@@ -877,7 +877,7 @@ void _Print_WriteChar(_Print_Sink *sink, const _Print_Directive *dir)
     } else if (_Utf8_DecodeChar(&ch, 1, &wc) == _UTF8_ASCII_LEN) {
         _Print_WriteWideText(sink, dir->pd_flags, dir->pd_width, &wc, 1);
     } else {
-        _Err_Errno = _SYS_EILSEQ;
+        _Err_Errno = _SYS_LINUX_EILSEQ;
         sink->ps_status = _PRINT_STATUS_FAILED;
     }
 }
@@ -1055,7 +1055,7 @@ void _Print_WriteWideString(_Print_Sink *sink, const _Print_Directive *dir)
     for (; len < max && wstr[count] != L'\0'; count++) {
         n = _Utf8_EncodeChar(wstr[count], bytes);
         if (n < 0) {
-            _Err_Errno = _SYS_EILSEQ;
+            _Err_Errno = _SYS_LINUX_EILSEQ;
             sink->ps_status = _PRINT_STATUS_FAILED;
             return;
         }

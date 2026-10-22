@@ -26,20 +26,11 @@
 #ifndef _ERRNO_H
 #define _ERRNO_H
 
-#if defined(__linux__)
-    #include <os/linux/_errno.h>
-    #define _ERRNO_EDOM   _ERRNO_LINUX_EDOM
-    #define _ERRNO_EILSEQ _ERRNO_LINUX_EILSEQ
-    #define _ERRNO_ERANGE _ERRNO_LINUX_ERANGE
-#else
-    #error "errno.h: no error numbers for this OS"
-#endif
-
 // Errors
 // [C99:7.5]: EDOM, EILSEQ, ERANGE and errno
-#define EDOM   _ERRNO_EDOM
-#define EILSEQ _ERRNO_EILSEQ
-#define ERANGE _ERRNO_ERANGE
+#define EDOM   33
+#define EILSEQ 84
+#define ERANGE 34
 #define errno  _Err_Errno
 
 // The error number of the last failed call, which _err.c defines.

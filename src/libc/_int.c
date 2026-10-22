@@ -76,7 +76,7 @@ unsigned long _Int_ToNumber(const void *str, _Int_Text text, unsigned long *end,
     *sign = _INT_SIGN_PLUS;
     *range = _INT_RANGE_INSIDE;
     if (base < 0 || base == 1 || base > _INT_BASE_MAX) {
-        _Err_Errno = _SYS_EINVAL;
+        _Err_Errno = _SYS_LINUX_EINVAL;
         return 0;
     }
     while (_Int_IsSpace(_Int_ReadChar(str, text, i))) {
@@ -117,7 +117,7 @@ long _Int_MakeSigned(unsigned long value, _Int_Sign sign, _Int_Range range)
     unsigned long limit = sign == _INT_SIGN_MINUS ? (unsigned long) _INT_SIGNED_MAX + 1 : (unsigned long) _INT_SIGNED_MAX;
 
     if (range == _INT_RANGE_OUTSIDE || value > limit) {
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
         return sign == _INT_SIGN_MINUS ? _INT_SIGNED_MIN : _INT_SIGNED_MAX;
     }
     if (sign == _INT_SIGN_MINUS && value == limit) {
@@ -130,7 +130,7 @@ long _Int_MakeSigned(unsigned long value, _Int_Sign sign, _Int_Range range)
 unsigned long _Int_MakeUnsigned(unsigned long value, _Int_Sign sign, _Int_Range range)
 {
     if (range == _INT_RANGE_OUTSIDE) {
-        _Err_Errno = _SYS_ERANGE;
+        _Err_Errno = _SYS_LINUX_ERANGE;
         return _INT_VALUE_MAX;
     }
     return sign == _INT_SIGN_MINUS ? 0U - value : value;
