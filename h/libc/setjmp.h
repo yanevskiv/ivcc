@@ -28,6 +28,7 @@
 
 #if defined(__x86_64__)
     #include <arch/x86_64/_setjmp.h>
+    #define _SETJMP_SAVED _SETJMP_X86_64_SAVED
 #else
     #error "setjmp.h: no nonlocal jumps for this architecture"
 #endif

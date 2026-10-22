@@ -27,8 +27,8 @@
 #define _OS_LINUX_ERRNO_H
 
 // Linux's numbers for C99's three errors.
-#define _ERRNO_EDOM   33
-#define _ERRNO_EILSEQ 84
-#define _ERRNO_ERANGE 34
+#define _ERRNO_LINUX_EDOM   33
+#define _ERRNO_LINUX_EILSEQ 84
+#define _ERRNO_LINUX_ERANGE 34
 
 #endif // _OS_LINUX_ERRNO_H

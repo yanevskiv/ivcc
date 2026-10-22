@@ -30,7 +30,7 @@
 #define _SYS_X86_64_LINUX_STAT_UNUSED 3
 
 // Linux's sigaction flag on x86-64 that says the restorer is given.
-#define _SYS_SA_RESTORER 0x04000000
+#define _SYS_X86_64_LINUX_SA_RESTORER 0x04000000
 
 // Linux's struct stat on x86-64, the kernel's and not glibc's.
 typedef struct _Sys_x86_64_Linux_Stat _Sys_x86_64_Linux_Stat;
@@ -56,12 +56,15 @@ struct _Sys_x86_64_Linux_Stat {
 };
 
 // Linux's struct sigaction on x86-64, which has a restorer.
-typedef struct _Sys_Sigaction _Sys_Sigaction;
-struct _Sys_Sigaction {
+typedef struct _Sys_x86_64_Linux_Sigaction _Sys_x86_64_Linux_Sigaction;
+struct _Sys_x86_64_Linux_Sigaction {
     void (*sa_handler)(int);   // the handler, or to ignore or the default
     unsigned long sa_flags;    // the flags that change the handling
     void (*sa_restorer)(void); // the function a handler returns through
     unsigned long sa_mask;     // the signals blocked while the handler runs
 };
+
+// Signal handlers
+void _Sys_x86_64_Linux_InvokeRtSigreturn(void);
 
 #endif // _ARCH_X86_64_LINUX_SYS_H

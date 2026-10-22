@@ -27,11 +27,11 @@
 #define _OS_LINUX_SIGNAL_H
 
 // Linux's numbers for C99's six signals.
-#define _SIGNAL_SIGABRT 6
-#define _SIGNAL_SIGFPE  8
-#define _SIGNAL_SIGILL  4
-#define _SIGNAL_SIGINT  2
-#define _SIGNAL_SIGSEGV 11
-#define _SIGNAL_SIGTERM 15
+#define _SIGNAL_LINUX_SIGABRT 6
+#define _SIGNAL_LINUX_SIGFPE  8
+#define _SIGNAL_LINUX_SIGILL  4
+#define _SIGNAL_LINUX_SIGINT  2
+#define _SIGNAL_LINUX_SIGSEGV 11
+#define _SIGNAL_LINUX_SIGTERM 15
 
 #endif // _OS_LINUX_SIGNAL_H

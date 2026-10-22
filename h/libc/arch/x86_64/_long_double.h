@@ -27,21 +27,21 @@
 #define _ARCH_X86_64_LONG_DOUBLE_H
 
 // A long double's significand bits and its biased exponent's bits.
-#define _LONG_DOUBLE_MANT     64
-#define _LONG_DOUBLE_EXP_BITS 15
+#define _LONG_DOUBLE_X86_64_MANT     64
+#define _LONG_DOUBLE_X86_64_EXP_BITS 15
 
 // A long double's least and greatest exponents, one below C's.
-#define _LONG_DOUBLE_EXP_MIN (-16382)
-#define _LONG_DOUBLE_EXP_MAX 16383
+#define _LONG_DOUBLE_X86_64_EXP_MIN (-16382)
+#define _LONG_DOUBLE_X86_64_EXP_MAX 16383
 
 // A long double's least normal, greatest, least subnormal and epsilon.
-#define _LONG_DOUBLE_MIN      0x1p-16382L
-#define _LONG_DOUBLE_MAX      0xf.fffffffffffffffp+16380L
-#define _LONG_DOUBLE_TRUE_MIN 0x1p-16445L
-#define _LONG_DOUBLE_EPSILON  0x1p-63L
+#define _LONG_DOUBLE_X86_64_MIN      0x1p-16382L
+#define _LONG_DOUBLE_X86_64_MAX      0xf.fffffffffffffffp+16380L
+#define _LONG_DOUBLE_X86_64_TRUE_MIN 0x1p-16445L
+#define _LONG_DOUBLE_X86_64_EPSILON  0x1p-63L
 
 // The least magnitude of a long double that is always an integer.
-#define _LONG_DOUBLE_INTEGRAL 0x1p63L
+#define _LONG_DOUBLE_X86_64_INTEGRAL 0x1p63L
 
 // The x87's sign and exponent word.
 unsigned int _Long_Double_x86_64_ReadTop(long double x);

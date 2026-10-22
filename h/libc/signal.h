@@ -28,6 +28,12 @@
 
 #if defined(__linux__)
     #include <os/linux/_signal.h>
+    #define _SIGNAL_SIGABRT _SIGNAL_LINUX_SIGABRT
+    #define _SIGNAL_SIGFPE  _SIGNAL_LINUX_SIGFPE
+    #define _SIGNAL_SIGILL  _SIGNAL_LINUX_SIGILL
+    #define _SIGNAL_SIGINT  _SIGNAL_LINUX_SIGINT
+    #define _SIGNAL_SIGSEGV _SIGNAL_LINUX_SIGSEGV
+    #define _SIGNAL_SIGTERM _SIGNAL_LINUX_SIGTERM
 #else
     #error "signal.h: no signals for this OS"
 #endif

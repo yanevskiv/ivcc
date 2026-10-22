@@ -27,6 +27,6 @@
 #define _ARCH_X86_64_SETJMP_H
 
 // The longs of a jmp_buf: six saved registers, the stack, the return address.
-#define _SETJMP_SAVED 8
+#define _SETJMP_X86_64_SAVED 8
 
 #endif // _ARCH_X86_64_SETJMP_H

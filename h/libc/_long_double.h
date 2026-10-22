@@ -28,6 +28,28 @@
 
 #if defined(__x86_64__)
     #include <arch/x86_64/_long_double.h>
+    #define _LONG_DOUBLE_MANT            _LONG_DOUBLE_X86_64_MANT
+    #define _LONG_DOUBLE_EXP_BITS        _LONG_DOUBLE_X86_64_EXP_BITS
+    #define _LONG_DOUBLE_EXP_MIN         _LONG_DOUBLE_X86_64_EXP_MIN
+    #define _LONG_DOUBLE_EXP_MAX         _LONG_DOUBLE_X86_64_EXP_MAX
+    #define _LONG_DOUBLE_MIN             _LONG_DOUBLE_X86_64_MIN
+    #define _LONG_DOUBLE_MAX             _LONG_DOUBLE_X86_64_MAX
+    #define _LONG_DOUBLE_TRUE_MIN        _LONG_DOUBLE_X86_64_TRUE_MIN
+    #define _LONG_DOUBLE_EPSILON         _LONG_DOUBLE_X86_64_EPSILON
+    #define _LONG_DOUBLE_INTEGRAL        _LONG_DOUBLE_X86_64_INTEGRAL
+    #define _Long_Double_ReadSignificand _Long_Double_x86_64_ReadSignificand
+    #define _Long_Double_ReadExponent    _Long_Double_x86_64_ReadExponent
+    #define _Long_Double_IsNegative      _Long_Double_x86_64_IsNegative
+    #define _Long_Double_MakeValue       _Long_Double_x86_64_MakeValue
+    #define _Long_Double_ReadClass       _Long_Double_x86_64_ReadClass
+    #define _Long_Double_IsNan           _Long_Double_x86_64_IsNan
+    #define _Long_Double_IsInf           _Long_Double_x86_64_IsInf
+    #define _Long_Double_ClearSign       _Long_Double_x86_64_ClearSign
+    #define _Long_Double_CopySign        _Long_Double_x86_64_CopySign
+    #define _Long_Double_SplitValue      _Long_Double_x86_64_SplitValue
+    #define _Long_Double_JoinValue       _Long_Double_x86_64_JoinValue
+    #define _Long_Double_StepValue       _Long_Double_x86_64_StepValue
+    #define _Long_Double_MakeNan         _Long_Double_x86_64_MakeNan
 #else
     #error "_long_double.h: no long double format for this architecture"
 #endif

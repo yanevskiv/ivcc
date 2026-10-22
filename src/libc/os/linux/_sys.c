@@ -30,127 +30,127 @@
 #include <_err.h>
 
 // The set rt_sigprocmask gives back when the old one is not wanted.
-#define _SYS_NO_SET ((unsigned long *) 0)
+#define _SYS_LINUX_NO_SET ((unsigned long *) 0)
 
 // The bytes of Linux's struct termios.
-#define _SYS_TERMIOS_SIZE 36
+#define _SYS_LINUX_TERMIOS_SIZE 36
 
 // Check that struct termios is laid out as the kernel's.
-_Static_assert(sizeof(_Sys_Termios) == _SYS_TERMIOS_SIZE, "_Sys_Termios should be the kernel's size");
+_Static_assert(sizeof(_Sys_Linux_Termios) == _SYS_LINUX_TERMIOS_SIZE, "_Sys_Linux_Termios should be the kernel's size");
 
 // Read up to len bytes from the descriptor fd into buf, or -1 with errno.
-long _Sys_ReadFile(int fd, void *buf, unsigned long len)
+long _Sys_Linux_ReadFile(int fd, void *buf, unsigned long len)
 {
-    return _Sys_CheckResult(_Sys_InvokeRead(fd, buf, len));
+    return _Sys_Linux_CheckResult(_Sys_Linux_InvokeRead(fd, buf, len));
 }
 
 // Write len bytes of buf to the descriptor fd, or return -1 with errno.
-long _Sys_WriteFile(int fd, const void *buf, unsigned long len)
+long _Sys_Linux_WriteFile(int fd, const void *buf, unsigned long len)
 {
-    return _Sys_CheckResult(_Sys_InvokeWrite(fd, buf, len));
+    return _Sys_Linux_CheckResult(_Sys_Linux_InvokeWrite(fd, buf, len));
 }
 
 // Open the file at path as flags say, mode its permissions, or return -1.
-int _Sys_OpenFile(const char *path, int flags, int mode)
+int _Sys_Linux_OpenFile(const char *path, int flags, int mode)
 {
-    return (int) _Sys_CheckResult(_Sys_InvokeOpen(path, flags, mode));
+    return (int) _Sys_Linux_CheckResult(_Sys_Linux_InvokeOpen(path, flags, mode));
 }
 
 // Close the descriptor fd, or return -1 with errno.
-int _Sys_CloseFile(int fd)
+int _Sys_Linux_CloseFile(int fd)
 {
-    return (int) _Sys_CheckResult(_Sys_InvokeClose(fd));
+    return (int) _Sys_Linux_CheckResult(_Sys_Linux_InvokeClose(fd));
 }
 
 // Move the descriptor fd's offset by offset from whence, and return it.
-long _Sys_SeekFile(int fd, long offset, int whence)
+long _Sys_Linux_SeekFile(int fd, long offset, int whence)
 {
-    return _Sys_CheckResult(_Sys_InvokeLseek(fd, offset, whence));
+    return _Sys_Linux_CheckResult(_Sys_Linux_InvokeLseek(fd, offset, whence));
 }
 
 // Copy the descriptor fd to as, closing what as was, or return -1.
-int _Sys_CopyDescriptor(int fd, int as)
+int _Sys_Linux_CopyDescriptor(int fd, int as)
 {
-    return (int) _Sys_CheckResult(_Sys_InvokeDup2(fd, as));
+    return (int) _Sys_Linux_CheckResult(_Sys_Linux_InvokeDup2(fd, as));
 }
 
 // Return whether the descriptor fd is a terminal, errno left as it was.
-_Bool _Sys_IsTerminal(int fd)
+_Bool _Sys_Linux_IsTerminal(int fd)
 {
-    _Sys_Termios term;
+    _Sys_Linux_Termios term;
 
-    return _Sys_InvokeIoctl(fd, _SYS_TCGETS, &term) == 0;
+    return _Sys_Linux_InvokeIoctl(fd, _SYS_LINUX_TCGETS, &term) == 0;
 }
 
 // Remove the file at path, or the empty directory there, or return -1.
-int _Sys_RemoveFile(const char *path)
+int _Sys_Linux_RemoveFile(const char *path)
 {
-    long status = _Sys_InvokeUnlink(path);
+    long status = _Sys_Linux_InvokeUnlink(path);
 
-    if (status == -_SYS_EISDIR) {
-        status = _Sys_InvokeRmdir(path);
+    if (status == -_SYS_LINUX_EISDIR) {
+        status = _Sys_Linux_InvokeRmdir(path);
     }
-    return (int) _Sys_CheckResult(status);
+    return (int) _Sys_Linux_CheckResult(status);
 }
 
 // Give the file at from the name to, replacing its holder, or return -1.
-int _Sys_RenameFile(const char *from, const char *to)
+int _Sys_Linux_RenameFile(const char *from, const char *to)
 {
-    return (int) _Sys_CheckResult(_Sys_InvokeRename(from, to));
+    return (int) _Sys_Linux_CheckResult(_Sys_Linux_InvokeRename(from, to));
 }
 
 // Return whether no file has the name path, errno left as it was.
-_Bool _Sys_IsNameUnused(const char *path)
+_Bool _Sys_Linux_IsNameUnused(const char *path)
 {
     _Sys_x86_64_Linux_Stat info;
 
-    return _Sys_InvokeLstat(path, &info) == -_SYS_ENOENT;
+    return _Sys_Linux_InvokeLstat(path, &info) == -_SYS_LINUX_ENOENT;
 }
 
 // Move the program break to addr, and return where it stands.
-void *_Sys_MoveBreak(void *addr)
+void *_Sys_Linux_MoveBreak(void *addr)
 {
-    return _Sys_InvokeBrk(addr);
+    return _Sys_Linux_InvokeBrk(addr);
 }
 
 // Install func as the handler of sig, the old one in old, or return -1.
-int _Sys_SetSignal(int sig, void (*func)(int), void (**old)(int))
+int _Sys_Linux_SetSignal(int sig, void (*func)(int), void (**old)(int))
 {
-    if (sig < _SYS_SIGNAL_FIRST || sig > _SYS_SIGNAL_LAST) {
-        _Err_Errno = _SYS_EINVAL;
+    if (sig < _SYS_LINUX_SIGNAL_FIRST || sig > _SYS_LINUX_SIGNAL_LAST) {
+        _Err_Errno = _SYS_LINUX_EINVAL;
         return -1;
     }
-    return (int) _Sys_CheckResult(_Sys_InvokeRtSigaction(sig, func, _SYS_SA_RESTART, 1UL << (sig - _SYS_SIGNAL_FIRST), old));
+    return (int) _Sys_Linux_CheckResult(_Sys_Linux_InvokeRtSigaction(sig, func, _SYS_LINUX_SA_RESTART, 1UL << (sig - _SYS_LINUX_SIGNAL_FIRST), old));
 }
 
 // Unblock the signal sig, or return -1 with errno.
-int _Sys_UnblockSignal(int sig)
+int _Sys_Linux_UnblockSignal(int sig)
 {
-    unsigned long set = 1UL << (sig - _SYS_SIGNAL_FIRST);
+    unsigned long set = 1UL << (sig - _SYS_LINUX_SIGNAL_FIRST);
 
-    return (int) _Sys_CheckResult(_Sys_InvokeRtSigprocmask(_SYS_SIG_UNBLOCK, &set, _SYS_NO_SET));
+    return (int) _Sys_Linux_CheckResult(_Sys_Linux_InvokeRtSigprocmask(_SYS_LINUX_SIG_UNBLOCK, &set, _SYS_LINUX_NO_SET));
 }
 
 // Send the signal sig to the program, or return -1 with errno.
-int _Sys_RaiseSignal(int sig)
+int _Sys_Linux_RaiseSignal(int sig)
 {
-    return (int) _Sys_CheckResult(_Sys_InvokeKill(_Sys_InvokeGetpid(), sig));
+    return (int) _Sys_Linux_CheckResult(_Sys_Linux_InvokeKill(_Sys_Linux_InvokeGetpid(), sig));
 }
 
 // Read the clock clock into spec, or return -1 with errno.
-int _Sys_ReadClock(int clock, _Sys_Timespec *spec)
+int _Sys_Linux_ReadClock(int clock, _Sys_Linux_Timespec *spec)
 {
-    return (int) _Sys_CheckResult(_Sys_InvokeClockGettime(clock, spec));
+    return (int) _Sys_Linux_CheckResult(_Sys_Linux_InvokeClockGettime(clock, spec));
 }
 
 // End the program, every thread of it, with status.
-void _Sys_ExitProgram(int status)
+void _Sys_Linux_ExitProgram(int status)
 {
-    _Sys_InvokeExitGroup(status);
+    _Sys_Linux_InvokeExitGroup(status);
 }
 
 // Return ret, a syscall's result, or -1 with errno for one that is -errno.
-long _Sys_CheckResult(long ret)
+long _Sys_Linux_CheckResult(long ret)
 {
     if (ret < 0) {
         _Err_Errno = (int) -ret;

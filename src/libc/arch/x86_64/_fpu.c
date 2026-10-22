@@ -30,7 +30,7 @@
 #define _FPU_X86_64_DEFAULT_CONTROL 0x037F
 #define _FPU_X86_64_DEFAULT_MXCSR   0x1F80
 
-// The operands _Fpu_RaiseFlags divides, an exception for each quotient.
+// The operands _Fpu_x86_64_RaiseFlags divides, an exception for each quotient.
 #define _FPU_X86_64_ZERO      0.0f
 #define _FPU_X86_64_ONE       1.0f
 #define _FPU_X86_64_THREE     3.0f
@@ -40,8 +40,8 @@
 // Store both units' environments in env, the x87's masks left as they were.
 __asm__(
     "  .text\n"
-    "  .globl _Fpu_StoreEnv\n"
-    "_Fpu_StoreEnv:\n"
+    "  .globl _Fpu_x86_64_StoreEnv\n"
+    "_Fpu_x86_64_StoreEnv:\n"
     "  fnstenv (%rdi)\n"
     "  fldenv (%rdi)\n"
     "  stmxcsr 28(%rdi)\n"
@@ -68,88 +68,88 @@ __asm__(
 );
 
 // Clear the flags of flags in both units.
-void _Fpu_ClearFlags(int flags)
+void _Fpu_x86_64_ClearFlags(int flags)
 {
-    _Fpu_Env env;
+    _Fpu_x86_64_Env env;
 
-    _Fpu_StoreEnv(&env);
-    env.fe_status &= (unsigned short) ~(flags & _FPU_EXCEPTS);
-    env.fe_mxcsr &= (unsigned int) ~(flags & _FPU_EXCEPTS);
+    _Fpu_x86_64_StoreEnv(&env);
+    env.fe_status &= (unsigned short) ~(flags & _FPU_X86_64_EXCEPTS);
+    env.fe_mxcsr &= (unsigned int) ~(flags & _FPU_X86_64_EXCEPTS);
     _Fpu_x86_64_LoadEnv(&env);
 }
 
 // Raise each exception of flags by a division that raises it.
-void _Fpu_RaiseFlags(int flags)
+void _Fpu_x86_64_RaiseFlags(int flags)
 {
-    if (flags & _FPU_INVALID) {
+    if (flags & _FPU_X86_64_INVALID) {
         _Fpu_x86_64_DivideSingle(_FPU_X86_64_ZERO, _FPU_X86_64_ZERO);
     }
-    if (flags & _FPU_DIVBYZERO) {
+    if (flags & _FPU_X86_64_DIVBYZERO) {
         _Fpu_x86_64_DivideSingle(_FPU_X86_64_ONE, _FPU_X86_64_ZERO);
     }
-    if (flags & _FPU_OVERFLOW) {
+    if (flags & _FPU_X86_64_OVERFLOW) {
         _Fpu_x86_64_DivideSingle(_FPU_X86_64_FLOAT_MAX, _FPU_X86_64_FLOAT_MIN);
     }
-    if (flags & _FPU_UNDERFLOW) {
+    if (flags & _FPU_X86_64_UNDERFLOW) {
         _Fpu_x86_64_DivideSingle(_FPU_X86_64_FLOAT_MIN, _FPU_X86_64_FLOAT_MAX);
     }
-    if (flags & _FPU_INEXACT) {
+    if (flags & _FPU_X86_64_INEXACT) {
         _Fpu_x86_64_DivideSingle(_FPU_X86_64_ONE, _FPU_X86_64_THREE);
     }
 }
 
 // Write the flags of mask in both units as flags holds them.
-void _Fpu_WriteFlags(int flags, int mask)
+void _Fpu_x86_64_WriteFlags(int flags, int mask)
 {
-    _Fpu_Env env;
+    _Fpu_x86_64_Env env;
 
-    mask &= _FPU_EXCEPTS;
-    _Fpu_StoreEnv(&env);
+    mask &= _FPU_X86_64_EXCEPTS;
+    _Fpu_x86_64_StoreEnv(&env);
     env.fe_status = (unsigned short) ((env.fe_status & ~mask) | (flags & mask));
     env.fe_mxcsr = (env.fe_mxcsr & (unsigned int) ~mask) | (unsigned int) (flags & mask);
     _Fpu_x86_64_LoadEnv(&env);
 }
 
 // Return which flags of flags either unit has set.
-int _Fpu_TestFlags(int flags)
+int _Fpu_x86_64_TestFlags(int flags)
 {
-    _Fpu_Env env;
+    _Fpu_x86_64_Env env;
 
-    _Fpu_StoreEnv(&env);
-    return (int) ((env.fe_status | env.fe_mxcsr) & (unsigned int) (flags & _FPU_EXCEPTS));
+    _Fpu_x86_64_StoreEnv(&env);
+    return (int) ((env.fe_status | env.fe_mxcsr) & (unsigned int) (flags & _FPU_X86_64_EXCEPTS));
 }
 
-// Read the rounding direction, the x87's, which _Fpu_WriteRound keeps SSE's.
-int _Fpu_ReadRound(void)
+// Read the rounding direction, the x87's, which SSE's is kept to.
+int _Fpu_x86_64_ReadRound(void)
 {
-    _Fpu_Env env;
+    _Fpu_x86_64_Env env;
 
-    _Fpu_StoreEnv(&env);
-    return env.fe_control & _FPU_ROUND_MASK;
+    _Fpu_x86_64_StoreEnv(&env);
+    return env.fe_control & _FPU_X86_64_ROUND_MASK;
 }
 
 // Write both units' rounding direction, if round names one.
-int _Fpu_WriteRound(int round)
+int _Fpu_x86_64_WriteRound(int round)
 {
-    _Fpu_Env env;
+    _Fpu_x86_64_Env env;
 
-    if (round & ~_FPU_ROUND_MASK) {
-        return _FPU_FAILED;
+    if (round & ~_FPU_X86_64_ROUND_MASK) {
+        return _FPU_X86_64_FAILED;
     }
-    _Fpu_StoreEnv(&env);
-    env.fe_control = (unsigned short) ((env.fe_control & ~_FPU_ROUND_MASK) | round);
-    env.fe_mxcsr &= (unsigned int) ~(_FPU_ROUND_MASK << _FPU_X86_64_SSE_ROUND_SHIFT);
+    _Fpu_x86_64_StoreEnv(&env);
+    env.fe_control = (unsigned short) ((env.fe_control & ~_FPU_X86_64_ROUND_MASK) | round);
+    env.fe_mxcsr &= (unsigned int) ~(_FPU_X86_64_ROUND_MASK << _FPU_X86_64_SSE_ROUND_SHIFT);
     env.fe_mxcsr |= (unsigned int) round << _FPU_X86_64_SSE_ROUND_SHIFT;
     _Fpu_x86_64_LoadEnv(&env);
     return 0;
 }
 
 // Store the environment in env, then clear the flags and mask every exception.
-void _Fpu_HoldEnv(_Fpu_Env *env)
+void _Fpu_x86_64_HoldEnv(_Fpu_x86_64_Env *env)
 {
-    _Fpu_Env held;
+    _Fpu_x86_64_Env held;
 
-    _Fpu_StoreEnv(env);
+    _Fpu_x86_64_StoreEnv(env);
     held = *env;
     held.fe_control |= _FPU_X86_64_FLAGS;
     held.fe_status &= (unsigned short) ~_FPU_X86_64_FLAGS;
@@ -159,13 +159,13 @@ void _Fpu_HoldEnv(_Fpu_Env *env)
 }
 
 // Write both units' controls and flags from env, the x87's stack kept.
-void _Fpu_WriteEnv(const _Fpu_Env *env)
+void _Fpu_x86_64_WriteEnv(const _Fpu_x86_64_Env *env)
 {
-    _Fpu_Env now;
+    _Fpu_x86_64_Env now;
 
-    _Fpu_StoreEnv(&now);
+    _Fpu_x86_64_StoreEnv(&now);
     now.fe_status &= (unsigned short) ~_FPU_X86_64_FLAGS;
-    if (env == _FPU_DEFAULT_ENV) {
+    if (env == _FPU_X86_64_DEFAULT_ENV) {
         now.fe_control = _FPU_X86_64_DEFAULT_CONTROL;
         now.fe_mxcsr = _FPU_X86_64_DEFAULT_MXCSR;
     } else {

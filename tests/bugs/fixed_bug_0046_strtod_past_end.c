@@ -13,11 +13,11 @@
 // A copy of str that ends on the last byte of a new last page of the break.
 static char *at_end(const char *str, unsigned long len)
 {
-    unsigned long base = (unsigned long) _Sys_InvokeBrk(0);
+    unsigned long base = (unsigned long) _Sys_MoveBreak(0);
     unsigned long end = (base + PAGE + PAGE - 1) / PAGE * PAGE;
     char *tail = (char *) end - len - 1;
 
-    if ((unsigned long) _Sys_InvokeBrk((void *) end) != end) {
+    if ((unsigned long) _Sys_MoveBreak((void *) end) != end) {
         return 0;
     }
     for (unsigned long i = 0; i <= len; i++) {

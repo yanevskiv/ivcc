@@ -28,6 +28,8 @@
 
 #if defined(__linux__)
     #include <os/linux/_err.h>
+    #define _ERR_ERRNO_COUNT _ERR_LINUX_ERRNO_COUNT
+    #define _Err_ErrnoTexts  _Err_Linux_ErrnoTexts
 #else
     #error "_err.h: no error texts for this OS"
 #endif

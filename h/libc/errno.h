@@ -28,6 +28,9 @@
 
 #if defined(__linux__)
     #include <os/linux/_errno.h>
+    #define _ERRNO_EDOM   _ERRNO_LINUX_EDOM
+    #define _ERRNO_EILSEQ _ERRNO_LINUX_EILSEQ
+    #define _ERRNO_ERANGE _ERRNO_LINUX_ERANGE
 #else
     #error "errno.h: no error numbers for this OS"
 #endif
