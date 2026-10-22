@@ -33,7 +33,7 @@
 #include <_sys.h>
 
 // A long double's format and its fields.
-#include <_ldouble.h>
+#include <_long_double.h>
 
 // The status so far.
 int _Test_Result = _TEST_PASSED;
@@ -99,14 +99,14 @@ void _Test_ShowHex(unsigned long long value, unsigned int digits)
 // Show a floating value as _TEST_FLOAT reports it, its fields as hex.
 void _Test_ShowFloat(long double value)
 {
-    unsigned long long top = _Ldouble_ReadExponent(value);
+    unsigned long long top = _Long_Double_ReadExponent(value);
 
-    if (_Ldouble_IsNegative(value)) {
-        top |= 1ULL << _LDOUBLE_EXP_BITS;
+    if (_Long_Double_IsNegative(value)) {
+        top |= 1ULL << _LONG_DOUBLE_EXP_BITS;
     }
     _Test_Write(_ERR_TEST_HEX);
-    _Test_ShowHex(top, (_LDOUBLE_EXP_BITS + _TEST_HEX_BITS) / _TEST_HEX_BITS);
-    _Test_ShowHex(_Ldouble_ReadSignificand(value), (_LDOUBLE_MANT + _TEST_HEX_BITS - 1) / _TEST_HEX_BITS);
+    _Test_ShowHex(top, (_LONG_DOUBLE_EXP_BITS + _TEST_HEX_BITS) / _TEST_HEX_BITS);
+    _Test_ShowHex(_Long_Double_ReadSignificand(value), (_LONG_DOUBLE_MANT + _TEST_HEX_BITS - 1) / _TEST_HEX_BITS);
 }
 
 // Show a string as _TEST_STR reports it, a string literal or none.
@@ -199,7 +199,7 @@ _Bool _Test_Uint(unsigned long got, unsigned long expected, const char *expr, co
 // Check that a floating value has the bytes expected, or neither is a number.
 _Bool _Test_Float(long double got, long double expected, const char *expr, const char *file, unsigned int line, const char *func)
 {
-    _Bool same = _Ldouble_IsNegative(got) == _Ldouble_IsNegative(expected) && _Ldouble_ReadExponent(got) == _Ldouble_ReadExponent(expected) && _Ldouble_ReadSignificand(got) == _Ldouble_ReadSignificand(expected);
+    _Bool same = _Long_Double_IsNegative(got) == _Long_Double_IsNegative(expected) && _Long_Double_ReadExponent(got) == _Long_Double_ReadExponent(expected) && _Long_Double_ReadSignificand(got) == _Long_Double_ReadSignificand(expected);
 
     if (got != got && expected != expected) {
         same = 1;

@@ -43,7 +43,7 @@
 #include <_fpu.h>
 
 // A long double's format and its fields.
-#include <_ldouble.h>
+#include <_long_double.h>
 
 // The format of float, its exponents one below C's.
 const _Fp_Format _Fp_FloatFormat = {
@@ -63,9 +63,9 @@ const _Fp_Format _Fp_DoubleFormat = {
 
 // The format of long double, its exponents one below C's, its lead bit given.
 const _Fp_Format _Fp_LongDoubleFormat = {
-    .ff_mant     = _LDOUBLE_MANT,
-    .ff_min      = _LDOUBLE_EXP_MIN,
-    .ff_max      = _LDOUBLE_EXP_MAX,
+    .ff_mant     = _LONG_DOUBLE_MANT,
+    .ff_min      = _LONG_DOUBLE_EXP_MIN,
+    .ff_max      = _LONG_DOUBLE_EXP_MAX,
     .ff_explicit = 1
 };
 
@@ -570,5 +570,5 @@ long double _Fp_ToLongDouble(const void *str, _Fp_Text text, unsigned long *end)
     _Fp_Real real;
 
     *end = _Fp_ToReal(str, text, &_Fp_LongDoubleFormat, &real);
-    return _Ldouble_MakeValue(real.fr_negative, real.fr_exp, real.fr_mant);
+    return _Long_Double_MakeValue(real.fr_negative, real.fr_exp, real.fr_mant);
 }

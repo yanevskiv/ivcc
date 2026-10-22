@@ -37,7 +37,7 @@ static void Test_PrecMathAtan(void)
     _TEST_FLOAT(__prec_math_atan(0.0), 0.0);
     _TEST_FLOAT(__prec_math_atanf(-0.0f), -0.0f);
     _TEST_FLOAT(__prec_math_atanl(-0.0L), -0.0L);
-    _TEST_TRUE(_Ldouble_IsNan(__prec_math_atan(dnan)));
+    _TEST_TRUE(_Long_Double_IsNan(__prec_math_atan(dnan)));
     _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
     _TEST_FLOAT(__prec_math_atan(inf), 0x1.921fb54442d18p+0);
     _TEST_FLOAT(__prec_math_atanf((float) -inf), -0x1.921fb6p+0f);

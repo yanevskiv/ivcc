@@ -39,7 +39,7 @@ static void Test_PrecMathCosh(void)
     _TEST_FLOAT(__prec_math_coshf(-0.0f), 1.0f);
     _TEST_FLOAT(__prec_math_coshl(-inf), _EXACT_INFINITY);
     _TEST_FLOAT(__prec_math_cosh(inf), inf);
-    _TEST_TRUE(_Ldouble_IsNan(__prec_math_cosh(dnan)));
+    _TEST_TRUE(_Long_Double_IsNan(__prec_math_cosh(dnan)));
     _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
 
     _Err_Errno = 0;

@@ -39,7 +39,7 @@ static void Test_PrecMathErfc(void)
     _TEST_FLOAT(__prec_math_erfcf(-0.0f), 1.0f);
     _TEST_FLOAT(__prec_math_erfcl(inf), 0.0L);
     _TEST_FLOAT(__prec_math_erfc(-inf), 2.0);
-    _TEST_TRUE(_Ldouble_IsNan(__prec_math_erfc(dnan)));
+    _TEST_TRUE(_Long_Double_IsNan(__prec_math_erfc(dnan)));
     _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
 
     _Err_Errno = 0;

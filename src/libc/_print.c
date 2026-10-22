@@ -51,7 +51,7 @@
 #include <_fpu.h>
 
 // A long double's format and its fields.
-#include <_ldouble.h>
+#include <_long_double.h>
 
 // The conversions, a letter that means two things by its length being two.
 const _Print_Rule _Print_Rules[_PRINT_RULES] = {
@@ -451,16 +451,16 @@ unsigned long _Print_ToDigits(char *end, _Print_UintmaxType value, int base, con
 // Unpack a floating value into a sign and its bits by a power of two.
 _Print_Real _Print_ToParts(long double value, _Print_Sign *sign, unsigned long long *mant, int *exp)
 {
-    unsigned int biased = _Ldouble_ReadExponent(value);
-    _Ldouble_Class kind = _Ldouble_ReadClass(value);
+    unsigned int biased = _Long_Double_ReadExponent(value);
+    _Long_Double_Class kind = _Long_Double_ReadClass(value);
 
-    *mant = _Ldouble_ReadSignificand(value);
-    *exp = (int) (biased != 0 ? biased : 1) - _LDOUBLE_EXP_MAX - (_LDOUBLE_MANT - 1);
-    *sign = _Ldouble_IsNegative(value) ? _PRINT_SIGN_MINUS : _PRINT_SIGN_PLUS;
-    if (kind == _LDOUBLE_CLASS_NAN) {
+    *mant = _Long_Double_ReadSignificand(value);
+    *exp = (int) (biased != 0 ? biased : 1) - _LONG_DOUBLE_EXP_MAX - (_LONG_DOUBLE_MANT - 1);
+    *sign = _Long_Double_IsNegative(value) ? _PRINT_SIGN_MINUS : _PRINT_SIGN_PLUS;
+    if (kind == _LONG_DOUBLE_CLASS_NAN) {
         return _PRINT_REAL_NAN;
     }
-    if (kind == _LDOUBLE_CLASS_INFINITE) {
+    if (kind == _LONG_DOUBLE_CLASS_INFINITE) {
         return _PRINT_REAL_INFINITE;
     }
     return _PRINT_REAL_FINITE;
@@ -1000,9 +1000,9 @@ void _Print_WriteHexReal(_Print_Sink *sink, const _Print_Directive *dir)
         return;
     }
     if (dir->pd_length == _PRINT_LENGTH_LDOUBLE) {
-        exp = mant != 0 ? exp + _LDOUBLE_MANT - _PRINT_HEX_BITS : 0;
+        exp = mant != 0 ? exp + _LONG_DOUBLE_MANT - _PRINT_HEX_BITS : 0;
     } else {
-        exp = mant != 0 ? exp + _LDOUBLE_MANT - 1 : 0;
+        exp = mant != 0 ? exp + _LONG_DOUBLE_MANT - 1 : 0;
         under = exp < _PRINT_DOUBLE_MIN - 1 ? _PRINT_DOUBLE_MIN - 1 - exp : 0;
         mant = mant >> (_PRINT_HEX_BITS - 1) >> under;
         exp += under;

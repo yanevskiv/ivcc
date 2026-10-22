@@ -42,7 +42,7 @@ static void Test_PrecMathLgamma(void)
     _TEST_FLOAT(__prec_math_lgammal(2.0L), 0.0L);
     _TEST_FLOAT(__prec_math_lgamma(inf), inf);
     _TEST_FLOAT(__prec_math_lgammal(-inf), inf);
-    _TEST_TRUE(_Ldouble_IsNan(__prec_math_lgamma(dnan)));
+    _TEST_TRUE(_Long_Double_IsNan(__prec_math_lgamma(dnan)));
     _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
 
     _Err_Errno = 0;

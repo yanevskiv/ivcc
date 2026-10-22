@@ -30,7 +30,7 @@
 #include <_exact.h>
 
 // A long double's format and its fields.
-#include <_ldouble.h>
+#include <_long_double.h>
 
 // The bits a working value keeps, the rest truncated.
 #define _PREC_MATH_WORK_BITS 160
@@ -189,13 +189,13 @@ long double       _Prec_Math_TakeLog1p(long double x, _Exact_Type type);
 long double       _Prec_Math_TakePow(long double x, long double y, _Exact_Type type);
 
 // The trigonometric and hyperbolic functions' cores.
-void         _Prec_Math_NudgeExact(_Exact_Value *e, _Ldouble_Step step);
+void         _Prec_Math_NudgeExact(_Exact_Value *e, _Long_Double_Step step);
 void         _Prec_Math_WorkRoot(_Exact_Value *root, const _Exact_Value *a);
 void         _Prec_Math_MakeQuarters(_Exact_Value *e, unsigned int quarters);
 unsigned int _Prec_Math_ReduceTrig(_Exact_Value *r, long double x);
 void         _Prec_Math_TrigExact(_Exact_Value *value, const _Exact_Value *r, _Prec_Math_Trig which);
 void         _Prec_Math_AtanExact(_Exact_Value *value, const _Exact_Value *num, const _Exact_Value *den);
-long double  _Prec_Math_TakeTiny(long double x, _Ldouble_Step step, _Exact_Type type);
+long double  _Prec_Math_TakeTiny(long double x, _Long_Double_Step step, _Exact_Type type);
 long double  _Prec_Math_TakeQuarters(unsigned int quarters, long double sign, _Exact_Type type);
 long double  _Prec_Math_TakeTrig(long double x, _Prec_Math_Trig which, _Exact_Type type);
 long double  _Prec_Math_TakeArc(long double x, _Prec_Math_Trig which, _Exact_Type type);

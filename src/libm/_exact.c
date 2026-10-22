@@ -29,7 +29,7 @@
 // Includes.
 #include <_fp.h>
 #include <_fpu.h>
-#include <_ldouble.h>
+#include <_long_double.h>
 #include <_str.h>
 
 // The bits of 2/pi past its point, 32 to a limb, the most significant first.
@@ -294,9 +294,9 @@ void _Exact_MakeValue(_Exact_Value *exact, long double x)
 {
     int exp;
 
-    _Exact_SetWide(&exact->ev_sig, _Ldouble_SplitValue(x, &exp));
-    exact->ev_unit = exp - _LDOUBLE_SPLIT_SHIFT;
-    exact->ev_negative = _Ldouble_IsNegative(x);
+    _Exact_SetWide(&exact->ev_sig, _Long_Double_SplitValue(x, &exp));
+    exact->ev_unit = exp - _LONG_DOUBLE_SPLIT_SHIFT;
+    exact->ev_negative = _Long_Double_IsNegative(x);
     exact->ev_sticky = 0;
 }
 
@@ -417,8 +417,8 @@ unsigned long long _Exact_RoundBits(const _Exact_Value *exact, int keep, int *lo
         return kept;
     }
     kept++;
-    if (keep > 0 && (keep == _LDOUBLE_SPLIT_BITS ? kept == 0 : kept >> keep != 0)) {
-        kept = _LDOUBLE_SPLIT_TOP >> (_LDOUBLE_SPLIT_BITS - keep);
+    if (keep > 0 && (keep == _LONG_DOUBLE_SPLIT_BITS ? kept == 0 : kept >> keep != 0)) {
+        kept = _LONG_DOUBLE_SPLIT_TOP >> (_LONG_DOUBLE_SPLIT_BITS - keep);
         (*low)++;
     }
     return kept;
@@ -453,9 +453,9 @@ long double _Exact_RoundValue(const _Exact_Value *exact, _Exact_Type type)
             max = _FP_DOUBLE_MAX;
         } break;
         default: {
-            digits = _LDOUBLE_MANT;
-            min = _LDOUBLE_EXP_MIN;
-            max = _LDOUBLE_EXP_MAX;
+            digits = _LONG_DOUBLE_MANT;
+            min = _LONG_DOUBLE_EXP_MIN;
+            max = _LONG_DOUBLE_EXP_MAX;
         } break;
     }
     if (top == _EXACT_WIDE_NONE) {
@@ -471,13 +471,13 @@ long double _Exact_RoundValue(const _Exact_Value *exact, _Exact_Type type)
     if (exp >= min && exact->ev_unit + low + keep - 1 > max) {
         infinite = mode == _FPU_TONEAREST || (mode == _FPU_UPWARD && ! exact->ev_negative) || (mode == _FPU_DOWNWARD && exact->ev_negative);
         _Fpu_RaiseFlags(_FPU_OVERFLOW | _FPU_INEXACT);
-        value = infinite ? _EXACT_INFINITY : _Ldouble_JoinValue(max, _EXACT_ALL_BITS << (_LDOUBLE_SPLIT_BITS - digits));
+        value = infinite ? _EXACT_INFINITY : _Long_Double_JoinValue(max, _EXACT_ALL_BITS << (_LONG_DOUBLE_SPLIT_BITS - digits));
         return exact->ev_negative ? -value : value;
     }
     if (inexact) {
         _Fpu_RaiseFlags(tiny ? _FPU_UNDERFLOW | _FPU_INEXACT : _FPU_INEXACT);
     }
-    value = _Ldouble_JoinValue(exact->ev_unit + low + _LDOUBLE_SPLIT_SHIFT, kept);
+    value = _Long_Double_JoinValue(exact->ev_unit + low + _LONG_DOUBLE_SPLIT_SHIFT, kept);
     return exact->ev_negative ? -value : value;
 }
 
@@ -491,8 +491,8 @@ unsigned int _Exact_ReduceQuarters(_Exact_Value *f, long double x)
     _Exact_Wide part;
     _Exact_Wide chunk;
     unsigned int quadrant = 0;
-    unsigned long long sig = _Ldouble_SplitValue(x, &exp);
-    int unit = exp - _LDOUBLE_SPLIT_SHIFT;
+    unsigned long long sig = _Long_Double_SplitValue(x, &exp);
+    int unit = exp - _LONG_DOUBLE_SPLIT_SHIFT;
 
     if (unit > _EXACT_QUADRANT_BITS) {
         first = (unit - _EXACT_QUADRANT_BITS) / _EXACT_LIMB_BITS;
