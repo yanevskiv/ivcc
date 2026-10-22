@@ -132,177 +132,177 @@ Checklist toward ISO C99: the language, then the standard library of clause 7.
             - [x] `__builtin_nan`, `__builtin_nanf`, `__builtin_nanl`, constant quiet NaNs for `NAN`, their payloads `nan`'s of a narrow tag
             - [x] `__STDC_IEC_559__` 1: conversions out of an integer's range raising invalid as gcc's, `-x` a sign flip, `strtod`, `scanf` and `printf` in the rounding direction
             - [x] `_Complex`: `va_arg` of the three types and of structs holding them, as gcc's
-            - [ ] target macros predefined from `-mtarget` (`__linux__`, `__unix__`, ...)
-            - [ ] `_start` hands `main` its `argc`, `argv` and `envp`, and a return from `main` calls `exit`
-            - [ ] `ivar`, which builds `libc.a`
-            - [ ] archives in `ivld`, pulling in only the members a program needs
-            - [ ] the system layer: one syscall stub, and the syscalls libc needs answered by `ivemu`
-            - [ ] signal delivery in `ivemu`: a handler, its frame and `rt_sigreturn`
-            - [ ] the floating-point control and status instructions, and `ivemu`'s rounding modes and exception flags
+            - [x] target macros predefined from `-mtarget` (`__linux__`, `__unix__`, ...)
+            - [x] `_start` hands `main` its `argc`, `argv` and `envp`, and a return from `main` calls `exit`
+            - [x] `ivar`, which builds `libc.a`
+            - [x] archives in `ivld`, pulling in only the members a program needs
+            - [x] the system layer: one syscall stub, and the syscalls libc needs answered by `ivemu`
+            - [x] signal delivery in `ivemu`: a handler, its frame and `rt_sigreturn`
+            - [x] the floating-point control and status instructions, and `ivemu`'s rounding modes and exception flags
             - [x] `_Generic`, for `<tgmath.h>`
-            - [ ] `__STDC_HOSTED__` is 1
+            - [x] `__STDC_HOSTED__` is 1
 
         `<stddef.h>` (7.17)
 
-            - [ ] `ptrdiff_t`, `size_t`, `wchar_t`
-            - [ ] `NULL`, `offsetof`
+            - [x] `ptrdiff_t`, `size_t`, `wchar_t`
+            - [x] `NULL`, `offsetof`
 
         `<stdbool.h>` (7.16)
 
-            - [ ] `bool`, `true`, `false`, `__bool_true_false_are_defined`
+            - [x] `bool`, `true`, `false`, `__bool_true_false_are_defined`
 
         `<iso646.h>` (7.9)
 
-            - [ ] `and`, `and_eq`, `bitand`, `bitor`, `compl`, `not`, `not_eq`, `or`, `or_eq`, `xor`, `xor_eq`
+            - [x] `and`, `and_eq`, `bitand`, `bitor`, `compl`, `not`, `not_eq`, `or`, `or_eq`, `xor`, `xor_eq`
 
         `<limits.h>` (7.10)
 
-            - [ ] `CHAR_BIT`, `MB_LEN_MAX`
-            - [ ] `SCHAR_MIN`, `SCHAR_MAX`, `UCHAR_MAX`, `CHAR_MIN`, `CHAR_MAX`
-            - [ ] `SHRT_MIN`, `SHRT_MAX`, `USHRT_MAX`, `INT_MIN`, `INT_MAX`, `UINT_MAX`
-            - [ ] `LONG_MIN`, `LONG_MAX`, `ULONG_MAX`, `LLONG_MIN`, `LLONG_MAX`, `ULLONG_MAX`
+            - [x] `CHAR_BIT`, `MB_LEN_MAX`
+            - [x] `SCHAR_MIN`, `SCHAR_MAX`, `UCHAR_MAX`, `CHAR_MIN`, `CHAR_MAX`
+            - [x] `SHRT_MIN`, `SHRT_MAX`, `USHRT_MAX`, `INT_MIN`, `INT_MAX`, `UINT_MAX`
+            - [x] `LONG_MIN`, `LONG_MAX`, `ULONG_MAX`, `LLONG_MIN`, `LLONG_MAX`, `ULLONG_MAX`
 
         `<stdint.h>` (7.18)
 
-            - [ ] exact-width types: `int8_t` to `int64_t`, `uint8_t` to `uint64_t`
-            - [ ] minimum-width types: `int_least8_t` to `uint_least64_t`
-            - [ ] fastest types: `int_fast8_t` to `uint_fast64_t`
-            - [ ] `intptr_t`, `uintptr_t`, `intmax_t`, `uintmax_t`
-            - [ ] the limits of each: `INT8_MIN` to `UINTMAX_MAX`
-            - [ ] the limits of other types: `PTRDIFF_MIN`, `PTRDIFF_MAX`, `SIG_ATOMIC_MIN`, `SIG_ATOMIC_MAX`, `SIZE_MAX`, `WCHAR_MIN`, `WCHAR_MAX`, `WINT_MIN`, `WINT_MAX`
-            - [ ] constant macros: `INT8_C` to `UINT64_C`, `INTMAX_C`, `UINTMAX_C`
+            - [x] exact-width types: `int8_t` to `int64_t`, `uint8_t` to `uint64_t`
+            - [x] minimum-width types: `int_least8_t` to `uint_least64_t`
+            - [x] fastest types: `int_fast8_t` to `uint_fast64_t`
+            - [x] `intptr_t`, `uintptr_t`, `intmax_t`, `uintmax_t`
+            - [x] the limits of each: `INT8_MIN` to `UINTMAX_MAX`
+            - [x] the limits of other types: `PTRDIFF_MIN`, `PTRDIFF_MAX`, `SIG_ATOMIC_MIN`, `SIG_ATOMIC_MAX`, `SIZE_MAX`, `WCHAR_MIN`, `WCHAR_MAX`, `WINT_MIN`, `WINT_MAX`
+            - [x] constant macros: `INT8_C` to `UINT64_C`, `INTMAX_C`, `UINTMAX_C`
 
         `<float.h>` (7.7)
 
-            - [ ] `FLT_ROUNDS`, `FLT_EVAL_METHOD`, `FLT_RADIX`, `DECIMAL_DIG`
-            - [ ] for `FLT`, `DBL` and `LDBL`: `_MANT_DIG`, `_DIG`, `_MIN_EXP`, `_MIN_10_EXP`, `_MAX_EXP`, `_MAX_10_EXP`
-            - [ ] for `FLT`, `DBL` and `LDBL`: `_MAX`, `_EPSILON`, `_MIN`
+            - [x] `FLT_ROUNDS`, `FLT_EVAL_METHOD`, `FLT_RADIX`, `DECIMAL_DIG`
+            - [x] for `FLT`, `DBL` and `LDBL`: `_MANT_DIG`, `_DIG`, `_MIN_EXP`, `_MIN_10_EXP`, `_MAX_EXP`, `_MAX_10_EXP`
+            - [x] for `FLT`, `DBL` and `LDBL`: `_MAX`, `_EPSILON`, `_MIN`
 
         `<stdarg.h>` (7.15)
 
-            - [ ] `va_list`
-            - [ ] `va_start`, `va_arg`, `va_copy`, `va_end`
+            - [x] `va_list`
+            - [x] `va_start`, `va_arg`, `va_copy`, `va_end`
 
         `<errno.h>` (7.5)
 
-            - [ ] `EDOM`, `EILSEQ`, `ERANGE`
-            - [ ] `errno`
+            - [x] `EDOM`, `EILSEQ`, `ERANGE`
+            - [x] `errno`
 
         `<ctype.h>` (7.4)
 
-            - [ ] classification: `isalnum`, `isalpha`, `isblank`, `iscntrl`, `isdigit`, `isgraph`, `islower`, `isprint`, `ispunct`, `isspace`, `isupper`, `isxdigit`
-            - [ ] case mapping: `tolower`, `toupper`
+            - [x] classification: `isalnum`, `isalpha`, `isblank`, `iscntrl`, `isdigit`, `isgraph`, `islower`, `isprint`, `ispunct`, `isspace`, `isupper`, `isxdigit`
+            - [x] case mapping: `tolower`, `toupper`
 
         `<string.h>` (7.21)
 
-            - [ ] copying: `memcpy`, `memmove`, `strcpy`, `strncpy`
-            - [ ] concatenation: `strcat`, `strncat`
-            - [ ] comparison: `memcmp`, `strcmp`, `strcoll`, `strncmp`, `strxfrm`
-            - [ ] search: `memchr`, `strchr`, `strcspn`, `strpbrk`, `strrchr`, `strspn`, `strstr`, `strtok`
-            - [ ] `memset`, `strerror`, `strlen`
+            - [x] copying: `memcpy`, `memmove`, `strcpy`, `strncpy`
+            - [x] concatenation: `strcat`, `strncat`
+            - [x] comparison: `memcmp`, `strcmp`, `strcoll`, `strncmp`, `strxfrm`
+            - [x] search: `memchr`, `strchr`, `strcspn`, `strpbrk`, `strrchr`, `strspn`, `strstr`, `strtok`
+            - [x] `memset`, `strerror`, `strlen`
 
         `<inttypes.h>` (7.8)
 
-            - [ ] `imaxdiv_t`
-            - [ ] `PRId8` to `PRIXPTR`, every `PRI` macro for `d`, `i`, `o`, `u`, `x` and `X`
-            - [ ] `SCNd8` to `SCNxPTR`, every `SCN` macro for `d`, `i`, `o`, `u` and `x`
-            - [ ] `imaxabs`, `imaxdiv`
-            - [ ] `strtoimax`, `strtoumax`
-            - [ ] `wcstoimax`, `wcstoumax`
+            - [x] `imaxdiv_t`
+            - [x] `PRId8` to `PRIXPTR`, every `PRI` macro for `d`, `i`, `o`, `u`, `x` and `X`
+            - [x] `SCNd8` to `SCNxPTR`, every `SCN` macro for `d`, `i`, `o`, `u` and `x`
+            - [x] `imaxabs`, `imaxdiv`
+            - [x] `strtoimax`, `strtoumax`
+            - [x] `wcstoimax`, `wcstoumax`
 
         `<setjmp.h>` (7.13)
 
-            - [ ] `jmp_buf`
-            - [ ] `setjmp`, `longjmp`
+            - [x] `jmp_buf`
+            - [x] `setjmp`, `longjmp`
 
         `<assert.h>` (7.2)
 
-            - [ ] `assert`, and `NDEBUG` turning it off at each inclusion
+            - [x] `assert`, and `NDEBUG` turning it off at each inclusion
 
         `<time.h>` (7.23)
 
-            - [ ] `CLOCKS_PER_SEC`, `clock_t`, `time_t`, `struct tm`
-            - [ ] manipulation: `clock`, `difftime`, `mktime`, `time`
-            - [ ] conversion: `asctime`, `ctime`, `gmtime`, `localtime`, `strftime`
+            - [x] `CLOCKS_PER_SEC`, `clock_t`, `time_t`, `struct tm`
+            - [x] manipulation: `clock`, `difftime`, `mktime`, `time`
+            - [x] conversion: `asctime`, `ctime`, `gmtime`, `localtime`, `strftime`
 
         `<signal.h>` (7.14)
 
-            - [ ] `sig_atomic_t`, `SIG_DFL`, `SIG_ERR`, `SIG_IGN`
-            - [ ] `SIGABRT`, `SIGFPE`, `SIGILL`, `SIGINT`, `SIGSEGV`, `SIGTERM`
-            - [ ] `signal`, `raise`
+            - [x] `sig_atomic_t`, `SIG_DFL`, `SIG_ERR`, `SIG_IGN`
+            - [x] `SIGABRT`, `SIGFPE`, `SIGILL`, `SIGINT`, `SIGSEGV`, `SIGTERM`
+            - [x] `signal`, `raise`
 
         `<locale.h>` (7.11)
 
-            - [ ] `struct lconv`, `LC_ALL`, `LC_COLLATE`, `LC_CTYPE`, `LC_MONETARY`, `LC_NUMERIC`, `LC_TIME`
-            - [ ] `setlocale`, with `"C"`, `"C.UTF-8"` and `""`
-            - [ ] `localeconv`
+            - [x] `struct lconv`, `LC_ALL`, `LC_COLLATE`, `LC_CTYPE`, `LC_MONETARY`, `LC_NUMERIC`, `LC_TIME`
+            - [x] `setlocale`, with `"C"`, `"C.UTF-8"` and `""`
+            - [x] `localeconv`
 
         `<stdlib.h>` (7.20)
 
-            - [ ] `div_t`, `ldiv_t`, `lldiv_t`, `EXIT_FAILURE`, `EXIT_SUCCESS`, `RAND_MAX`, `MB_CUR_MAX`
-            - [ ] numeric conversion: `atof`, `atoi`, `atol`, `atoll`
-            - [ ] numeric conversion: `strtod`, `strtof`, `strtold`, with hexadecimal, infinity and NaN
-            - [ ] numeric conversion: `strtol`, `strtoll`, `strtoul`, `strtoull`
-            - [ ] pseudo-random numbers: `rand`, `srand`
-            - [ ] memory management: `calloc`, `free`, `malloc`, `realloc`
-            - [ ] environment: `abort`, `atexit`, `exit`, `_Exit`, `getenv`, `system`
-            - [ ] searching and sorting: `bsearch`, `qsort`
-            - [ ] integer arithmetic: `abs`, `labs`, `llabs`, `div`, `ldiv`, `lldiv`
-            - [ ] multibyte characters: `mblen`, `mbtowc`, `wctomb`
-            - [ ] multibyte strings: `mbstowcs`, `wcstombs`
+            - [x] `div_t`, `ldiv_t`, `lldiv_t`, `EXIT_FAILURE`, `EXIT_SUCCESS`, `RAND_MAX`, `MB_CUR_MAX`
+            - [x] numeric conversion: `atof`, `atoi`, `atol`, `atoll`
+            - [x] numeric conversion: `strtod`, `strtof`, `strtold`, with hexadecimal, infinity and NaN
+            - [x] numeric conversion: `strtol`, `strtoll`, `strtoul`, `strtoull`
+            - [x] pseudo-random numbers: `rand`, `srand`
+            - [x] memory management: `calloc`, `free`, `malloc`, `realloc`
+            - [x] environment: `abort`, `atexit`, `exit`, `_Exit`, `getenv`, `system`
+            - [x] searching and sorting: `bsearch`, `qsort`
+            - [x] integer arithmetic: `abs`, `labs`, `llabs`, `div`, `ldiv`, `lldiv`
+            - [x] multibyte characters: `mblen`, `mbtowc`, `wctomb`
+            - [x] multibyte strings: `mbstowcs`, `wcstombs`
 
         `<stdio.h>` (7.19)
 
-            - [ ] `FILE`, `fpos_t`, `_IOFBF`, `_IOLBF`, `_IONBF`, `BUFSIZ`, `EOF`, `FOPEN_MAX`, `FILENAME_MAX`, `L_tmpnam`, `SEEK_CUR`, `SEEK_END`, `SEEK_SET`, `TMP_MAX`
-            - [ ] `stdin`, `stdout`, `stderr`, buffered as C asks
-            - [ ] operations on files: `remove`, `rename`, `tmpfile`, `tmpnam`
-            - [ ] file access: `fclose`, `fflush`, `fopen`, `freopen`, `setbuf`, `setvbuf`
-            - [ ] formatted output: `fprintf`, `printf`, `snprintf`, `sprintf`, `vfprintf`, `vprintf`, `vsnprintf`, `vsprintf`
-            - [ ] formatted output of floating values: `%f`, `%e`, `%g` and `%a`
-            - [ ] formatted input: `fscanf`, `scanf`, `sscanf`, `vfscanf`, `vscanf`, `vsscanf`
-            - [ ] character input and output: `fgetc`, `fgets`, `fputc`, `fputs`, `getc`, `getchar`, `gets`, `putc`, `putchar`, `puts`, `ungetc`
-            - [ ] direct input and output: `fread`, `fwrite`
-            - [ ] file positioning: `fgetpos`, `fseek`, `fsetpos`, `ftell`, `rewind`
-            - [ ] error handling: `clearerr`, `feof`, `ferror`, `perror`
+            - [x] `FILE`, `fpos_t`, `_IOFBF`, `_IOLBF`, `_IONBF`, `BUFSIZ`, `EOF`, `FOPEN_MAX`, `FILENAME_MAX`, `L_tmpnam`, `SEEK_CUR`, `SEEK_END`, `SEEK_SET`, `TMP_MAX`
+            - [x] `stdin`, `stdout`, `stderr`, buffered as C asks
+            - [x] operations on files: `remove`, `rename`, `tmpfile`, `tmpnam`
+            - [x] file access: `fclose`, `fflush`, `fopen`, `freopen`, `setbuf`, `setvbuf`
+            - [x] formatted output: `fprintf`, `printf`, `snprintf`, `sprintf`, `vfprintf`, `vprintf`, `vsnprintf`, `vsprintf`
+            - [x] formatted output of floating values: `%f`, `%e`, `%g` and `%a`
+            - [x] formatted input: `fscanf`, `scanf`, `sscanf`, `vfscanf`, `vscanf`, `vsscanf`
+            - [x] character input and output: `fgetc`, `fgets`, `fputc`, `fputs`, `getc`, `getchar`, `gets`, `putc`, `putchar`, `puts`, `ungetc`
+            - [x] direct input and output: `fread`, `fwrite`
+            - [x] file positioning: `fgetpos`, `fseek`, `fsetpos`, `ftell`, `rewind`
+            - [x] error handling: `clearerr`, `feof`, `ferror`, `perror`
 
         `<wctype.h>` (7.25)
 
-            - [ ] `wint_t`, `wctrans_t`, `wctype_t`, `WEOF`
-            - [ ] classification: `iswalnum`, `iswalpha`, `iswblank`, `iswcntrl`, `iswdigit`, `iswgraph`, `iswlower`, `iswprint`, `iswpunct`, `iswspace`, `iswupper`, `iswxdigit`
-            - [ ] extensible classification: `iswctype`, `wctype`
-            - [ ] case mapping: `towlower`, `towupper`
-            - [ ] extensible mapping: `towctrans`, `wctrans`
+            - [x] `wint_t`, `wctrans_t`, `wctype_t`, `WEOF`
+            - [x] classification: `iswalnum`, `iswalpha`, `iswblank`, `iswcntrl`, `iswdigit`, `iswgraph`, `iswlower`, `iswprint`, `iswpunct`, `iswspace`, `iswupper`, `iswxdigit`
+            - [x] extensible classification: `iswctype`, `wctype`
+            - [x] case mapping: `towlower`, `towupper`
+            - [x] extensible mapping: `towctrans`, `wctrans`
 
         `<wchar.h>` (7.24)
 
-            - [ ] `mbstate_t`, `wint_t`, `WCHAR_MIN`, `WCHAR_MAX`, `WEOF`
-            - [ ] formatted wide input and output: `fwprintf`, `fwscanf`, `swprintf`, `swscanf`, `vfwprintf`, `vfwscanf`, `vswprintf`, `vswscanf`, `vwprintf`, `vwscanf`, `wprintf`, `wscanf`
-            - [ ] wide character input and output: `fgetwc`, `fgetws`, `fputwc`, `fputws`, `fwide`, `getwc`, `getwchar`, `putwc`, `putwchar`, `ungetwc`
-            - [ ] numeric conversion: `wcstod`, `wcstof`, `wcstold`, `wcstol`, `wcstoll`, `wcstoul`, `wcstoull`
-            - [ ] copying: `wcscpy`, `wcsncpy`, `wmemcpy`, `wmemmove`
-            - [ ] concatenation: `wcscat`, `wcsncat`
-            - [ ] comparison: `wcscmp`, `wcscoll`, `wcsncmp`, `wcsxfrm`, `wmemcmp`
-            - [ ] search: `wcschr`, `wcscspn`, `wcspbrk`, `wcsrchr`, `wcsspn`, `wcsstr`, `wcstok`, `wmemchr`
-            - [ ] `wcslen`, `wmemset`, `wcsftime`
-            - [ ] single-byte conversion: `btowc`, `wctob`
-            - [ ] restartable multibyte conversion: `mbsinit`, `mbrlen`, `mbrtowc`, `wcrtomb`, `mbsrtowcs`, `wcsrtombs`
+            - [x] `mbstate_t`, `wint_t`, `WCHAR_MIN`, `WCHAR_MAX`, `WEOF`
+            - [x] formatted wide input and output: `fwprintf`, `fwscanf`, `swprintf`, `swscanf`, `vfwprintf`, `vfwscanf`, `vswprintf`, `vswscanf`, `vwprintf`, `vwscanf`, `wprintf`, `wscanf`
+            - [x] wide character input and output: `fgetwc`, `fgetws`, `fputwc`, `fputws`, `fwide`, `getwc`, `getwchar`, `putwc`, `putwchar`, `ungetwc`
+            - [x] numeric conversion: `wcstod`, `wcstof`, `wcstold`, `wcstol`, `wcstoll`, `wcstoul`, `wcstoull`
+            - [x] copying: `wcscpy`, `wcsncpy`, `wmemcpy`, `wmemmove`
+            - [x] concatenation: `wcscat`, `wcsncat`
+            - [x] comparison: `wcscmp`, `wcscoll`, `wcsncmp`, `wcsxfrm`, `wmemcmp`
+            - [x] search: `wcschr`, `wcscspn`, `wcspbrk`, `wcsrchr`, `wcsspn`, `wcsstr`, `wcstok`, `wmemchr`
+            - [x] `wcslen`, `wmemset`, `wcsftime`
+            - [x] single-byte conversion: `btowc`, `wctob`
+            - [x] restartable multibyte conversion: `mbsinit`, `mbrlen`, `mbrtowc`, `wcrtomb`, `mbsrtowcs`, `wcsrtombs`
 
         `<fenv.h>` (7.6)
 
-            - [ ] `fenv_t`, `fexcept_t`, `FE_DFL_ENV`
-            - [ ] `FE_DIVBYZERO`, `FE_INEXACT`, `FE_INVALID`, `FE_OVERFLOW`, `FE_UNDERFLOW`, `FE_ALL_EXCEPT`
-            - [ ] `FE_DOWNWARD`, `FE_TONEAREST`, `FE_TOWARDZERO`, `FE_UPWARD`
-            - [ ] `#pragma STDC FENV_ACCESS`
-            - [ ] exceptions: `feclearexcept`, `fegetexceptflag`, `feraiseexcept`, `fesetexceptflag`, `fetestexcept`
-            - [ ] rounding: `fegetround`, `fesetround`
-            - [ ] environment: `fegetenv`, `feholdexcept`, `fesetenv`, `feupdateenv`
+            - [x] `fenv_t`, `fexcept_t`, `FE_DFL_ENV`
+            - [x] `FE_DIVBYZERO`, `FE_INEXACT`, `FE_INVALID`, `FE_OVERFLOW`, `FE_UNDERFLOW`, `FE_ALL_EXCEPT`
+            - [x] `FE_DOWNWARD`, `FE_TONEAREST`, `FE_TOWARDZERO`, `FE_UPWARD`
+            - [x] `#pragma STDC FENV_ACCESS`
+            - [x] exceptions: `feclearexcept`, `fegetexceptflag`, `feraiseexcept`, `fesetexceptflag`, `fetestexcept`
+            - [x] rounding: `fegetround`, `fesetround`
+            - [x] environment: `fegetenv`, `feholdexcept`, `fesetenv`, `feupdateenv`
 
         `<math.h>` (7.12), each function in `double`, `float` (`f`) and `long double` (`l`)
 
             - [x] `float_t`, `double_t`, `HUGE_VAL`, `HUGE_VALF`, `HUGE_VALL`, `INFINITY`, `NAN`
             - [x] `FP_INFINITE`, `FP_NAN`, `FP_NORMAL`, `FP_SUBNORMAL`, `FP_ZERO`, `FP_FAST_FMA`, `FP_FAST_FMAF`, `FP_FAST_FMAL` (optional, left undefined), `FP_ILOGB0`, `FP_ILOGBNAN`
             - [x] `MATH_ERRNO`, `MATH_ERREXCEPT`, `math_errhandling`
-            - [ ] `#pragma STDC FP_CONTRACT`
+            - [x] `#pragma STDC FP_CONTRACT`
             - [x] classification: `fpclassify`, `isfinite`, `isinf`, `isnan`, `isnormal`, `signbit`
             - [x] trigonometric, within a few ulps: `acos`, `asin`, `atan`, `atan2`, `cos`, `sin`, `tan`
             - [x] hyperbolic, within a few ulps: `acosh`, `asinh`, `atanh`, `cosh`, `sinh`, `tanh`
