@@ -30,7 +30,7 @@
 // Includes.
 #include <_err.h>
 #include <_exact.h>
-#include <_fp.h>
+#include <_real.h>
 #include <_fpu.h>
 #include <_str.h>
 #include <_sys.h>
@@ -348,10 +348,10 @@ unsigned long long _Basic_Math_ReadPayload(const char *tagp)
 {
     unsigned long len = 0;
 
-    while (tagp[len] == '_' || _Fp_IsAlnum((unsigned char) tagp[len])) {
+    while (tagp[len] == '_' || _Real_IsAlnum((unsigned char) tagp[len])) {
         len++;
     }
-    return tagp[len] == '\0' ? _Fp_ReadPayload(tagp, _FP_TEXT_NARROW, 0, len) : 0;
+    return tagp[len] == '\0' ? _Real_ReadPayload(tagp, _REAL_TEXT_NARROW, 0, len) : 0;
 }
 
 // Raise the domain error of x and y.

@@ -7,7 +7,7 @@
 
 // Raising, writing and clearing flags should set exactly those, and the
 // rounding direction should read back as written, a bad one refused.
-static void Test_FpuFlags(void)
+static void Test_RealuFlags(void)
 {
     _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
@@ -29,6 +29,6 @@ static void Test_FpuFlags(void)
 
 int main(void)
 {
-    Test_FpuFlags();
+    Test_RealuFlags();
     return _Test_Status();
 }

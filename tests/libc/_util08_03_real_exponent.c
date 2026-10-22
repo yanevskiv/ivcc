@@ -1,11 +1,11 @@
 // (Test) Status: 0
-// A test file for <_fp.h> exponents read.
+// A test file for <_real.h> exponents read.
 
 // Include helpers.
-#include "_util08_00_fp_helpers.inc"
+#include "_util08_00_real_helpers.inc"
 
 // An exponent should need its letter and a digit, and be none without them.
-static void Test_FpExponent(void)
+static void Test_RealExponent(void)
 {
     long exp = 0;
 
@@ -19,14 +19,14 @@ static void Test_FpExponent(void)
     _TEST_TRUE(raises("p1", 'e', 0, 0));
     _TEST_TRUE(raises("1", 'e', 0, 0));
     _TEST_TRUE(raises("", 'e', 0, 0));
-    _TEST_UINT(_Fp_ReadExponent("1e99999999999999999999999999z", _FP_TEXT_NARROW, 1, 'e', &exp), 28);
-    _TEST_TRUE(exp >= _FP_EXP_LIMIT);
-    _TEST_UINT(_Fp_ReadExponent("1e-99999999999999999999999999", _FP_TEXT_NARROW, 1, 'e', &exp), 29);
-    _TEST_TRUE(exp <= -_FP_EXP_LIMIT);
+    _TEST_UINT(_Real_ReadExponent("1e99999999999999999999999999z", _REAL_TEXT_NARROW, 1, 'e', &exp), 28);
+    _TEST_TRUE(exp >= _REAL_EXP_LIMIT);
+    _TEST_UINT(_Real_ReadExponent("1e-99999999999999999999999999", _REAL_TEXT_NARROW, 1, 'e', &exp), 29);
+    _TEST_TRUE(exp <= -_REAL_EXP_LIMIT);
 }
 
 int main(void)
 {
-    Test_FpExponent();
+    Test_RealExponent();
     return _Test_Status();
 }

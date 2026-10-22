@@ -54,7 +54,7 @@
 #include <stdio.h>
 
 // The conversion wcstod and its two stand on.
-#include <_fp.h>
+#include <_real.h>
 
 // The integer conversions wcstol and its family share.
 #include <inttypes.h>
@@ -334,7 +334,7 @@ wint_t ungetwc(wint_t wc, FILE *stream)
 double wcstod(const wchar_t *restrict nptr, wchar_t **restrict endptr)
 {
     size_t end;
-    double value = _Fp_ToDouble(nptr, _FP_TEXT_WIDE, &end);
+    double value = _Real_ToDouble(nptr, _REAL_TEXT_WIDE, &end);
 
     if (endptr != NULL) {
         *endptr = (wchar_t *) nptr + end;
@@ -346,7 +346,7 @@ double wcstod(const wchar_t *restrict nptr, wchar_t **restrict endptr)
 float wcstof(const wchar_t *restrict nptr, wchar_t **restrict endptr)
 {
     size_t end;
-    float value = _Fp_ToFloat(nptr, _FP_TEXT_WIDE, &end);
+    float value = _Real_ToFloat(nptr, _REAL_TEXT_WIDE, &end);
 
     if (endptr != NULL) {
         *endptr = (wchar_t *) nptr + end;
@@ -358,7 +358,7 @@ float wcstof(const wchar_t *restrict nptr, wchar_t **restrict endptr)
 long double wcstold(const wchar_t *restrict nptr, wchar_t **restrict endptr)
 {
     size_t end;
-    long double value = _Fp_ToLongDouble(nptr, _FP_TEXT_WIDE, &end);
+    long double value = _Real_ToLongDouble(nptr, _REAL_TEXT_WIDE, &end);
 
     if (endptr != NULL) {
         *endptr = (wchar_t *) nptr + end;

@@ -45,7 +45,7 @@
 #include <signal.h>
 
 // The conversion strtod and its two stand on.
-#include <_fp.h>
+#include <_real.h>
 
 // The integer conversions strtol and its family share.
 #include <inttypes.h>
@@ -252,7 +252,7 @@ long long atoll(const char *nptr)
 double strtod(const char *restrict nptr, char **restrict endptr)
 {
     size_t end;
-    double value = _Fp_ToDouble(nptr, _FP_TEXT_NARROW, &end);
+    double value = _Real_ToDouble(nptr, _REAL_TEXT_NARROW, &end);
 
     if (endptr != NULL) {
         *endptr = (char *) nptr + end;
@@ -264,7 +264,7 @@ double strtod(const char *restrict nptr, char **restrict endptr)
 float strtof(const char *restrict nptr, char **restrict endptr)
 {
     size_t end;
-    float value = _Fp_ToFloat(nptr, _FP_TEXT_NARROW, &end);
+    float value = _Real_ToFloat(nptr, _REAL_TEXT_NARROW, &end);
 
     if (endptr != NULL) {
         *endptr = (char *) nptr + end;
@@ -276,7 +276,7 @@ float strtof(const char *restrict nptr, char **restrict endptr)
 long double strtold(const char *restrict nptr, char **restrict endptr)
 {
     size_t end;
-    long double value = _Fp_ToLongDouble(nptr, _FP_TEXT_NARROW, &end);
+    long double value = _Real_ToLongDouble(nptr, _REAL_TEXT_NARROW, &end);
 
     if (endptr != NULL) {
         *endptr = (char *) nptr + end;

@@ -48,7 +48,7 @@
 #include <_int.h>
 
 // The floating number an input item is.
-#include <_fp.h>
+#include <_real.h>
 
 // The conversions, a letter that means two things by its length being two.
 const _Scan_Rule _Scan_Rules[_SCAN_RULES] = {
@@ -180,11 +180,11 @@ _Bool _Scan_ToReal(const char *str, _Scan_Length length, void *dest)
     long double extended = 0;
 
     if (length == _SCAN_LENGTH_LONG) {
-        real = _Fp_ToDouble(str, _FP_TEXT_NARROW, &end);
+        real = _Real_ToDouble(str, _REAL_TEXT_NARROW, &end);
     } else if (length == _SCAN_LENGTH_LDOUBLE) {
-        extended = _Fp_ToLongDouble(str, _FP_TEXT_NARROW, &end);
+        extended = _Real_ToLongDouble(str, _REAL_TEXT_NARROW, &end);
     } else {
-        single = _Fp_ToFloat(str, _FP_TEXT_NARROW, &end);
+        single = _Real_ToFloat(str, _REAL_TEXT_NARROW, &end);
     }
     whole = end > 0 && str[end] == '\0';
     if (whole && dest != _SCAN_NULL && length == _SCAN_LENGTH_LONG) {

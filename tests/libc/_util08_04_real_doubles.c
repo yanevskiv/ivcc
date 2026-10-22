@@ -1,11 +1,11 @@
 // (Test) Status: 0
-// A test file for <_fp.h> doubles converted from text.
+// A test file for <_real.h> doubles converted from text.
 
 // Include helpers.
-#include "_util08_00_fp_helpers.inc"
+#include "_util08_00_real_helpers.inc"
 
 // A number should convert to the nearest double, ties to even, to its end.
-static void Test_FpDoubles(void)
+static void Test_RealDoubles(void)
 {
     unsigned long end = 0;
     double value;
@@ -33,10 +33,10 @@ static void Test_FpDoubles(void)
     _TEST_TRUE(converts("+.e1", 0.0, 0));
     _TEST_TRUE(converts("infinit", 1.0 / 0.0, 3));
     _TEST_TRUE(converts("-INFINITY!", -1.0 / 0.0, 9));
-    value = _Fp_ToDouble("nan(12)x", _FP_TEXT_NARROW, &end);
+    value = _Real_ToDouble("nan(12)x", _REAL_TEXT_NARROW, &end);
     _TEST_TRUE(value != value);
     _TEST_UINT(end, 7);
-    value = _Fp_ToDouble("NAN(", _FP_TEXT_NARROW, &end);
+    value = _Real_ToDouble("NAN(", _REAL_TEXT_NARROW, &end);
     _TEST_TRUE(value != value);
     _TEST_UINT(end, 3);
     _TEST_INT(_Err_Errno, 0);
@@ -52,6 +52,6 @@ static void Test_FpDoubles(void)
 
 int main(void)
 {
-    Test_FpDoubles();
+    Test_RealDoubles();
     return _Test_Status();
 }

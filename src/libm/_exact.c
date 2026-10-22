@@ -27,7 +27,7 @@
 #include <_exact.h>
 
 // Includes.
-#include <_fp.h>
+#include <_real.h>
 #include <_fpu.h>
 #include <_str.h>
 
@@ -442,14 +442,14 @@ long double _Exact_RoundValue(const _Exact_Value *exact, _Exact_Type type)
 
     switch (type) {
         case _EXACT_TYPE_FLOAT: {
-            digits = _FP_FLOAT_MANT;
-            min = _FP_FLOAT_MIN;
-            max = _FP_FLOAT_MAX;
+            digits = _REAL_FLOAT_MANT;
+            min = _REAL_FLOAT_MIN;
+            max = _REAL_FLOAT_MAX;
         } break;
         case _EXACT_TYPE_DOUBLE: {
-            digits = _FP_DOUBLE_MANT;
-            min = _FP_DOUBLE_MIN;
-            max = _FP_DOUBLE_MAX;
+            digits = _REAL_DOUBLE_MANT;
+            min = _REAL_DOUBLE_MIN;
+            max = _REAL_DOUBLE_MAX;
         } break;
         default: {
             digits = _FPU_X86_64_LDBL_MANT;
