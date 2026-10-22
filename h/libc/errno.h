@@ -27,7 +27,7 @@
 #define _ERRNO_H
 
 #if defined(__linux__)
-    #include <os/linux/errno.h>
+    #include <os/linux/_errno.h>
 #else
     #error "errno.h: no error numbers for this OS"
 #endif

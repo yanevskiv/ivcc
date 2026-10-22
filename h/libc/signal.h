@@ -27,7 +27,7 @@
 #define _SIGNAL_H
 
 #if defined(__linux__)
-    #include <os/linux/signal.h>
+    #include <os/linux/_signal.h>
 #else
     #error "signal.h: no signals for this OS"
 #endif
