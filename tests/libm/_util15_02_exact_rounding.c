@@ -19,20 +19,20 @@ static void Test_ExactRounding(void)
     _Exact_MakeValue(&one, 1.0L);
     _Exact_MakeValue(&tiny, 0x1p-70L);
     _Exact_AddValues(&sum, &one, &tiny);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(_Exact_RoundValue(&sum, _EXACT_TYPE_DOUBLE), 1.0L);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INEXACT);
-    _Fpu_WriteRound(_FPU_UPWARD);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INEXACT);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_UPWARD);
     _TEST_FLOAT(_Exact_RoundValue(&sum, _EXACT_TYPE_DOUBLE), 1.0L + 0x1p-52L);
     _TEST_FLOAT(_Exact_RoundValue(&sum, _EXACT_TYPE_FLOAT), 1.0L + 0x1p-23L);
     _TEST_FLOAT(_Exact_RoundValue(&sum, _EXACT_TYPE_LDOUBLE), 1.0L + 0x1p-63L);
-    _Fpu_WriteRound(_FPU_TONEAREST);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_TONEAREST);
 
     _Exact_MakeValue(&sum, 2.25L);
     _Exact_ExtractRoot(&root, &sum, _EXACT_ROOT_SQUARE);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(_Exact_RoundValue(&root, _EXACT_TYPE_LDOUBLE), 1.5L);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 }
 
 int main(void)

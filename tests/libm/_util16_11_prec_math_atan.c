@@ -13,7 +13,7 @@
 // raising nothing, give a tiny x itself and +-pi/2 of an infinity.
 static void Test_PrecMathAtan(void)
 {
-    static const int modes[MODES] = {_FPU_TONEAREST, _FPU_DOWNWARD, _FPU_UPWARD, _FPU_TOWARDZERO};
+    static const int modes[MODES] = {_FPU_X86_64_TONEAREST, _FPU_X86_64_DOWNWARD, _FPU_X86_64_UPWARD, _FPU_X86_64_TOWARDZERO};
     static const float valuef[MODES] = {-0x1.3fc176p+0f, -0x1.3fc178p+0f, -0x1.3fc176p+0f, -0x1.3fc176p+0f};
     static const long double valuel[MODES] = {0xb.c4de960b0029c17p-3L, 0xb.c4de960b0029c17p-3L, 0xb.c4de960b0029c18p-3L, 0xb.c4de960b0029c17p-3L};
     volatile double half = 0.5;
@@ -24,26 +24,26 @@ static void Test_PrecMathAtan(void)
     double dnan = zero / zero;
 
     for (int i = 0; i < MODES; i++) {
-        _Fpu_WriteRound(modes[i]);
-        _Fpu_ClearFlags(_FPU_EXCEPTS);
+        _Fpu_x86_64_WriteRound(modes[i]);
+        _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
         _TEST_FLOAT(__prec_math_atanf(threef), valuef[i]);
         _TEST_FLOAT(__prec_math_atanl(tenl), valuel[i]);
-        _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INEXACT);
+        _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INEXACT);
     }
-    _Fpu_WriteRound(_FPU_TONEAREST);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_TONEAREST);
     _TEST_FLOAT(__prec_math_atan(half), 0x1.dac670561bb4fp-2);
 
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(__prec_math_atan(0.0), 0.0);
     _TEST_FLOAT(__prec_math_atanf(-0.0f), -0.0f);
     _TEST_FLOAT(__prec_math_atanl(-0.0L), -0.0L);
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_atan(dnan)));
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_atan(dnan)));
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
     _TEST_FLOAT(__prec_math_atan(inf), 0x1.921fb54442d18p+0);
     _TEST_FLOAT(__prec_math_atanf((float) -inf), -0x1.921fb6p+0f);
     _TEST_FLOAT(__prec_math_atanl(0x1p100L), 0xc.90fdaa22168c235p-3L);
     _TEST_FLOAT(__prec_math_atan(-0x1p-70), -0x1p-70);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
 }
 
 int main(void)

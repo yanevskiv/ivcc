@@ -222,7 +222,7 @@ int _Basic_Math_ClassifyDouble(double x)
 // Classify x as a long double, the x87's refused encodings as glibc does.
 int _Basic_Math_ClassifyLDouble(long double x)
 {
-    switch (_Long_Double_ReadClass(x)) {
+    switch (_Long_Double_x86_64_ReadClass(x)) {
         case _LONG_DOUBLE_CLASS_ZERO: {
             return _BASIC_MATH_FP_ZERO;
         } break;
@@ -260,7 +260,7 @@ int _Basic_Math_ReadSignDouble(double x)
 // Return 1 if x's sign is negative, else 0.
 int _Basic_Math_ReadSignLDouble(long double x)
 {
-    return _Long_Double_IsNegative(x);
+    return _Long_Double_x86_64_IsNegative(x);
 }
 
 // Return x < y, compared only once known to be ordered.
@@ -299,7 +299,7 @@ long double _Basic_Math_ScaleLDouble(long double x, int n)
         n += _BASIC_MATH_LDOUBLE_STEP_DOWN;
     }
     n = n > _BASIC_MATH_LDOUBLE_EXP_HIGH ? _BASIC_MATH_LDOUBLE_EXP_HIGH : n < _BASIC_MATH_LDOUBLE_EXP_LOW ? _BASIC_MATH_LDOUBLE_EXP_LOW : n;
-    return x * _Long_Double_JoinValue(n, _LONG_DOUBLE_SPLIT_TOP);
+    return x * _Long_Double_x86_64_JoinValue(n, _LONG_DOUBLE_SPLIT_TOP);
 }
 
 // Clamp a long exponent to an int.
@@ -316,8 +316,8 @@ long double _Basic_Math_TakeRemainder(long double x, long double y, _Basic_Math_
     unsigned int q = 0;
     unsigned long long carry = 0;
     long double sign = x;
-    unsigned long long rest = _Long_Double_SplitValue(x, &ex);
-    unsigned long long div = _Long_Double_SplitValue(y, &ey);
+    unsigned long long rest = _Long_Double_x86_64_SplitValue(x, &ex);
+    unsigned long long div = _Long_Double_x86_64_SplitValue(y, &ey);
 
     for (int shift = ex - ey; shift >= 0; shift--) {
         if (carry != 0 || rest >= div) {
@@ -340,7 +340,7 @@ long double _Basic_Math_TakeRemainder(long double x, long double y, _Basic_Math_
         q = _BASIC_MATH_QUOTIENT_ODD;
     }
     *quo = q;
-    return __basic_math_copysignl(_Long_Double_JoinValue(ex < ey ? ex : ey, rest), sign);
+    return __basic_math_copysignl(_Long_Double_x86_64_JoinValue(ex < ey ? ex : ey, rest), sign);
 }
 
 // Read nan's payload from tagp as strtod reads one from "NAN(tagp)".
@@ -365,7 +365,7 @@ long double _Basic_Math_RaiseDomain(long double x, long double y)
 long double _Basic_Math_RaisePole(void)
 {
     _Err_Errno = _SYS_ERANGE;
-    _Fpu_RaiseFlags(_FPU_DIVBYZERO);
+    _Fpu_x86_64_RaiseFlags(_FPU_X86_64_DIVBYZERO);
     return -_EXACT_INFINITY;
 }
 
@@ -382,7 +382,7 @@ long double _Basic_Math_CheckRange(long double x, long double y, long double lea
 {
     _Basic_Math_CheckScaled(x, y);
     if (y == y && y != 0 && __basic_math_fabsl(y) < least) {
-        _Fpu_RaiseFlags(_FPU_UNDERFLOW | _FPU_INEXACT);
+        _Fpu_x86_64_RaiseFlags(_FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT);
     }
     return y;
 }
@@ -409,13 +409,13 @@ long double _Basic_Math_CheckPower(long double x, long double y, long double z, 
 void _Basic_Math_CheckNext(long double x, int class)
 {
     if (class == _BASIC_MATH_FP_INFINITE) {
-        _Fpu_RaiseFlags(_FPU_OVERFLOW | _FPU_INEXACT);
+        _Fpu_x86_64_RaiseFlags(_FPU_X86_64_OVERFLOW | _FPU_X86_64_INEXACT);
         _Err_Errno = _SYS_ERANGE;
     } else if ((class == _BASIC_MATH_FP_SUBNORMAL || class == _BASIC_MATH_FP_ZERO) && x != 0) {
-        _Fpu_RaiseFlags(_FPU_UNDERFLOW | _FPU_INEXACT);
+        _Fpu_x86_64_RaiseFlags(_FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT);
         _Err_Errno = _SYS_ERANGE;
     } else if (class == _BASIC_MATH_FP_SUBNORMAL) {
-        _Fpu_RaiseFlags(_FPU_UNDERFLOW | _FPU_INEXACT);
+        _Fpu_x86_64_RaiseFlags(_FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT);
     }
 }
 
@@ -527,7 +527,7 @@ int _Basic_Math_SplitFraction(long double x, long double *m)
 {
     int e;
 
-    *m = _Long_Double_SplitValue(x, &e) * _BASIC_MATH_LDOUBLE_UNIT;
+    *m = _Long_Double_x86_64_SplitValue(x, &e) * _BASIC_MATH_LDOUBLE_UNIT;
     if (*m > _BASIC_MATH_SQRT_TWO) {
         *m *= _BASIC_MATH_HALF;
         e++;
@@ -724,7 +724,7 @@ long double _Basic_Math_TakeLogParts(long double x, long double *low)
 _Basic_Math_Parity _Basic_Math_ReadParity(long double y)
 {
     int exp;
-    unsigned long long sig = _Long_Double_SplitValue(y, &exp);
+    unsigned long long sig = _Long_Double_x86_64_SplitValue(y, &exp);
     int point = _LONG_DOUBLE_SPLIT_SHIFT - exp;
 
     if (point < 0) {
@@ -798,7 +798,7 @@ long double _Basic_Math_IterateRoot(long double x)
     if (x == 0) {
         return 0;
     }
-    m = _Long_Double_SplitValue(x, &e) * _BASIC_MATH_LDOUBLE_UNIT;
+    m = _Long_Double_x86_64_SplitValue(x, &e) * _BASIC_MATH_LDOUBLE_UNIT;
     if (e % 2 != 0) {
         m *= 2;
         e--;
@@ -1423,16 +1423,16 @@ long double _Basic_Math_TakeTgamma(long double x, int *n)
 // Take a fraction of x to nearest, then scale it in the rounding direction.
 long double _Basic_Math_TakeNearest(long double (*take)(long double, int *), long double x)
 {
-    int round = _Fpu_ReadRound();
+    int round = _Fpu_x86_64_ReadRound();
     long double result;
     int n;
 
-    if (round != _FPU_TONEAREST) {
-        _Fpu_WriteRound(_FPU_TONEAREST);
+    if (round != _FPU_X86_64_TONEAREST) {
+        _Fpu_x86_64_WriteRound(_FPU_X86_64_TONEAREST);
     }
     result = take(x, &n);
-    if (round != _FPU_TONEAREST) {
-        _Fpu_WriteRound(round);
+    if (round != _FPU_X86_64_TONEAREST) {
+        _Fpu_x86_64_WriteRound(round);
     }
     return _Basic_Math_ScaleLDouble(result, n);
 }
@@ -1747,9 +1747,9 @@ long double __basic_math_frexpl(long double value, int *exp)
     if (! _BASIC_MATH_IS_FINITE(value) || value == 0) {
         return value + value;
     }
-    sig = _Long_Double_SplitValue(value, &power);
+    sig = _Long_Double_x86_64_SplitValue(value, &power);
     *exp = power - _BASIC_MATH_FRACTION_EXP;
-    return __basic_math_copysignl(_Long_Double_JoinValue(_BASIC_MATH_FRACTION_EXP, sig), value);
+    return __basic_math_copysignl(_Long_Double_x86_64_JoinValue(_BASIC_MATH_FRACTION_EXP, sig), value);
 }
 
 // Extract x's exponent as an int.
@@ -1772,10 +1772,10 @@ int __basic_math_ilogbl(long double x)
 
     if (class == _BASIC_MATH_FP_NAN || class == _BASIC_MATH_FP_INFINITE || class == _BASIC_MATH_FP_ZERO) {
         _Err_Errno = _SYS_EDOM;
-        _Fpu_RaiseFlags(_FPU_INVALID);
+        _Fpu_x86_64_RaiseFlags(_FPU_X86_64_INVALID);
         return class == _BASIC_MATH_FP_INFINITE ? _BASIC_MATH_INT_MAX : class == _BASIC_MATH_FP_ZERO ? _BASIC_MATH_FP_ILOGB0 : _BASIC_MATH_FP_ILOGBNAN;
     }
-    _Long_Double_SplitValue(x, &exp);
+    _Long_Double_x86_64_SplitValue(x, &exp);
     return exp;
 }
 
@@ -1893,10 +1893,10 @@ long double __basic_math_logbl(long double x)
         return _EXACT_INFINITY;
     }
     if (x == 0) {
-        _Fpu_RaiseFlags(_FPU_DIVBYZERO);
+        _Fpu_x86_64_RaiseFlags(_FPU_X86_64_DIVBYZERO);
         return -_EXACT_INFINITY;
     }
-    _Long_Double_SplitValue(x, &exp);
+    _Long_Double_x86_64_SplitValue(x, &exp);
     return exp;
 }
 
@@ -2018,7 +2018,7 @@ float __basic_math_fabsf(float x)
 // Clear the sign of x.
 long double __basic_math_fabsl(long double x)
 {
-    return _Long_Double_ClearSign(x);
+    return _Long_Double_x86_64_ClearSign(x);
 }
 
 // Take the square root of the sum of the squares of x and y.
@@ -2202,15 +2202,15 @@ float __basic_math_nearbyintf(float x)
 // Round x to an integer in the current direction without inexact.
 long double __basic_math_nearbyintl(long double x)
 {
-    _Fpu_Env env;
+    _Fpu_x86_64_Env env;
     long double rounded;
 
     if (_BASIC_MATH_IS_NAN(x)) {
         return x + x;
     }
-    _Fpu_HoldEnv(&env);
+    _Fpu_x86_64_HoldEnv(&env);
     rounded = __basic_math_rintl(x);
-    _Fpu_WriteEnv(&env);
+    _Fpu_x86_64_WriteEnv(&env);
     return rounded;
 }
 
@@ -2356,14 +2356,14 @@ long double __basic_math_truncl(long double x)
     if (! _BASIC_MATH_IS_FINITE(x) || x == 0) {
         return x + x;
     }
-    sig = _Long_Double_SplitValue(x, &exp);
+    sig = _Long_Double_x86_64_SplitValue(x, &exp);
     if (exp >= _LONG_DOUBLE_SPLIT_SHIFT) {
         return x;
     }
     if (exp < 0) {
         return __basic_math_copysignl(0, x);
     }
-    return __basic_math_copysignl(_Long_Double_JoinValue(exp, sig & _EXACT_ALL_BITS << (_LONG_DOUBLE_SPLIT_SHIFT - exp)), x);
+    return __basic_math_copysignl(_Long_Double_x86_64_JoinValue(exp, sig & _EXACT_ALL_BITS << (_LONG_DOUBLE_SPLIT_SHIFT - exp)), x);
 }
 
 // Take the remainder of x by y toward zero.
@@ -2478,7 +2478,7 @@ float __basic_math_copysignf(float x, float y)
 // Give x the sign of y.
 long double __basic_math_copysignl(long double x, long double y)
 {
-    return _Long_Double_CopySign(x, y);
+    return _Long_Double_x86_64_CopySign(x, y);
 }
 
 // Make a quiet NaN of tagp's payload.
@@ -2504,7 +2504,7 @@ float __basic_math_nanf(const char *tagp)
 // Make a quiet NaN of tagp's payload.
 long double __basic_math_nanl(const char *tagp)
 {
-    return _Long_Double_MakeNan(_Basic_Math_ReadPayload(tagp));
+    return _Long_Double_x86_64_MakeNan(_Basic_Math_ReadPayload(tagp));
 }
 
 // Step x to the next value toward y.
@@ -2593,7 +2593,7 @@ long double __basic_math_nexttowardl(long double x, long double y)
     if (x == 0) {
         next = y < 0 ? -_BASIC_MATH_LDOUBLE_TINY : _BASIC_MATH_LDOUBLE_TINY;
     } else {
-        next = _Long_Double_StepValue(x, (x < y) == (x > 0) ? _LONG_DOUBLE_STEP_UP : _LONG_DOUBLE_STEP_DOWN);
+        next = _Long_Double_x86_64_StepValue(x, (x < y) == (x > 0) ? _LONG_DOUBLE_STEP_UP : _LONG_DOUBLE_STEP_DOWN);
     }
     _Basic_Math_CheckNext(x, _BASIC_MATH_CLASSIFY(next));
     return next;

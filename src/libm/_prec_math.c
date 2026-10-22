@@ -340,7 +340,7 @@ _Bool _Prec_Math_IsPowerTen(long double x, long k)
     if (k < 1 || k > _PREC_MATH_LDOUBLE_TENS) {
         return 0;
     }
-    _Exact_SetWide(&value, _Long_Double_SplitValue(x, &exp));
+    _Exact_SetWide(&value, _Long_Double_x86_64_SplitValue(x, &exp));
     if (_Exact_AlignWide(&value, exp - _LONG_DOUBLE_SPLIT_SHIFT)) {
         return 0;
     }
@@ -353,7 +353,7 @@ _Bool _Prec_Math_IsPowerTen(long double x, long k)
 _Prec_Math_Parity _Prec_Math_ReadParity(long double y)
 {
     int exp;
-    unsigned long long sig = _Long_Double_SplitValue(y, &exp);
+    unsigned long long sig = _Long_Double_x86_64_SplitValue(y, &exp);
     int point = _LONG_DOUBLE_SPLIT_SHIFT - exp;
 
     if (point < 0) {
@@ -372,7 +372,7 @@ _Bool _Prec_Math_PowerExact(_Exact_Value *value, long double x, long double y)
     _Exact_Wide odd;
     _Exact_Wide rest;
     _Exact_Value power;
-    unsigned long long sig = _Long_Double_SplitValue(x, &exp);
+    unsigned long long sig = _Long_Double_x86_64_SplitValue(x, &exp);
     int unit = exp - _LONG_DOUBLE_SPLIT_SHIFT;
 
     for (; (sig & _EXACT_LOW_BIT) == 0; sig >>= 1) {
@@ -425,7 +425,7 @@ long double _Prec_Math_RaiseDomain(long double x, long double y)
 long double _Prec_Math_RaisePole(void)
 {
     _Err_Errno = _SYS_ERANGE;
-    _Fpu_RaiseFlags(_FPU_DIVBYZERO);
+    _Fpu_x86_64_RaiseFlags(_FPU_X86_64_DIVBYZERO);
     return -_EXACT_INFINITY;
 }
 
@@ -434,7 +434,7 @@ long double _Prec_Math_RoundRange(const _Exact_Value *value, _Exact_Type type)
 {
     long double result = _Exact_RoundValue(value, type);
 
-    if (_Long_Double_IsInf(result) || result == 0) {
+    if (_Long_Double_x86_64_IsInf(result) || result == 0) {
         _Err_Errno = _SYS_ERANGE;
     }
     return result;
@@ -447,17 +447,17 @@ long double _Prec_Math_TakeExp(long double x, _Prec_Math_Base base, _Exact_Type 
     _Exact_Value value;
     _Exact_Value constant;
 
-    if (_Long_Double_IsNan(x)) {
+    if (_Long_Double_x86_64_IsNan(x)) {
         return x + x;
     }
-    if (_Long_Double_IsInf(x)) {
+    if (_Long_Double_x86_64_IsInf(x)) {
         return x > 0 ? x : 0.0L;
     }
     if (x == 0) {
         return 1.0L;
     }
-    if (_Long_Double_ClearSign(x) > _PREC_MATH_EXP_CLAMP) {
-        x = _Long_Double_CopySign(_PREC_MATH_EXP_CLAMP, x);
+    if (_Long_Double_x86_64_ClearSign(x) > _PREC_MATH_EXP_CLAMP) {
+        x = _Long_Double_x86_64_CopySign(_PREC_MATH_EXP_CLAMP, x);
     }
     if (base == _PREC_MATH_BASE_2 && _Prec_Math_ReadParity(x) != _PREC_MATH_PARITY_NONE) {
         _Exact_SetWide(&value.ev_sig, _EXACT_LOW_BIT);
@@ -482,10 +482,10 @@ long double _Prec_Math_TakeExpm1(long double x, _Exact_Type type)
     _Exact_Value t;
     _Exact_Value value;
 
-    if (_Long_Double_IsNan(x)) {
+    if (_Long_Double_x86_64_IsNan(x)) {
         return x + x;
     }
-    if (_Long_Double_IsInf(x)) {
+    if (_Long_Double_x86_64_IsInf(x)) {
         return x > 0 ? x : -1.0L;
     }
     if (x == 0) {
@@ -508,7 +508,7 @@ long double _Prec_Math_TakeLog(long double x, _Prec_Math_Base base, _Exact_Type 
     _Exact_Value value;
     _Exact_Value constant;
 
-    if (_Long_Double_IsNan(x)) {
+    if (_Long_Double_x86_64_IsNan(x)) {
         return x + x;
     }
     if (x < 0) {
@@ -517,7 +517,7 @@ long double _Prec_Math_TakeLog(long double x, _Prec_Math_Base base, _Exact_Type 
     if (x == 0) {
         return _Prec_Math_RaisePole();
     }
-    if (_Long_Double_IsInf(x)) {
+    if (_Long_Double_x86_64_IsInf(x)) {
         return x;
     }
     if (x == 1) {
@@ -547,7 +547,7 @@ long double _Prec_Math_TakeLog1p(long double x, _Exact_Type type)
     _Exact_Value u;
     _Exact_Value value;
 
-    if (_Long_Double_IsNan(x)) {
+    if (_Long_Double_x86_64_IsNan(x)) {
         return x + x;
     }
     if (x < -1) {
@@ -556,7 +556,7 @@ long double _Prec_Math_TakeLog1p(long double x, _Exact_Type type)
     if (x == -1) {
         return _Prec_Math_RaisePole();
     }
-    if (_Long_Double_IsInf(x) || x == 0) {
+    if (_Long_Double_x86_64_IsInf(x) || x == 0) {
         return x;
     }
     _Exact_MakeValue(&u, x);
@@ -581,18 +581,18 @@ long double _Prec_Math_TakePow(long double x, long double y, _Exact_Type type)
     if (y == 0 || x == 1) {
         return 1.0L;
     }
-    if (_Long_Double_IsNan(x) || _Long_Double_IsNan(y)) {
+    if (_Long_Double_x86_64_IsNan(x) || _Long_Double_x86_64_IsNan(y)) {
         return x + y;
     }
-    if (_Long_Double_IsInf(y)) {
-        return _Long_Double_ClearSign(x) == 1 ? 1.0L : (_Long_Double_ClearSign(x) < 1) == (y < 0) ? _EXACT_INFINITY : 0.0L;
+    if (_Long_Double_x86_64_IsInf(y)) {
+        return _Long_Double_x86_64_ClearSign(x) == 1 ? 1.0L : (_Long_Double_x86_64_ClearSign(x) < 1) == (y < 0) ? _EXACT_INFINITY : 0.0L;
     }
     parity = _Prec_Math_ReadParity(y);
-    negative = _Long_Double_IsNegative(x) && parity == _PREC_MATH_PARITY_ODD;
+    negative = _Long_Double_x86_64_IsNegative(x) && parity == _PREC_MATH_PARITY_ODD;
     if (x == 0 && y < 0) {
         return negative ? _Prec_Math_RaisePole() : -_Prec_Math_RaisePole();
     }
-    if (x == 0 || _Long_Double_IsInf(x)) {
+    if (x == 0 || _Long_Double_x86_64_IsInf(x)) {
         result = (x == 0) == (y < 0) ? _EXACT_INFINITY : 0.0L;
         return negative ? -result : result;
     }
@@ -604,8 +604,8 @@ long double _Prec_Math_TakePow(long double x, long double y, _Exact_Type type)
         _Exact_ExtractRoot(&value, &u, _EXACT_ROOT_SQUARE);
         return _Exact_RoundValue(&value, type);
     }
-    if (! _Prec_Math_PowerExact(&value, _Long_Double_ClearSign(x), y)) {
-        _Exact_MakeValue(&u, _Long_Double_ClearSign(x));
+    if (! _Prec_Math_PowerExact(&value, _Long_Double_x86_64_ClearSign(x), y)) {
+        _Exact_MakeValue(&u, _Long_Double_x86_64_ClearSign(x));
         e = _Prec_Math_SplitLog(&num, &den, &u);
         _Prec_Math_LogExact(&log, &num, &den, e);
         _Exact_MakeValue(&u, y);
@@ -649,7 +649,7 @@ void _Prec_Math_WorkRoot(_Exact_Value *root, const _Exact_Value *a)
     scaled.ev_unit -= 2 * half;
     top = scaled.ev_sig;
     _Exact_AlignWide(&top, _LONG_DOUBLE_SPLIT_SHIFT - _Exact_FindWideTop(&top));
-    m = _Long_Double_JoinValue(exp - 2 * half, _Exact_ReadWideLow(&top));
+    m = _Long_Double_x86_64_JoinValue(exp - 2 * half, _Exact_ReadWideLow(&top));
     s = m;
     for (int i = 0; i < _PREC_MATH_ROOT_GUESSES; i++) {
         s = (s + m / s) / 2;
@@ -778,7 +778,7 @@ long double _Prec_Math_TakeQuarters(unsigned int quarters, long double sign, _Ex
     _Exact_Value value;
 
     _Prec_Math_MakeQuarters(&value, quarters);
-    value.ev_negative = _Long_Double_IsNegative(sign) != 0;
+    value.ev_negative = _Long_Double_x86_64_IsNegative(sign) != 0;
     value.ev_sticky = 1;
     return _Exact_RoundValue(&value, type);
 }
@@ -794,31 +794,31 @@ long double _Prec_Math_TakeTrig(long double x, _Prec_Math_Trig which, _Exact_Typ
     _Exact_Value cosine;
     unsigned int quadrant = 0;
 
-    if (_Long_Double_IsNan(x)) {
+    if (_Long_Double_x86_64_IsNan(x)) {
         return x + x;
     }
-    if (_Long_Double_IsInf(x)) {
+    if (_Long_Double_x86_64_IsInf(x)) {
         return _Prec_Math_RaiseDomain(x, 0);
     }
     if (x == 0) {
         return which == _PREC_MATH_TRIG_COS ? 1.0L : x;
     }
-    if (_Long_Double_ClearSign(x) < _PREC_MATH_TINY && which == _PREC_MATH_TRIG_COS) {
+    if (_Long_Double_x86_64_ClearSign(x) < _PREC_MATH_TINY && which == _PREC_MATH_TRIG_COS) {
         return _Prec_Math_TakeTiny(1.0L, _LONG_DOUBLE_STEP_DOWN, type);
     }
-    if (_Long_Double_ClearSign(x) < _PREC_MATH_TINY) {
+    if (_Long_Double_x86_64_ClearSign(x) < _PREC_MATH_TINY) {
         return _Prec_Math_TakeTiny(x, which == _PREC_MATH_TRIG_SIN ? _LONG_DOUBLE_STEP_DOWN : _LONG_DOUBLE_STEP_UP, type);
     }
-    if (_Long_Double_ClearSign(x) < 1) {
-        _Exact_MakeValue(&r, _Long_Double_ClearSign(x));
+    if (_Long_Double_x86_64_ClearSign(x) < 1) {
+        _Exact_MakeValue(&r, _Long_Double_x86_64_ClearSign(x));
     } else {
-        quadrant = _Prec_Math_ReduceTrig(&r, _Long_Double_ClearSign(x));
+        quadrant = _Prec_Math_ReduceTrig(&r, _Long_Double_x86_64_ClearSign(x));
     }
     odd = (quadrant & _PREC_MATH_QUADRANT_ODD) != 0;
     switch (which) {
         case _PREC_MATH_TRIG_SIN: {
             _Prec_Math_TrigExact(&value, &r, odd ? _PREC_MATH_TRIG_COS : _PREC_MATH_TRIG_SIN);
-            flip = ((quadrant & _PREC_MATH_QUADRANT_HALF) != 0) != (_Long_Double_IsNegative(x) != 0);
+            flip = ((quadrant & _PREC_MATH_QUADRANT_HALF) != 0) != (_Long_Double_x86_64_IsNegative(x) != 0);
         } break;
         case _PREC_MATH_TRIG_COS: {
             _Prec_Math_TrigExact(&value, &r, odd ? _PREC_MATH_TRIG_SIN : _PREC_MATH_TRIG_COS);
@@ -828,7 +828,7 @@ long double _Prec_Math_TakeTrig(long double x, _Prec_Math_Trig which, _Exact_Typ
             _Prec_Math_TrigExact(&sine, &r, _PREC_MATH_TRIG_SIN);
             _Prec_Math_TrigExact(&cosine, &r, _PREC_MATH_TRIG_COS);
             _Prec_Math_WorkDivide(&value, odd ? &cosine : &sine, odd ? &sine : &cosine);
-            flip = odd != (_Long_Double_IsNegative(x) != 0);
+            flip = odd != (_Long_Double_x86_64_IsNegative(x) != 0);
         } break;
     }
     if (flip) {
@@ -849,19 +849,19 @@ long double _Prec_Math_TakeArc(long double x, _Prec_Math_Trig which, _Exact_Type
     _Exact_Value value;
     _Exact_Value whole;
 
-    if (_Long_Double_IsNan(x)) {
+    if (_Long_Double_x86_64_IsNan(x)) {
         return x + x;
     }
-    if (_Long_Double_ClearSign(x) > 1) {
+    if (_Long_Double_x86_64_ClearSign(x) > 1) {
         return _Prec_Math_RaiseDomain(x, 0);
     }
     if (which == _PREC_MATH_TRIG_SIN && x == 0) {
         return x;
     }
-    if (which == _PREC_MATH_TRIG_SIN && _Long_Double_ClearSign(x) < _PREC_MATH_TINY) {
+    if (which == _PREC_MATH_TRIG_SIN && _Long_Double_x86_64_ClearSign(x) < _PREC_MATH_TINY) {
         return _Prec_Math_TakeTiny(x, _LONG_DOUBLE_STEP_UP, type);
     }
-    if (which == _PREC_MATH_TRIG_SIN && _Long_Double_ClearSign(x) == 1) {
+    if (which == _PREC_MATH_TRIG_SIN && _Long_Double_x86_64_ClearSign(x) == 1) {
         return _Prec_Math_TakeQuarters(_PREC_MATH_HALF_PI, x, type);
     }
     if (which == _PREC_MATH_TRIG_COS && x == 1) {
@@ -870,7 +870,7 @@ long double _Prec_Math_TakeArc(long double x, _Prec_Math_Trig which, _Exact_Type
     if (which == _PREC_MATH_TRIG_COS && (x == 0 || x == -1)) {
         return _Prec_Math_TakeQuarters(x == 0 ? _PREC_MATH_HALF_PI : _PREC_MATH_WHOLE_PI, 1.0L, type);
     }
-    _Exact_MakeValue(&side, _Long_Double_ClearSign(x));
+    _Exact_MakeValue(&side, _Long_Double_x86_64_ClearSign(x));
     _Exact_MakeValue(&one, 1.0L);
     _Prec_Math_WorkAdd(&high, &one, &side);
     side.ev_negative = 1;
@@ -901,30 +901,30 @@ long double _Prec_Math_TakeAtan2(long double y, long double x, _Exact_Type type)
     _Exact_Value value;
     _Exact_Value whole;
 
-    if (_Long_Double_IsNan(x) || _Long_Double_IsNan(y)) {
+    if (_Long_Double_x86_64_IsNan(x) || _Long_Double_x86_64_IsNan(y)) {
         return x + y;
     }
     if (y == 0) {
-        return _Long_Double_IsNegative(x) ? _Prec_Math_TakeQuarters(_PREC_MATH_WHOLE_PI, y, type) : y;
+        return _Long_Double_x86_64_IsNegative(x) ? _Prec_Math_TakeQuarters(_PREC_MATH_WHOLE_PI, y, type) : y;
     }
-    if (_Long_Double_IsInf(y) && _Long_Double_IsInf(x)) {
+    if (_Long_Double_x86_64_IsInf(y) && _Long_Double_x86_64_IsInf(x)) {
         return _Prec_Math_TakeQuarters(x > 0 ? _PREC_MATH_QUARTER_PI : _PREC_MATH_THREE_QUARTER_PI, y, type);
     }
-    if (_Long_Double_IsInf(y) || x == 0) {
+    if (_Long_Double_x86_64_IsInf(y) || x == 0) {
         return _Prec_Math_TakeQuarters(_PREC_MATH_HALF_PI, y, type);
     }
-    if (_Long_Double_IsInf(x)) {
-        return x > 0 ? _Long_Double_CopySign(0.0L, y) : _Prec_Math_TakeQuarters(_PREC_MATH_WHOLE_PI, y, type);
+    if (_Long_Double_x86_64_IsInf(x)) {
+        return x > 0 ? _Long_Double_x86_64_CopySign(0.0L, y) : _Prec_Math_TakeQuarters(_PREC_MATH_WHOLE_PI, y, type);
     }
-    _Exact_MakeValue(&num, _Long_Double_ClearSign(y));
-    _Exact_MakeValue(&den, _Long_Double_ClearSign(x));
+    _Exact_MakeValue(&num, _Long_Double_x86_64_ClearSign(y));
+    _Exact_MakeValue(&den, _Long_Double_x86_64_ClearSign(x));
     _Prec_Math_AtanExact(&value, &num, &den);
     if (x < 0) {
         _Prec_Math_MakeQuarters(&whole, _PREC_MATH_WHOLE_PI);
         value.ev_negative = 1;
         _Prec_Math_WorkAdd(&value, &whole, &value);
     }
-    value.ev_negative = _Long_Double_IsNegative(y) != 0;
+    value.ev_negative = _Long_Double_x86_64_IsNegative(y) != 0;
     value.ev_sticky = 1;
     return _Prec_Math_RoundRange(&value, type);
 }
@@ -939,22 +939,22 @@ long double _Prec_Math_TakeHyperbolic(long double x, _Prec_Math_Trig which, _Exa
     _Exact_Value part;
     _Exact_Value value;
 
-    if (_Long_Double_IsNan(x)) {
+    if (_Long_Double_x86_64_IsNan(x)) {
         return x + x;
     }
-    if (_Long_Double_IsInf(x)) {
-        return which == _PREC_MATH_TRIG_COS ? _EXACT_INFINITY : which == _PREC_MATH_TRIG_SIN ? x : _Long_Double_CopySign(1.0L, x);
+    if (_Long_Double_x86_64_IsInf(x)) {
+        return which == _PREC_MATH_TRIG_COS ? _EXACT_INFINITY : which == _PREC_MATH_TRIG_SIN ? x : _Long_Double_x86_64_CopySign(1.0L, x);
     }
     if (x == 0) {
         return which == _PREC_MATH_TRIG_COS ? 1.0L : x;
     }
-    if (_Long_Double_ClearSign(x) < _PREC_MATH_TINY && which == _PREC_MATH_TRIG_COS) {
+    if (_Long_Double_x86_64_ClearSign(x) < _PREC_MATH_TINY && which == _PREC_MATH_TRIG_COS) {
         return _Prec_Math_TakeTiny(1.0L, _LONG_DOUBLE_STEP_UP, type);
     }
-    if (_Long_Double_ClearSign(x) < _PREC_MATH_TINY) {
+    if (_Long_Double_x86_64_ClearSign(x) < _PREC_MATH_TINY) {
         return _Prec_Math_TakeTiny(x, which == _PREC_MATH_TRIG_SIN ? _LONG_DOUBLE_STEP_UP : _LONG_DOUBLE_STEP_DOWN, type);
     }
-    _Exact_MakeValue(&t, _Long_Double_ClearSign(x));
+    _Exact_MakeValue(&t, _Long_Double_x86_64_ClearSign(x));
     if (which == _PREC_MATH_TRIG_TAN) {
         t.ev_unit++;
     }
@@ -996,25 +996,25 @@ long double _Prec_Math_TakeArcHyperbolic(long double x, _Prec_Math_Trig which, _
     _Exact_Value root;
     _Exact_Value value;
 
-    if (_Long_Double_IsNan(x)) {
+    if (_Long_Double_x86_64_IsNan(x)) {
         return x + x;
     }
-    if ((which == _PREC_MATH_TRIG_COS && x < 1) || (which == _PREC_MATH_TRIG_TAN && _Long_Double_ClearSign(x) > 1)) {
+    if ((which == _PREC_MATH_TRIG_COS && x < 1) || (which == _PREC_MATH_TRIG_TAN && _Long_Double_x86_64_ClearSign(x) > 1)) {
         return _Prec_Math_RaiseDomain(x, 0);
     }
-    if (which == _PREC_MATH_TRIG_TAN && _Long_Double_ClearSign(x) == 1) {
+    if (which == _PREC_MATH_TRIG_TAN && _Long_Double_x86_64_ClearSign(x) == 1) {
         return x > 0 ? -_Prec_Math_RaisePole() : _Prec_Math_RaisePole();
     }
-    if (_Long_Double_IsInf(x) || x == 0) {
+    if (_Long_Double_x86_64_IsInf(x) || x == 0) {
         return x;
     }
     if (which == _PREC_MATH_TRIG_COS && x == 1) {
         return 0.0L;
     }
-    if (_Long_Double_ClearSign(x) < _PREC_MATH_TINY) {
+    if (_Long_Double_x86_64_ClearSign(x) < _PREC_MATH_TINY) {
         return _Prec_Math_TakeTiny(x, which == _PREC_MATH_TRIG_SIN ? _LONG_DOUBLE_STEP_DOWN : _LONG_DOUBLE_STEP_UP, type);
     }
-    _Exact_MakeValue(&a, _Long_Double_ClearSign(x));
+    _Exact_MakeValue(&a, _Long_Double_x86_64_ClearSign(x));
     _Exact_MakeValue(&one, 1.0L);
     switch (which) {
         case _PREC_MATH_TRIG_SIN: {
@@ -1222,13 +1222,13 @@ _Bool _Prec_Math_LogGammaExact(_Exact_Value *log, long double x)
         whole++;
     }
     negative = (rest < 0) != ((whole & 1) != 0);
-    turn = _Long_Double_ClearSign(rest) > _PREC_MATH_SINE_TURN ? _PREC_MATH_HALF - _Long_Double_ClearSign(rest) : _Long_Double_ClearSign(rest);
+    turn = _Long_Double_x86_64_ClearSign(rest) > _PREC_MATH_SINE_TURN ? _PREC_MATH_HALF - _Long_Double_x86_64_ClearSign(rest) : _Long_Double_x86_64_ClearSign(rest);
     sine = one;
     if (turn != 0) {
         _Exact_MakeValue(&part, turn);
         _Prec_Math_MakeConstant(&r, _PREC_MATH_CONST_PI);
         _Prec_Math_WorkMultiply(&r, &r, &part);
-        _Prec_Math_TrigExact(&sine, &r, _Long_Double_ClearSign(rest) > _PREC_MATH_SINE_TURN ? _PREC_MATH_TRIG_COS : _PREC_MATH_TRIG_SIN);
+        _Prec_Math_TrigExact(&sine, &r, _Long_Double_x86_64_ClearSign(rest) > _PREC_MATH_SINE_TURN ? _PREC_MATH_TRIG_COS : _PREC_MATH_TRIG_SIN);
     }
     _Prec_Math_MakeConstant(&r, _PREC_MATH_CONST_PI);
     _Prec_Math_WorkDivide(&r, &r, &sine);
@@ -1248,19 +1248,19 @@ long double _Prec_Math_TakeErf(long double x, _Exact_Type type)
     _Exact_Value one;
     _Exact_Value value;
 
-    if (_Long_Double_IsNan(x)) {
+    if (_Long_Double_x86_64_IsNan(x)) {
         return x + x;
     }
-    if (_Long_Double_IsInf(x)) {
-        return _Long_Double_CopySign(1.0L, x);
+    if (_Long_Double_x86_64_IsInf(x)) {
+        return _Long_Double_x86_64_CopySign(1.0L, x);
     }
     if (x == 0) {
         return x;
     }
-    if (_Long_Double_ClearSign(x) < _PREC_MATH_ERF_SPLIT) {
-        _Prec_Math_ErfExact(&value, _Long_Double_ClearSign(x));
+    if (_Long_Double_x86_64_ClearSign(x) < _PREC_MATH_ERF_SPLIT) {
+        _Prec_Math_ErfExact(&value, _Long_Double_x86_64_ClearSign(x));
     } else {
-        _Prec_Math_ErfcExact(&value, _Long_Double_ClearSign(x));
+        _Prec_Math_ErfcExact(&value, _Long_Double_x86_64_ClearSign(x));
         _Exact_MakeValue(&one, 1.0L);
         value.ev_negative = 1;
         _Prec_Math_WorkAdd(&value, &one, &value);
@@ -1276,22 +1276,22 @@ long double _Prec_Math_TakeErfc(long double x, _Exact_Type type)
     _Exact_Value base;
     _Exact_Value value;
 
-    if (_Long_Double_IsNan(x)) {
+    if (_Long_Double_x86_64_IsNan(x)) {
         return x + x;
     }
-    if (_Long_Double_IsInf(x)) {
+    if (_Long_Double_x86_64_IsInf(x)) {
         return x > 0 ? 0.0L : 2.0L;
     }
     if (x == 0) {
         return 1.0L;
     }
-    if (_Long_Double_ClearSign(x) < _PREC_MATH_ERF_SPLIT) {
-        _Prec_Math_ErfExact(&value, _Long_Double_ClearSign(x));
+    if (_Long_Double_x86_64_ClearSign(x) < _PREC_MATH_ERF_SPLIT) {
+        _Prec_Math_ErfExact(&value, _Long_Double_x86_64_ClearSign(x));
         _Exact_MakeValue(&base, 1.0L);
         value.ev_negative = x > 0;
         _Prec_Math_WorkAdd(&value, &base, &value);
     } else {
-        _Prec_Math_ErfcExact(&value, _Long_Double_ClearSign(x));
+        _Prec_Math_ErfcExact(&value, _Long_Double_x86_64_ClearSign(x));
     }
     if (x <= -_PREC_MATH_ERF_SPLIT) {
         _Exact_MakeValue(&base, 2.0L);
@@ -1307,10 +1307,10 @@ long double _Prec_Math_TakeLgamma(long double x, _Exact_Type type)
 {
     _Exact_Value value;
 
-    if (_Long_Double_IsNan(x)) {
+    if (_Long_Double_x86_64_IsNan(x)) {
         return x + x;
     }
-    if (_Long_Double_IsInf(x)) {
+    if (_Long_Double_x86_64_IsInf(x)) {
         return _EXACT_INFINITY;
     }
     if (x == 1 || x == 2) {
@@ -1332,16 +1332,16 @@ long double _Prec_Math_TakeTgamma(long double x, _Exact_Type type)
     _Exact_Value value;
     _Bool negative;
 
-    if (_Long_Double_IsNan(x)) {
+    if (_Long_Double_x86_64_IsNan(x)) {
         return x + x;
     }
     if (x == 0) {
-        return _Long_Double_IsNegative(x) ? _Prec_Math_RaisePole() : -_Prec_Math_RaisePole();
+        return _Long_Double_x86_64_IsNegative(x) ? _Prec_Math_RaisePole() : -_Prec_Math_RaisePole();
     }
-    if (_Long_Double_IsInf(x) && x > 0) {
+    if (_Long_Double_x86_64_IsInf(x) && x > 0) {
         return x;
     }
-    if (_Long_Double_IsInf(x) || (x < 0 && _Prec_Math_ReadParity(x) != _PREC_MATH_PARITY_NONE)) {
+    if (_Long_Double_x86_64_IsInf(x) || (x < 0 && _Prec_Math_ReadParity(x) != _PREC_MATH_PARITY_NONE)) {
         return _Prec_Math_RaiseDomain(x, 0);
     }
     if (x > 0 && x <= _PREC_MATH_FACTORIAL_MAX && _Prec_Math_ReadParity(x) != _PREC_MATH_PARITY_NONE) {

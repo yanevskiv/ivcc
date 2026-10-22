@@ -29,76 +29,76 @@
 // Clear the flags of excepts in both units.
 int feclearexcept(int excepts)
 {
-    _Fpu_ClearFlags(excepts);
+    _Fpu_x86_64_ClearFlags(excepts);
     return 0;
 }
 
 // Store in flagp which flags of excepts either unit has set.
 int fegetexceptflag(fexcept_t *flagp, int excepts)
 {
-    *flagp = (fexcept_t) _Fpu_TestFlags(excepts);
+    *flagp = (fexcept_t) _Fpu_x86_64_TestFlags(excepts);
     return 0;
 }
 
 // Raise each exception of excepts as the arithmetic raising it would.
 int feraiseexcept(int excepts)
 {
-    _Fpu_RaiseFlags(excepts);
+    _Fpu_x86_64_RaiseFlags(excepts);
     return 0;
 }
 
 // Set the flags of excepts in both units as flagp holds them.
 int fesetexceptflag(const fexcept_t *flagp, int excepts)
 {
-    _Fpu_WriteFlags(*flagp, excepts);
+    _Fpu_x86_64_WriteFlags(*flagp, excepts);
     return 0;
 }
 
 // Return which flags of excepts either unit has set.
 int fetestexcept(int excepts)
 {
-    return _Fpu_TestFlags(excepts);
+    return _Fpu_x86_64_TestFlags(excepts);
 }
 
 // Return the rounding direction.
 int fegetround(void)
 {
-    return _Fpu_ReadRound();
+    return _Fpu_x86_64_ReadRound();
 }
 
 // Set both units' rounding direction to round, if it names one.
 int fesetround(int round)
 {
-    return _Fpu_WriteRound(round);
+    return _Fpu_x86_64_WriteRound(round);
 }
 
 // Store both units' environments in envp.
 int fegetenv(fenv_t *envp)
 {
-    _Fpu_StoreEnv(envp);
+    _Fpu_x86_64_StoreEnv(envp);
     return 0;
 }
 
 // Store the environment in envp, then clear the flags and mask every exception.
 int feholdexcept(fenv_t *envp)
 {
-    _Fpu_HoldEnv(envp);
+    _Fpu_x86_64_HoldEnv(envp);
     return 0;
 }
 
 // Set both units' controls and flags from envp, the x87's stack kept.
 int fesetenv(const fenv_t *envp)
 {
-    _Fpu_WriteEnv(envp);
+    _Fpu_x86_64_WriteEnv(envp);
     return 0;
 }
 
 // Set the environment from envp, then raise the exceptions raised before.
 int feupdateenv(const fenv_t *envp)
 {
-    int raised = _Fpu_TestFlags(FE_ALL_EXCEPT);
+    int raised = _Fpu_x86_64_TestFlags(FE_ALL_EXCEPT);
 
-    _Fpu_WriteEnv(envp);
-    _Fpu_RaiseFlags(raised);
+    _Fpu_x86_64_WriteEnv(envp);
+    _Fpu_x86_64_RaiseFlags(raised);
     return 0;
 }

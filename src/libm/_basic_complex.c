@@ -265,7 +265,7 @@ void _Basic_Complex_DivideLDouble(long double a, long double b, long double c, l
 void _Basic_Complex_CheckTiny(long double x, long double least)
 {
     if (_BASIC_MATH_IS_FINITE(x) && x != 0 && __basic_math_fabsl(x) < least) {
-        _Fpu_RaiseFlags(_FPU_UNDERFLOW | _FPU_INEXACT);
+        _Fpu_x86_64_RaiseFlags(_FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT);
     }
 }
 
@@ -302,7 +302,7 @@ long double _Complex _Basic_Complex_RoundLDouble(long double x, long double y)
 // Make a quiet NaN of no payload and a clear sign.
 long double _Basic_Complex_MakeNan(void)
 {
-    return _Long_Double_MakeNan(0);
+    return _Long_Double_x86_64_MakeNan(0);
 }
 
 // Square x into a high and a low part, or zero where x is below least.
@@ -418,7 +418,7 @@ void _Basic_Complex_TakeExp(long double x, long double y, long double *re, long 
     } else if (_BASIC_MATH_IS_FINITE(x)) {
         *re = _Basic_Complex_MakeNan();
         *im = *re;
-        _Fpu_RaiseFlags(_FPU_INVALID);
+        _Fpu_x86_64_RaiseFlags(_FPU_X86_64_INVALID);
     } else if (_BASIC_MATH_IS_INF(x) && _BASIC_MATH_IS_FINITE(y)) {
         m = x < 0 ? 0 : _EXACT_INFINITY;
         if (y == 0) {
@@ -436,7 +436,7 @@ void _Basic_Complex_TakeExp(long double x, long double y, long double *re, long 
         *re = _Basic_Complex_MakeNan();
         *im = y == 0 ? y : *re;
         if (y != 0 && ! _BASIC_MATH_IS_NAN(y)) {
-            _Fpu_RaiseFlags(_FPU_INVALID);
+            _Fpu_x86_64_RaiseFlags(_FPU_X86_64_INVALID);
         }
     }
 }
@@ -599,7 +599,7 @@ void _Basic_Complex_TakeSinh(long double x, long double y, long double *re, long
         } else {
             *re = _Basic_Complex_MakeNan();
             *im = *re;
-            _Fpu_RaiseFlags(_FPU_INVALID);
+            _Fpu_x86_64_RaiseFlags(_FPU_X86_64_INVALID);
         }
     } else if (_BASIC_MATH_IS_INF(x) && _BASIC_MATH_IS_FINITE(y)) {
         if (y == 0) {
@@ -705,7 +705,7 @@ void _Basic_Complex_TakeTanh(long double x, long double y, long double *re, long
         *re = x == 0 ? x : _Basic_Complex_MakeNan();
         *im = _Basic_Complex_MakeNan();
         if (_BASIC_MATH_IS_INF(y)) {
-            _Fpu_RaiseFlags(_FPU_INVALID);
+            _Fpu_x86_64_RaiseFlags(_FPU_X86_64_INVALID);
         }
     }
 }
@@ -937,7 +937,7 @@ void _Basic_Complex_TakeAtanh(long double x, long double y, long double *re, lon
     } else if (y == 0 && a <= 1) {
         if (a == 1) {
             *re = __basic_math_copysignl(_EXACT_INFINITY, x);
-            _Fpu_RaiseFlags(_FPU_DIVBYZERO);
+            _Fpu_x86_64_RaiseFlags(_FPU_X86_64_DIVBYZERO);
         } else {
             *re = x == 0 ? x : _Basic_Math_TakeArcHyperbolic(x, _BASIC_MATH_TRIG_TAN);
         }

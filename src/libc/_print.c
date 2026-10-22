@@ -451,12 +451,12 @@ unsigned long _Print_ToDigits(char *end, _Print_UintmaxType value, int base, con
 // Unpack a floating value into a sign and its bits by a power of two.
 _Print_Real _Print_ToParts(long double value, _Print_Sign *sign, unsigned long long *mant, int *exp)
 {
-    unsigned int biased = _Long_Double_ReadExponent(value);
-    _Long_Double_Class kind = _Long_Double_ReadClass(value);
+    unsigned int biased = _Long_Double_x86_64_ReadExponent(value);
+    _Long_Double_Class kind = _Long_Double_x86_64_ReadClass(value);
 
-    *mant = _Long_Double_ReadSignificand(value);
-    *exp = (int) (biased != 0 ? biased : 1) - _LONG_DOUBLE_EXP_MAX - (_LONG_DOUBLE_MANT - 1);
-    *sign = _Long_Double_IsNegative(value) ? _PRINT_SIGN_MINUS : _PRINT_SIGN_PLUS;
+    *mant = _Long_Double_x86_64_ReadSignificand(value);
+    *exp = (int) (biased != 0 ? biased : 1) - _LONG_DOUBLE_X86_64_EXP_MAX - (_LONG_DOUBLE_X86_64_MANT - 1);
+    *sign = _Long_Double_x86_64_IsNegative(value) ? _PRINT_SIGN_MINUS : _PRINT_SIGN_PLUS;
     if (kind == _LONG_DOUBLE_CLASS_NAN) {
         return _PRINT_REAL_NAN;
     }
@@ -545,13 +545,13 @@ void _Print_ToNumeral(long double value, _Print_Numeral *num)
 // Read the direction a magnitude of sign rounds in, upward away from zero.
 int _Print_ReadRound(_Print_Sign sign)
 {
-    int round = _Fpu_ReadRound();
+    int round = _Fpu_x86_64_ReadRound();
 
-    if (sign == _PRINT_SIGN_MINUS && round == _FPU_UPWARD) {
-        return _FPU_DOWNWARD;
+    if (sign == _PRINT_SIGN_MINUS && round == _FPU_X86_64_UPWARD) {
+        return _FPU_X86_64_DOWNWARD;
     }
-    if (sign == _PRINT_SIGN_MINUS && round == _FPU_DOWNWARD) {
-        return _FPU_UPWARD;
+    if (sign == _PRINT_SIGN_MINUS && round == _FPU_X86_64_DOWNWARD) {
+        return _FPU_X86_64_UPWARD;
     }
     return round;
 }
@@ -568,8 +568,8 @@ void _Print_RoundNumeral(_Print_Numeral *num, long keep)
         return;
     }
     len = keep > 0 ? (unsigned long) keep : 0;
-    up = round == _FPU_UPWARD || (round == _FPU_TONEAREST && keep >= 0 && digit[len] >= '5');
-    if (up && round == _FPU_TONEAREST && digit[len] == '5' && len + 1 == num->pn_len) {
+    up = round == _FPU_X86_64_UPWARD || (round == _FPU_X86_64_TONEAREST && keep >= 0 && digit[len] >= '5');
+    if (up && round == _FPU_X86_64_TONEAREST && digit[len] == '5' && len + 1 == num->pn_len) {
         up = len > 0 && (digit[len - 1] - '0') % 2 != 0;
     }
     while (up && len > 0 && digit[len - 1] == '9') {
@@ -838,7 +838,7 @@ void _Print_WriteMantissa(_Print_Sink *sink, const _Print_Directive *dir, _Print
         unit = 1ULL << (_PRINT_HEX_BITS * (last - precision));
         below = mant & (unit - 1);
         mant -= below;
-        if (round == _FPU_TONEAREST ? below > unit / 2 || (below == unit / 2 && (mant & unit) != 0) : round == _FPU_UPWARD && below != 0) {
+        if (round == _FPU_X86_64_TONEAREST ? below > unit / 2 || (below == unit / 2 && (mant & unit) != 0) : round == _FPU_X86_64_UPWARD && below != 0) {
             mant += unit;
             if (mant < unit) {
                 mant = 1ULL << (_PRINT_HEX_BITS * last);
@@ -1000,9 +1000,9 @@ void _Print_WriteHexReal(_Print_Sink *sink, const _Print_Directive *dir)
         return;
     }
     if (dir->pd_length == _PRINT_LENGTH_LDOUBLE) {
-        exp = mant != 0 ? exp + _LONG_DOUBLE_MANT - _PRINT_HEX_BITS : 0;
+        exp = mant != 0 ? exp + _LONG_DOUBLE_X86_64_MANT - _PRINT_HEX_BITS : 0;
     } else {
-        exp = mant != 0 ? exp + _LONG_DOUBLE_MANT - 1 : 0;
+        exp = mant != 0 ? exp + _LONG_DOUBLE_X86_64_MANT - 1 : 0;
         under = exp < _PRINT_DOUBLE_MIN - 1 ? _PRINT_DOUBLE_MIN - 1 - exp : 0;
         mant = mant >> (_PRINT_HEX_BITS - 1) >> under;
         exp += under;

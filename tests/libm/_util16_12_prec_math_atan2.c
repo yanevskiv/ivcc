@@ -14,7 +14,7 @@
 // and a range error when the result underflows to zero.
 static void Test_PrecMathAtan2(void)
 {
-    static const int modes[MODES] = {_FPU_TONEAREST, _FPU_DOWNWARD, _FPU_UPWARD, _FPU_TOWARDZERO};
+    static const int modes[MODES] = {_FPU_X86_64_TONEAREST, _FPU_X86_64_DOWNWARD, _FPU_X86_64_UPWARD, _FPU_X86_64_TOWARDZERO};
     static const float valuef[MODES] = {-0x1.4978fap-1f, -0x1.4978fcp-1f, -0x1.4978fap-1f, -0x1.4978fap-1f};
     static const long double valuel[MODES] = {-0x9.6cbe3f9990e91a8p-2L, -0x9.6cbe3f9990e91a8p-2L, -0x9.6cbe3f9990e91a7p-2L, -0x9.6cbe3f9990e91a7p-2L};
     volatile double one = 1.0;
@@ -25,24 +25,24 @@ static void Test_PrecMathAtan2(void)
     double dnan = zero / zero;
 
     for (int i = 0; i < MODES; i++) {
-        _Fpu_WriteRound(modes[i]);
-        _Fpu_ClearFlags(_FPU_EXCEPTS);
+        _Fpu_x86_64_WriteRound(modes[i]);
+        _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
         _TEST_FLOAT(__prec_math_atan2f(threef, 4.0f), valuef[i]);
         _TEST_FLOAT(__prec_math_atan2l(onel, onel), valuel[i]);
-        _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INEXACT);
+        _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INEXACT);
     }
-    _Fpu_WriteRound(_FPU_TONEAREST);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_TONEAREST);
     _TEST_FLOAT(__prec_math_atan2(one, -2.0), 0x1.56c6e7397f5aep+1);
 
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(__prec_math_atan2(0.0, 0.0), 0.0);
     _TEST_FLOAT(__prec_math_atan2(-0.0, 0.0), -0.0);
     _TEST_FLOAT(__prec_math_atan2f(-0.0f, 2.0f), -0.0f);
     _TEST_FLOAT(__prec_math_atan2l(0.0L, inf), 0.0L);
     _TEST_FLOAT(__prec_math_atan2(-1.0, inf), -0.0);
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_atan2(dnan, 1.0)));
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_atan2(inf, dnan)));
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_atan2(dnan, 1.0)));
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_atan2(inf, dnan)));
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
     _TEST_FLOAT(__prec_math_atan2(0.0, -0.0), 0x1.921fb54442d18p+1);
     _TEST_FLOAT(__prec_math_atan2(-0.0, -0.0), -0x1.921fb54442d18p+1);
     _TEST_FLOAT(__prec_math_atan2(-0.0, -1.0), -0x1.921fb54442d18p+1);
@@ -55,12 +55,12 @@ static void Test_PrecMathAtan2(void)
     _TEST_FLOAT(__prec_math_atan2l(-inf, inf), -0xc.90fdaa22168c235p-4L);
 
     _Err_Errno = 0;
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(__prec_math_atan2(0x1p-1000, 0x1p100), 0.0);
     _TEST_INT(_Err_Errno, _SYS_ERANGE);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_UNDERFLOW | _FPU_INEXACT);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT);
     _Err_Errno = 0;
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
 }
 
 int main(void)

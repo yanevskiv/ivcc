@@ -13,7 +13,7 @@
 // nothing, and a NaN with invalid and EDOM below 1.
 static void Test_PrecMathAcosh(void)
 {
-    static const int modes[MODES] = {_FPU_TONEAREST, _FPU_DOWNWARD, _FPU_UPWARD, _FPU_TOWARDZERO};
+    static const int modes[MODES] = {_FPU_X86_64_TONEAREST, _FPU_X86_64_DOWNWARD, _FPU_X86_64_UPWARD, _FPU_X86_64_TOWARDZERO};
     static const double value[MODES] = {0x1.ecc2caec5160ap-1, 0x1.ecc2caec51609p-1, 0x1.ecc2caec5160ap-1, 0x1.ecc2caec51609p-1};
     static const float valuef[MODES] = {0x1.ecc2cap-1f, 0x1.ecc2cap-1f, 0x1.ecc2ccp-1f, 0x1.ecc2cap-1f};
     static const long double valuel[MODES] = {0xb.17217f7d1cf79acp-4L, 0xb.17217f7d1cf79abp-4L, 0xb.17217f7d1cf79acp-4L, 0xb.17217f7d1cf79abp-4L};
@@ -25,33 +25,33 @@ static void Test_PrecMathAcosh(void)
     double dnan = zero / zero;
 
     for (int i = 0; i < MODES; i++) {
-        _Fpu_WriteRound(modes[i]);
-        _Fpu_ClearFlags(_FPU_EXCEPTS);
+        _Fpu_x86_64_WriteRound(modes[i]);
+        _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
         _TEST_FLOAT(__prec_math_acosh(half), value[i]);
         _TEST_FLOAT(__prec_math_acoshf(halff), valuef[i]);
         _TEST_FLOAT(__prec_math_acoshl(quarterl), valuel[i]);
-        _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INEXACT);
+        _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INEXACT);
     }
-    _Fpu_WriteRound(_FPU_TONEAREST);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_TONEAREST);
 
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(__prec_math_acosh(1.0), 0.0);
     _TEST_FLOAT(__prec_math_acoshf(1.0f), 0.0f);
     _TEST_FLOAT(__prec_math_acoshl(1.0L), 0.0L);
     _TEST_FLOAT(__prec_math_acosh(inf), inf);
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_acosh(dnan)));
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_acosh(dnan)));
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 
     _Err_Errno = 0;
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_acosh(0.5)));
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_acosh(0.5)));
     _TEST_INT(_Err_Errno, _SYS_EDOM);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INVALID);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INVALID);
     _Err_Errno = 0;
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_acoshf((float) -inf)));
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_acoshf((float) -inf)));
     _TEST_INT(_Err_Errno, _SYS_EDOM);
     _Err_Errno = 0;
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
 }
 
 int main(void)

@@ -1,5 +1,5 @@
 /*
- * C header file for the floating-point units, picked by architecture.
+ * C header file for the x86-64 floating-point units' controls and flags.
  *
  * Copyright (C) 2026 Ivan Janevski
  *
@@ -26,33 +26,67 @@
 #ifndef _FPU_H
 #define _FPU_H
 
-#if defined(__x86_64__)
-    #include <arch/x86_64/_fpu.h>
-    #define _FPU_FAILED      _FPU_X86_64_FAILED
-    #define _FPU_INVALID     _FPU_X86_64_INVALID
-    #define _FPU_DIVBYZERO   _FPU_X86_64_DIVBYZERO
-    #define _FPU_OVERFLOW    _FPU_X86_64_OVERFLOW
-    #define _FPU_UNDERFLOW   _FPU_X86_64_UNDERFLOW
-    #define _FPU_INEXACT     _FPU_X86_64_INEXACT
-    #define _FPU_EXCEPTS     _FPU_X86_64_EXCEPTS
-    #define _FPU_TONEAREST   _FPU_X86_64_TONEAREST
-    #define _FPU_DOWNWARD    _FPU_X86_64_DOWNWARD
-    #define _FPU_UPWARD      _FPU_X86_64_UPWARD
-    #define _FPU_TOWARDZERO  _FPU_X86_64_TOWARDZERO
-    #define _FPU_ROUND_MASK  _FPU_X86_64_ROUND_MASK
-    #define _FPU_DEFAULT_ENV _FPU_X86_64_DEFAULT_ENV
-    #define _Fpu_Env         _Fpu_x86_64_Env
-    #define _Fpu_StoreEnv    _Fpu_x86_64_StoreEnv
-    #define _Fpu_ClearFlags  _Fpu_x86_64_ClearFlags
-    #define _Fpu_RaiseFlags  _Fpu_x86_64_RaiseFlags
-    #define _Fpu_WriteFlags  _Fpu_x86_64_WriteFlags
-    #define _Fpu_TestFlags   _Fpu_x86_64_TestFlags
-    #define _Fpu_ReadRound   _Fpu_x86_64_ReadRound
-    #define _Fpu_WriteRound  _Fpu_x86_64_WriteRound
-    #define _Fpu_HoldEnv     _Fpu_x86_64_HoldEnv
-    #define _Fpu_WriteEnv    _Fpu_x86_64_WriteEnv
-#else
-    #error "_fpu.h: no floating-point unit for this architecture"
-#endif
+// What a function returns when it does not do what it was asked.
+#define _FPU_X86_64_FAILED 1
+
+// The exception flags of the x87 and MXCSR, C99's five and all of those.
+#define _FPU_X86_64_INVALID   0x01
+#define _FPU_X86_64_DIVBYZERO 0x04
+#define _FPU_X86_64_OVERFLOW  0x08
+#define _FPU_X86_64_UNDERFLOW 0x10
+#define _FPU_X86_64_INEXACT   0x20
+#define _FPU_X86_64_EXCEPTS   0x3D
+
+// All six of the x87's and MXCSR's flags, the denormal operand's among them.
+#define _FPU_X86_64_FLAGS 0x3F
+
+// The rounding directions as the x87 control word holds them, and its field.
+#define _FPU_X86_64_TONEAREST  0x0000
+#define _FPU_X86_64_DOWNWARD   0x0400
+#define _FPU_X86_64_UPWARD     0x0800
+#define _FPU_X86_64_TOWARDZERO 0x0C00
+#define _FPU_X86_64_ROUND_MASK 0x0C00
+
+// How far above the x87 control word's fields MXCSR holds the same ones.
+#define _FPU_X86_64_SSE_ROUND_SHIFT 3
+#define _FPU_X86_64_SSE_MASK_SHIFT  7
+
+// The dwords of the x87 environment that hold its last pointers and opcode.
+#define _FPU_X86_64_POINTERS 4
+
+// The environment a program starts with, as an environment's address.
+#define _FPU_X86_64_DEFAULT_ENV ((const _Fpu_x86_64_Env *) -1)
+
+// Both units' environments, the x87's image and then MXCSR.
+typedef struct _Fpu_x86_64_Env _Fpu_x86_64_Env;
+struct _Fpu_x86_64_Env {
+    unsigned short fe_control;                      // the x87 control word
+    unsigned short fe_unused1;                      // reserved
+    unsigned short fe_status;                       // the x87 status word
+    unsigned short fe_unused2;                      // reserved
+    unsigned short fe_tags;                         // the x87 tag word
+    unsigned short fe_unused3;                      // reserved
+    unsigned int fe_pointers[_FPU_X86_64_POINTERS]; // last opcode and addresses
+    unsigned int fe_mxcsr;                          // SSE's control and status
+};
+
+// Both units' environments, and a division on SSE.
+void  _Fpu_x86_64_StoreEnv(_Fpu_x86_64_Env *env);
+void  _Fpu_x86_64_LoadEnv(const _Fpu_x86_64_Env *env);
+float _Fpu_x86_64_DivideSingle(float a, float b);
+
+// The flags.
+void _Fpu_x86_64_ClearFlags(int flags);
+void _Fpu_x86_64_RaiseFlags(int flags);
+void _Fpu_x86_64_WriteFlags(int flags, int mask);
+int  _Fpu_x86_64_TestFlags(int flags);
+
+// The rounding direction.
+int _Fpu_x86_64_ReadRound(void);
+int _Fpu_x86_64_WriteRound(int round);
+
+// The whole environment.
+void _Fpu_x86_64_HoldEnv(_Fpu_x86_64_Env *env);
+void _Fpu_x86_64_WriteEnv(const _Fpu_x86_64_Env *env);
 
 #endif // _FPU_H

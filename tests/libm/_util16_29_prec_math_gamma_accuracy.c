@@ -10,10 +10,10 @@ static void Test_PrecMathGammaAccuracy(void)
 {
     volatile long double near_pole = -0x8.7fffffffffffffep+2L;
 
-    _Fpu_WriteRound(_FPU_DOWNWARD);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_DOWNWARD);
     _TEST_FLOAT(__prec_math_lgammal(near_pole), -0xc.449271bd28ed47p+2L);
-    _Fpu_WriteRound(_FPU_TONEAREST);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_TONEAREST);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
 }
 
 int main(void)

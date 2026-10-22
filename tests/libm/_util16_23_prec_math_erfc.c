@@ -13,7 +13,7 @@
 // raising nothing, and a range error when its result underflows to zero.
 static void Test_PrecMathErfc(void)
 {
-    static const int modes[MODES] = {_FPU_TONEAREST, _FPU_DOWNWARD, _FPU_UPWARD, _FPU_TOWARDZERO};
+    static const int modes[MODES] = {_FPU_X86_64_TONEAREST, _FPU_X86_64_DOWNWARD, _FPU_X86_64_UPWARD, _FPU_X86_64_TOWARDZERO};
     static const double value[MODES] = {0x1.b82879728f11ep-1, 0x1.b82879728f11dp-1, 0x1.b82879728f11ep-1, 0x1.b82879728f11dp-1};
     static const float valuef[MODES] = {0x1.b8287ap-1f, 0x1.b82878p-1f, 0x1.b8287ap-1f, 0x1.b82878p-1f};
     static const long double valuel[MODES] = {0xd.c143cb94788ed18p-4L, 0xd.c143cb94788ed17p-4L, 0xd.c143cb94788ed18p-4L, 0xd.c143cb94788ed17p-4L};
@@ -25,33 +25,33 @@ static void Test_PrecMathErfc(void)
     double dnan = zero / zero;
 
     for (int i = 0; i < MODES; i++) {
-        _Fpu_WriteRound(modes[i]);
-        _Fpu_ClearFlags(_FPU_EXCEPTS);
+        _Fpu_x86_64_WriteRound(modes[i]);
+        _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
         _TEST_FLOAT(__prec_math_erfc(eighth), value[i]);
         _TEST_FLOAT(__prec_math_erfcf(eighthf), valuef[i]);
         _TEST_FLOAT(__prec_math_erfcl(eighthl), valuel[i]);
-        _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INEXACT);
+        _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INEXACT);
     }
-    _Fpu_WriteRound(_FPU_TONEAREST);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_TONEAREST);
 
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(__prec_math_erfc(0.0), 1.0);
     _TEST_FLOAT(__prec_math_erfcf(-0.0f), 1.0f);
     _TEST_FLOAT(__prec_math_erfcl(inf), 0.0L);
     _TEST_FLOAT(__prec_math_erfc(-inf), 2.0);
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_erfc(dnan)));
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_erfc(dnan)));
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_erfc(30.0), 0.0);
     _TEST_INT(_Err_Errno, _SYS_ERANGE);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_UNDERFLOW | _FPU_INEXACT);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_erfcl(-30.0L), 2.0L);
     _TEST_INT(_Err_Errno, 0);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INEXACT);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INEXACT);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
 }
 
 int main(void)

@@ -18,12 +18,12 @@ static void Test_PrecMathTrigAccuracy(void)
     _TEST_FLOAT(__prec_math_cos(reduced), -0x1.14ae72e6ba22fp-61);
     _TEST_FLOAT(__prec_math_tan(reduced), -0x1.d9ba9a7975636p+60);
     _TEST_FLOAT(__prec_math_sinhl(hyperbolic), 0xf.bfc7ed594726667p-10L);
-    _Fpu_WriteRound(_FPU_DOWNWARD);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_DOWNWARD);
     _TEST_FLOAT(__prec_math_cos(tiny), 0x1.fffffffffffffp-1);
-    _Fpu_WriteRound(_FPU_UPWARD);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_UPWARD);
     _TEST_FLOAT(__prec_math_tanh(least), 0x1p-1022);
-    _Fpu_WriteRound(_FPU_TONEAREST);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_TONEAREST);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
 }
 
 int main(void)

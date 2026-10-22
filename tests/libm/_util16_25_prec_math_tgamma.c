@@ -29,33 +29,33 @@ static void Test_PrecMathTgamma(void)
     _TEST_FLOAT(__prec_math_tgammaf(14.0f), 6227020800.0f);
     _TEST_FLOAT(__prec_math_tgammal(27.0L), 403291461126605635584000000.0L);
 
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(__prec_math_tgamma(inf), inf);
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_tgamma(dnan)));
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_tgamma(dnan)));
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_tgamma(zero), _EXACT_INFINITY);
     _TEST_FLOAT(__prec_math_tgammaf(-0.0f), -_EXACT_INFINITY);
     _TEST_INT(_Err_Errno, _SYS_ERANGE);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_DIVBYZERO);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_DIVBYZERO);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_tgamma(-1.0)));
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_tgammal(-inf)));
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_tgamma(-1.0)));
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_tgammal(-inf)));
     _TEST_INT(_Err_Errno, _SYS_EDOM);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INVALID);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INVALID);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_tgamma(172.0), _EXACT_INFINITY);
     _TEST_INT(_Err_Errno, _SYS_ERANGE);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_OVERFLOW | _FPU_INEXACT);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_OVERFLOW | _FPU_X86_64_INEXACT);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_tgamma(-200.5), -0.0);
     _TEST_INT(_Err_Errno, _SYS_ERANGE);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_UNDERFLOW | _FPU_INEXACT);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
 }
 

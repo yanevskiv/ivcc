@@ -63,9 +63,9 @@ const _Fp_Format _Fp_DoubleFormat = {
 
 // The format of long double, its exponents one below C's, its lead bit given.
 const _Fp_Format _Fp_LongDoubleFormat = {
-    .ff_mant     = _LONG_DOUBLE_MANT,
-    .ff_min      = _LONG_DOUBLE_EXP_MIN,
-    .ff_max      = _LONG_DOUBLE_EXP_MAX,
+    .ff_mant     = _LONG_DOUBLE_X86_64_MANT,
+    .ff_min      = _LONG_DOUBLE_X86_64_EXP_MIN,
+    .ff_max      = _LONG_DOUBLE_X86_64_EXP_MAX,
     .ff_explicit = 1
 };
 
@@ -316,13 +316,13 @@ void _Fp_DropBits(_Fp_Unrounded *value, long bits)
 // Read the direction real's magnitude rounds in, upward away from zero.
 int _Fp_ReadRound(const _Fp_Real *real)
 {
-    int round = _Fpu_ReadRound();
+    int round = _Fpu_x86_64_ReadRound();
 
-    if (real->fr_negative && round == _FPU_UPWARD) {
-        return _FPU_DOWNWARD;
+    if (real->fr_negative && round == _FPU_X86_64_UPWARD) {
+        return _FPU_X86_64_DOWNWARD;
     }
-    if (real->fr_negative && round == _FPU_DOWNWARD) {
-        return _FPU_UPWARD;
+    if (real->fr_negative && round == _FPU_X86_64_DOWNWARD) {
+        return _FPU_X86_64_UPWARD;
     }
     return round;
 }
@@ -330,10 +330,10 @@ int _Fp_ReadRound(const _Fp_Real *real)
 // Return whether part's magnitude rounds up to its next mantissa in round.
 _Bool _Fp_IsRoundedUp(const _Fp_Unrounded *part, int round)
 {
-    if (round == _FPU_TONEAREST) {
+    if (round == _FPU_X86_64_TONEAREST) {
         return part->fu_rest > _FP_REST_HALF || (part->fu_rest == _FP_REST_HALF && (part->fu_mant & 1));
     }
-    return round == _FPU_UPWARD && part->fu_rest != _FP_REST_NONE;
+    return round == _FPU_X86_64_UPWARD && part->fu_rest != _FP_REST_NONE;
 }
 
 // Round value to fmt in the current direction, ERANGE and flags as glibc's.
@@ -363,18 +363,18 @@ void _Fp_RoundReal(const _Fp_Unrounded *value, const _Fp_Format *fmt, _Fp_Real *
             part.fu_exp++;
         }
     }
-    if (part.fu_exp > fmt->ff_max && (round == _FPU_TONEAREST || round == _FPU_UPWARD)) {
+    if (part.fu_exp > fmt->ff_max && (round == _FPU_X86_64_TONEAREST || round == _FPU_X86_64_UPWARD)) {
         real->fr_exp = (unsigned int) (2 * fmt->ff_max + 1);
         real->fr_mant = fmt->ff_explicit ? 1ULL << (fmt->ff_mant - 1) : 0;
         _Err_Errno = _SYS_ERANGE;
-        _Fpu_RaiseFlags(_FPU_OVERFLOW | _FPU_INEXACT);
+        _Fpu_x86_64_RaiseFlags(_FPU_X86_64_OVERFLOW | _FPU_X86_64_INEXACT);
         return;
     }
     if (part.fu_exp > fmt->ff_max) {
         real->fr_exp = (unsigned int) (2 * fmt->ff_max);
         real->fr_mant = fmt->ff_explicit ? ones : ones >> 1;
         _Err_Errno = _SYS_ERANGE;
-        _Fpu_RaiseFlags(_FPU_OVERFLOW | _FPU_INEXACT);
+        _Fpu_x86_64_RaiseFlags(_FPU_X86_64_OVERFLOW | _FPU_X86_64_INEXACT);
         return;
     }
     if (part.fu_exp >= fmt->ff_min) {
@@ -385,10 +385,10 @@ void _Fp_RoundReal(const _Fp_Unrounded *value, const _Fp_Format *fmt, _Fp_Real *
     real->fr_mant = fmt->ff_explicit ? part.fu_mant : part.fu_mant & ones >> 1;
     if (tiny && part.fu_rest != _FP_REST_NONE) {
         _Err_Errno = _SYS_ERANGE;
-        _Fpu_RaiseFlags(_FPU_UNDERFLOW);
+        _Fpu_x86_64_RaiseFlags(_FPU_X86_64_UNDERFLOW);
     }
     if (part.fu_rest != _FP_REST_NONE) {
-        _Fpu_RaiseFlags(_FPU_INEXACT);
+        _Fpu_x86_64_RaiseFlags(_FPU_X86_64_INEXACT);
     }
 }
 
@@ -570,5 +570,5 @@ long double _Fp_ToLongDouble(const void *str, _Fp_Text text, unsigned long *end)
     _Fp_Real real;
 
     *end = _Fp_ToReal(str, text, &_Fp_LongDoubleFormat, &real);
-    return _Long_Double_MakeValue(real.fr_negative, real.fr_exp, real.fr_mant);
+    return _Long_Double_x86_64_MakeValue(real.fr_negative, real.fr_exp, real.fr_mant);
 }

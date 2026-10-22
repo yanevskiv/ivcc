@@ -14,7 +14,7 @@
 // with invalid and EDOM outside [-1, +1].
 static void Test_PrecMathAtanh(void)
 {
-    static const int modes[MODES] = {_FPU_TONEAREST, _FPU_DOWNWARD, _FPU_UPWARD, _FPU_TOWARDZERO};
+    static const int modes[MODES] = {_FPU_X86_64_TONEAREST, _FPU_X86_64_DOWNWARD, _FPU_X86_64_UPWARD, _FPU_X86_64_TOWARDZERO};
     static const double value[MODES] = {0x1.f2272ae325a57p-1, 0x1.f2272ae325a57p-1, 0x1.f2272ae325a58p-1, 0x1.f2272ae325a57p-1};
     static const float valuef[MODES] = {0x1.193ea8p-1f, 0x1.193ea6p-1f, 0x1.193ea8p-1f, 0x1.193ea6p-1f};
     volatile double three = 0.75;
@@ -25,42 +25,42 @@ static void Test_PrecMathAtanh(void)
     double dnan = zero / zero;
 
     for (int i = 0; i < MODES; i++) {
-        _Fpu_WriteRound(modes[i]);
-        _Fpu_ClearFlags(_FPU_EXCEPTS);
+        _Fpu_x86_64_WriteRound(modes[i]);
+        _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
         _TEST_FLOAT(__prec_math_atanh(three), value[i]);
         _TEST_FLOAT(__prec_math_atanhf(halff), valuef[i]);
-        _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INEXACT);
+        _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INEXACT);
     }
-    _Fpu_WriteRound(_FPU_TONEAREST);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_TONEAREST);
     _TEST_FLOAT(__prec_math_atanhl(fifthl), 0xc.f991f65fcc25f96p-6L);
 
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(__prec_math_atanh(0.0), 0.0);
     _TEST_FLOAT(__prec_math_atanhf(-0.0f), -0.0f);
     _TEST_FLOAT(__prec_math_atanhl(-0.0L), -0.0L);
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_atanh(dnan)));
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_atanh(dnan)));
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_atanh(1.0), _EXACT_INFINITY);
     _TEST_INT(_Err_Errno, _SYS_ERANGE);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_DIVBYZERO);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_DIVBYZERO);
     _Err_Errno = 0;
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(__prec_math_atanhl(-1.0L), -_EXACT_INFINITY);
     _TEST_INT(_Err_Errno, _SYS_ERANGE);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_DIVBYZERO);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_DIVBYZERO);
     _Err_Errno = 0;
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_atanh(1.5)));
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_atanh(1.5)));
     _TEST_INT(_Err_Errno, _SYS_EDOM);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INVALID);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INVALID);
     _Err_Errno = 0;
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_atanhf((float) inf)));
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_atanhf((float) inf)));
     _TEST_INT(_Err_Errno, _SYS_EDOM);
     _Err_Errno = 0;
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
 }
 
 int main(void)

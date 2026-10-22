@@ -34,17 +34,17 @@
 // [C99:7.6p6]: FE_ALL_EXCEPT, their bitwise OR
 // [C99:7.6p7]: the rounding directions, distinct nonnegative values
 // [C99:7.6p8]: FE_DFL_ENV, the environment at program startup
-#define FE_DIVBYZERO  _FPU_DIVBYZERO
-#define FE_INEXACT    _FPU_INEXACT
-#define FE_INVALID    _FPU_INVALID
-#define FE_OVERFLOW   _FPU_OVERFLOW
-#define FE_UNDERFLOW  _FPU_UNDERFLOW
+#define FE_DIVBYZERO  _FPU_X86_64_DIVBYZERO
+#define FE_INEXACT    _FPU_X86_64_INEXACT
+#define FE_INVALID    _FPU_X86_64_INVALID
+#define FE_OVERFLOW   _FPU_X86_64_OVERFLOW
+#define FE_UNDERFLOW  _FPU_X86_64_UNDERFLOW
 #define FE_ALL_EXCEPT (FE_DIVBYZERO | FE_INEXACT | FE_INVALID | FE_OVERFLOW | FE_UNDERFLOW)
-#define FE_DOWNWARD   _FPU_DOWNWARD
-#define FE_TONEAREST  _FPU_TONEAREST
-#define FE_TOWARDZERO _FPU_TOWARDZERO
-#define FE_UPWARD     _FPU_UPWARD
-#define FE_DFL_ENV    _FPU_DEFAULT_ENV
+#define FE_DOWNWARD   _FPU_X86_64_DOWNWARD
+#define FE_TONEAREST  _FPU_X86_64_TONEAREST
+#define FE_TOWARDZERO _FPU_X86_64_TOWARDZERO
+#define FE_UPWARD     _FPU_X86_64_UPWARD
+#define FE_DFL_ENV    _FPU_X86_64_DEFAULT_ENV
 
 // Floating-point environment
 // [C99:7.6p4]: fexcept_t, the status flags
@@ -52,7 +52,7 @@ typedef unsigned short fexcept_t;
 
 // Floating-point environment
 // [C99:7.6p3]: fenv_t, the whole environment
-typedef _Fpu_Env fenv_t;
+typedef _Fpu_x86_64_Env fenv_t;
 
 // Floating-point exceptions
 // [C99:7.6.2]: feclearexcept to fetestexcept, the five flag functions

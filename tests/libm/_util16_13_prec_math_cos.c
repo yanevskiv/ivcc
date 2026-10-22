@@ -13,7 +13,7 @@
 // the cosine of a large x, and a NaN with invalid and EDOM of an infinity.
 static void Test_PrecMathCos(void)
 {
-    static const int modes[MODES] = {_FPU_TONEAREST, _FPU_DOWNWARD, _FPU_UPWARD, _FPU_TOWARDZERO};
+    static const int modes[MODES] = {_FPU_X86_64_TONEAREST, _FPU_X86_64_DOWNWARD, _FPU_X86_64_UPWARD, _FPU_X86_64_TOWARDZERO};
     static const float valuef[MODES] = {-0x1.aa2266p-2f, -0x1.aa2266p-2f, -0x1.aa2264p-2f, -0x1.aa2264p-2f};
     static const long double valuel[MODES] = {0xf.80aa4fbef750ba8p-4L, 0xf.80aa4fbef750ba7p-4L, 0xf.80aa4fbef750ba8p-4L, 0xf.80aa4fbef750ba7p-4L};
     volatile double half = 0.5;
@@ -24,33 +24,33 @@ static void Test_PrecMathCos(void)
     double dnan = zero / zero;
 
     for (int i = 0; i < MODES; i++) {
-        _Fpu_WriteRound(modes[i]);
-        _Fpu_ClearFlags(_FPU_EXCEPTS);
+        _Fpu_x86_64_WriteRound(modes[i]);
+        _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
         _TEST_FLOAT(__prec_math_cosf(twof), valuef[i]);
         _TEST_FLOAT(__prec_math_cosl(quarterl), valuel[i]);
-        _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INEXACT);
+        _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INEXACT);
     }
-    _Fpu_WriteRound(_FPU_TONEAREST);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_TONEAREST);
     _TEST_FLOAT(__prec_math_cos(half), 0x1.c1528065b7d5p-1);
     _TEST_FLOAT(__prec_math_cos(1e22), 0x1.0be2cef01c8f4p-1);
 
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(__prec_math_cos(0.0), 1.0);
     _TEST_FLOAT(__prec_math_cosf(-0.0f), 1.0f);
     _TEST_FLOAT(__prec_math_cosl(-0.0L), 1.0L);
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_cos(dnan)));
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_cos(dnan)));
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 
     _Err_Errno = 0;
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_cos(-inf)));
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_cos(-inf)));
     _TEST_INT(_Err_Errno, _SYS_EDOM);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INVALID);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INVALID);
     _Err_Errno = 0;
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_cosl(inf)));
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_cosl(inf)));
     _TEST_INT(_Err_Errno, _SYS_EDOM);
     _Err_Errno = 0;
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
 }
 
 int main(void)

@@ -14,23 +14,23 @@ static void Test_PrecMathExactPowers(void)
     volatile double two = 2.0;
     volatile double thirteen = 13.0;
 
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
-    _Fpu_WriteRound(_FPU_DOWNWARD);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_DOWNWARD);
     _TEST_FLOAT(__prec_math_pow(three, 2.0), 9.0);
-    _Fpu_WriteRound(_FPU_UPWARD);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_UPWARD);
     _TEST_FLOAT(__prec_math_pow(nine, 0.5), 3.0);
-    _Fpu_WriteRound(_FPU_TOWARDZERO);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_TOWARDZERO);
     _TEST_FLOAT(__prec_math_pow(-three, 3.0), -27.0);
-    _Fpu_WriteRound(_FPU_UPWARD);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_UPWARD);
     _TEST_FLOAT(__prec_math_pow(two, -1074.0), 0x1p-1074);
-    _Fpu_WriteRound(_FPU_DOWNWARD);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_DOWNWARD);
     _TEST_FLOAT(__prec_math_pow(thirteen, 11.0), 0x1.a145156b35p+40);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
-    _Fpu_WriteRound(_FPU_TOWARDZERO);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_TOWARDZERO);
     _TEST_FLOAT(__prec_math_pow(two, 1024.0), 0x1.fffffffffffffp+1023);
-    _TEST_INT(_Fpu_TestFlags(_FPU_OVERFLOW), _FPU_OVERFLOW);
-    _Fpu_WriteRound(_FPU_TONEAREST);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_OVERFLOW), _FPU_X86_64_OVERFLOW);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_TONEAREST);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
 }
 
 int main(void)

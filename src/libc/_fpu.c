@@ -24,7 +24,7 @@
  */
 
 // Module header.
-#include <arch/x86_64/_fpu.h>
+#include <_fpu.h>
 
 // The control words a program starts with: all masked, to nearest, 64 bits.
 #define _FPU_X86_64_DEFAULT_CONTROL 0x037F
@@ -37,6 +37,7 @@
 #define _FPU_X86_64_FLOAT_MAX 0x1.fffffep127f
 #define _FPU_X86_64_FLOAT_MIN 0x1p-126f
 
+#ifdef __x86_64__
 // Store both units' environments in env, the x87's masks left as they were.
 __asm__(
     "  .text\n"
@@ -66,6 +67,9 @@ __asm__(
     "  divss %xmm1, %xmm0\n"
     "  ret\n"
 );
+#else
+    #error "_fpu.c: no floating-point environment for this architecture"
+#endif
 
 // Clear the flags of flags in both units.
 void _Fpu_x86_64_ClearFlags(int flags)

@@ -294,9 +294,9 @@ void _Exact_MakeValue(_Exact_Value *exact, long double x)
 {
     int exp;
 
-    _Exact_SetWide(&exact->ev_sig, _Long_Double_SplitValue(x, &exp));
+    _Exact_SetWide(&exact->ev_sig, _Long_Double_x86_64_SplitValue(x, &exp));
     exact->ev_unit = exp - _LONG_DOUBLE_SPLIT_SHIFT;
-    exact->ev_negative = _Long_Double_IsNegative(x);
+    exact->ev_negative = _Long_Double_x86_64_IsNegative(x);
     exact->ev_sticky = 0;
 }
 
@@ -343,7 +343,7 @@ void _Exact_AddValues(_Exact_Value *sum, const _Exact_Value *a, const _Exact_Val
         _Exact_SubtractWide(&sum->ev_sig, &one);
     }
     if (order == 0) {
-        sum->ev_negative = _Fpu_ReadRound() == _FPU_DOWNWARD;
+        sum->ev_negative = _Fpu_x86_64_ReadRound() == _FPU_X86_64_DOWNWARD;
     }
 }
 
@@ -392,7 +392,7 @@ unsigned long long _Exact_RoundBits(const _Exact_Value *exact, int keep, int *lo
     _Bool up;
     unsigned long long kept;
     _Bool half = 0;
-    int mode = _Fpu_ReadRound();
+    int mode = _Fpu_x86_64_ReadRound();
     _Exact_Wide rest = exact->ev_sig;
     _Bool below = exact->ev_sticky;
 
@@ -406,10 +406,10 @@ unsigned long long _Exact_RoundBits(const _Exact_Value *exact, int keep, int *lo
     }
     kept = _Exact_ReadWideLow(&rest);
     *inexact = half || below;
-    if (mode == _FPU_TONEAREST) {
+    if (mode == _FPU_X86_64_TONEAREST) {
         up = half && (below || (kept & _EXACT_LOW_BIT) != 0);
-    } else if (mode == _FPU_UPWARD || mode == _FPU_DOWNWARD) {
-        up = *inexact && exact->ev_negative == (mode == _FPU_DOWNWARD);
+    } else if (mode == _FPU_X86_64_UPWARD || mode == _FPU_X86_64_DOWNWARD) {
+        up = *inexact && exact->ev_negative == (mode == _FPU_X86_64_DOWNWARD);
     } else {
         up = 0;
     }
@@ -437,7 +437,7 @@ long double _Exact_RoundValue(const _Exact_Value *exact, _Exact_Type type)
     unsigned long long kept;
     _Bool infinite;
     long double value;
-    int mode = _Fpu_ReadRound();
+    int mode = _Fpu_x86_64_ReadRound();
     int top = _Exact_FindWideTop(&exact->ev_sig);
     int exp = exact->ev_unit + top;
 
@@ -453,9 +453,9 @@ long double _Exact_RoundValue(const _Exact_Value *exact, _Exact_Type type)
             max = _FP_DOUBLE_MAX;
         } break;
         default: {
-            digits = _LONG_DOUBLE_MANT;
-            min = _LONG_DOUBLE_EXP_MIN;
-            max = _LONG_DOUBLE_EXP_MAX;
+            digits = _LONG_DOUBLE_X86_64_MANT;
+            min = _LONG_DOUBLE_X86_64_EXP_MIN;
+            max = _LONG_DOUBLE_X86_64_EXP_MAX;
         } break;
     }
     if (top == _EXACT_WIDE_NONE) {
@@ -469,15 +469,15 @@ long double _Exact_RoundValue(const _Exact_Value *exact, _Exact_Type type)
     keep = exp < min ? digits - (min - exp) : digits;
     kept = _Exact_RoundBits(exact, keep, &low, &inexact);
     if (exp >= min && exact->ev_unit + low + keep - 1 > max) {
-        infinite = mode == _FPU_TONEAREST || (mode == _FPU_UPWARD && ! exact->ev_negative) || (mode == _FPU_DOWNWARD && exact->ev_negative);
-        _Fpu_RaiseFlags(_FPU_OVERFLOW | _FPU_INEXACT);
-        value = infinite ? _EXACT_INFINITY : _Long_Double_JoinValue(max, _EXACT_ALL_BITS << (_LONG_DOUBLE_SPLIT_BITS - digits));
+        infinite = mode == _FPU_X86_64_TONEAREST || (mode == _FPU_X86_64_UPWARD && ! exact->ev_negative) || (mode == _FPU_X86_64_DOWNWARD && exact->ev_negative);
+        _Fpu_x86_64_RaiseFlags(_FPU_X86_64_OVERFLOW | _FPU_X86_64_INEXACT);
+        value = infinite ? _EXACT_INFINITY : _Long_Double_x86_64_JoinValue(max, _EXACT_ALL_BITS << (_LONG_DOUBLE_SPLIT_BITS - digits));
         return exact->ev_negative ? -value : value;
     }
     if (inexact) {
-        _Fpu_RaiseFlags(tiny ? _FPU_UNDERFLOW | _FPU_INEXACT : _FPU_INEXACT);
+        _Fpu_x86_64_RaiseFlags(tiny ? _FPU_X86_64_UNDERFLOW | _FPU_X86_64_INEXACT : _FPU_X86_64_INEXACT);
     }
-    value = _Long_Double_JoinValue(exact->ev_unit + low + _LONG_DOUBLE_SPLIT_SHIFT, kept);
+    value = _Long_Double_x86_64_JoinValue(exact->ev_unit + low + _LONG_DOUBLE_SPLIT_SHIFT, kept);
     return exact->ev_negative ? -value : value;
 }
 
@@ -491,7 +491,7 @@ unsigned int _Exact_ReduceQuarters(_Exact_Value *f, long double x)
     _Exact_Wide part;
     _Exact_Wide chunk;
     unsigned int quadrant = 0;
-    unsigned long long sig = _Long_Double_SplitValue(x, &exp);
+    unsigned long long sig = _Long_Double_x86_64_SplitValue(x, &exp);
     int unit = exp - _LONG_DOUBLE_SPLIT_SHIFT;
 
     if (unit > _EXACT_QUADRANT_BITS) {

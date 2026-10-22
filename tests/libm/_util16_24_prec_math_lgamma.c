@@ -14,7 +14,7 @@
 // error when its result overflows.
 static void Test_PrecMathLgamma(void)
 {
-    static const int modes[MODES] = {_FPU_TONEAREST, _FPU_DOWNWARD, _FPU_UPWARD, _FPU_TOWARDZERO};
+    static const int modes[MODES] = {_FPU_X86_64_TONEAREST, _FPU_X86_64_DOWNWARD, _FPU_X86_64_UPWARD, _FPU_X86_64_TOWARDZERO};
     static const double value[MODES] = {0x1.2383e809a67e8p-2, 0x1.2383e809a67e7p-2, 0x1.2383e809a67e8p-2, 0x1.2383e809a67e7p-2};
     static const float valuef[MODES] = {0x1.2383e8p-2f, 0x1.2383e8p-2f, 0x1.2383eap-2f, 0x1.2383e8p-2f};
     static const long double valuel[MODES] = {0x9.1c1f404d33f3cfcp-5L, 0x9.1c1f404d33f3cfbp-5L, 0x9.1c1f404d33f3cfcp-5L, 0x9.1c1f404d33f3cfbp-5L};
@@ -26,40 +26,40 @@ static void Test_PrecMathLgamma(void)
     double dnan = zero / zero;
 
     for (int i = 0; i < MODES; i++) {
-        _Fpu_WriteRound(modes[i]);
-        _Fpu_ClearFlags(_FPU_EXCEPTS);
+        _Fpu_x86_64_WriteRound(modes[i]);
+        _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
         _TEST_FLOAT(__prec_math_lgamma(five), value[i]);
         _TEST_FLOAT(__prec_math_lgammaf(fivef), valuef[i]);
         _TEST_FLOAT(__prec_math_lgammal(fivel), valuel[i]);
-        _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INEXACT);
+        _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_INEXACT);
     }
-    _Fpu_WriteRound(_FPU_TONEAREST);
+    _Fpu_x86_64_WriteRound(_FPU_X86_64_TONEAREST);
 
     _TEST_FLOAT(__prec_math_lgamma(-0.75), 0x1.93616060ea5ep+0);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _TEST_FLOAT(__prec_math_lgamma(1.0), 0.0);
     _TEST_FLOAT(__prec_math_lgammaf(2.0f), 0.0f);
     _TEST_FLOAT(__prec_math_lgammal(2.0L), 0.0L);
     _TEST_FLOAT(__prec_math_lgamma(inf), inf);
     _TEST_FLOAT(__prec_math_lgammal(-inf), inf);
-    _TEST_TRUE(_Long_Double_IsNan(__prec_math_lgamma(dnan)));
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
+    _TEST_TRUE(_Long_Double_x86_64_IsNan(__prec_math_lgamma(dnan)));
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), 0);
 
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_lgamma(zero), _EXACT_INFINITY);
     _TEST_INT(_Err_Errno, _SYS_ERANGE);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_DIVBYZERO);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_DIVBYZERO);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_lgammal(-3.0L), _EXACT_INFINITY);
     _TEST_INT(_Err_Errno, _SYS_ERANGE);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_DIVBYZERO);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_DIVBYZERO);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
     _TEST_FLOAT(__prec_math_lgamma(0x1.fffffffffffffp+1023), _EXACT_INFINITY);
     _TEST_INT(_Err_Errno, _SYS_ERANGE);
-    _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_OVERFLOW | _FPU_INEXACT);
-    _Fpu_ClearFlags(_FPU_EXCEPTS);
+    _TEST_INT(_Fpu_x86_64_TestFlags(_FPU_X86_64_EXCEPTS), _FPU_X86_64_OVERFLOW | _FPU_X86_64_INEXACT);
+    _Fpu_x86_64_ClearFlags(_FPU_X86_64_EXCEPTS);
     _Err_Errno = 0;
 }
 

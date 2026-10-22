@@ -1,5 +1,5 @@
 /*
- * C header file for long double's fields, picked by architecture.
+ * C header file for long double's fields on x86-64.
  *
  * Copyright (C) 2026 Ivan Janevski
  *
@@ -26,33 +26,22 @@
 #ifndef _LONG_DOUBLE_H
 #define _LONG_DOUBLE_H
 
-#if defined(__x86_64__)
-    #include <arch/x86_64/_long_double.h>
-    #define _LONG_DOUBLE_MANT            _LONG_DOUBLE_X86_64_MANT
-    #define _LONG_DOUBLE_EXP_BITS        _LONG_DOUBLE_X86_64_EXP_BITS
-    #define _LONG_DOUBLE_EXP_MIN         _LONG_DOUBLE_X86_64_EXP_MIN
-    #define _LONG_DOUBLE_EXP_MAX         _LONG_DOUBLE_X86_64_EXP_MAX
-    #define _LONG_DOUBLE_MIN             _LONG_DOUBLE_X86_64_MIN
-    #define _LONG_DOUBLE_MAX             _LONG_DOUBLE_X86_64_MAX
-    #define _LONG_DOUBLE_TRUE_MIN        _LONG_DOUBLE_X86_64_TRUE_MIN
-    #define _LONG_DOUBLE_EPSILON         _LONG_DOUBLE_X86_64_EPSILON
-    #define _LONG_DOUBLE_INTEGRAL        _LONG_DOUBLE_X86_64_INTEGRAL
-    #define _Long_Double_ReadSignificand _Long_Double_x86_64_ReadSignificand
-    #define _Long_Double_ReadExponent    _Long_Double_x86_64_ReadExponent
-    #define _Long_Double_IsNegative      _Long_Double_x86_64_IsNegative
-    #define _Long_Double_MakeValue       _Long_Double_x86_64_MakeValue
-    #define _Long_Double_ReadClass       _Long_Double_x86_64_ReadClass
-    #define _Long_Double_IsNan           _Long_Double_x86_64_IsNan
-    #define _Long_Double_IsInf           _Long_Double_x86_64_IsInf
-    #define _Long_Double_ClearSign       _Long_Double_x86_64_ClearSign
-    #define _Long_Double_CopySign        _Long_Double_x86_64_CopySign
-    #define _Long_Double_SplitValue      _Long_Double_x86_64_SplitValue
-    #define _Long_Double_JoinValue       _Long_Double_x86_64_JoinValue
-    #define _Long_Double_StepValue       _Long_Double_x86_64_StepValue
-    #define _Long_Double_MakeNan         _Long_Double_x86_64_MakeNan
-#else
-    #error "_long_double.h: no long double format for this architecture"
-#endif
+// A long double's significand bits and its biased exponent's bits.
+#define _LONG_DOUBLE_X86_64_MANT     64
+#define _LONG_DOUBLE_X86_64_EXP_BITS 15
+
+// A long double's least and greatest exponents, one below C's.
+#define _LONG_DOUBLE_X86_64_EXP_MIN (-16382)
+#define _LONG_DOUBLE_X86_64_EXP_MAX 16383
+
+// A long double's least normal, greatest, least subnormal and epsilon.
+#define _LONG_DOUBLE_X86_64_MIN      0x1p-16382L
+#define _LONG_DOUBLE_X86_64_MAX      0xf.fffffffffffffffp+16380L
+#define _LONG_DOUBLE_X86_64_TRUE_MIN 0x1p-16445L
+#define _LONG_DOUBLE_X86_64_EPSILON  0x1p-63L
+
+// The least magnitude of a long double that is always an integer.
+#define _LONG_DOUBLE_X86_64_INTEGRAL 0x1p63L
 
 // The bits of a split significand, its top bit's place, and its top bit.
 #define _LONG_DOUBLE_SPLIT_BITS  64
@@ -78,24 +67,28 @@ enum _Long_Double_Step {
 };
 
 // Fields
-unsigned long long _Long_Double_ReadSignificand(long double x);
-unsigned int       _Long_Double_ReadExponent(long double x);
-_Bool              _Long_Double_IsNegative(long double x);
-long double        _Long_Double_MakeValue(_Bool negative, unsigned int exp, unsigned long long sig);
+unsigned long long _Long_Double_x86_64_ReadSignificand(long double x);
+unsigned int       _Long_Double_x86_64_ReadExponent(long double x);
+_Bool              _Long_Double_x86_64_IsNegative(long double x);
+long double        _Long_Double_x86_64_MakeValue(_Bool negative, unsigned int exp, unsigned long long sig);
 
 // Classes
-_Long_Double_Class _Long_Double_ReadClass(long double x);
-_Bool              _Long_Double_IsNan(long double x);
-_Bool              _Long_Double_IsInf(long double x);
+_Long_Double_Class _Long_Double_x86_64_ReadClass(long double x);
+_Bool              _Long_Double_x86_64_IsNan(long double x);
+_Bool              _Long_Double_x86_64_IsInf(long double x);
 
 // Signs
-long double _Long_Double_ClearSign(long double x);
-long double _Long_Double_CopySign(long double x, long double y);
+long double _Long_Double_x86_64_ClearSign(long double x);
+long double _Long_Double_x86_64_CopySign(long double x, long double y);
 
 // Values
-unsigned long long _Long_Double_SplitValue(long double x, int *exp);
-long double        _Long_Double_JoinValue(int exp, unsigned long long sig);
-long double        _Long_Double_StepValue(long double x, _Long_Double_Step step);
-long double        _Long_Double_MakeNan(unsigned long long payload);
+unsigned long long _Long_Double_x86_64_SplitValue(long double x, int *exp);
+long double        _Long_Double_x86_64_JoinValue(int exp, unsigned long long sig);
+long double        _Long_Double_x86_64_StepValue(long double x, _Long_Double_Step step);
+long double        _Long_Double_x86_64_MakeNan(unsigned long long payload);
+
+// The x87's sign and exponent word.
+unsigned int _Long_Double_x86_64_ReadTop(long double x);
+long double  _Long_Double_x86_64_MakeTop(unsigned int top, unsigned long long sig);
 
 #endif // _LONG_DOUBLE_H

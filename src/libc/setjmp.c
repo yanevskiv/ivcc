@@ -1,5 +1,5 @@
 /*
- * C source file for nonlocal jumps on x86-64.
+ * C source file for nonlocal jumps.
  *
  * Copyright (C) 2026 Ivan Janevski
  *
@@ -26,6 +26,7 @@
 // Module header.
 #include <setjmp.h>
 
+#ifdef __x86_64__
 // Save the callee-saved registers, stack pointer and return address in env.
 __asm__(
     "  .text\n"
@@ -66,3 +67,6 @@ __asm__(
     "  push %rdx\n"
     "  ret\n"
 );
+#else
+    #error "setjmp.c: no nonlocal jumps for this architecture"
+#endif
