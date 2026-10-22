@@ -33,8 +33,8 @@
 #define _SYS_SA_RESTORER 0x04000000
 
 // Linux's struct stat on x86-64, the kernel's and not glibc's.
-typedef struct _Sys_Stat _Sys_Stat;
-struct _Sys_Stat {
+typedef struct _Sys_x86_64_Linux_Stat _Sys_x86_64_Linux_Stat;
+struct _Sys_x86_64_Linux_Stat {
     unsigned long st_dev;             // the device the file is on
     unsigned long st_ino;             // the file's inode number
     unsigned long st_nlink;           // the hard links to the file

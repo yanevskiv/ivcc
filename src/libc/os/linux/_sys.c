@@ -102,7 +102,7 @@ int _Sys_RenameFile(const char *from, const char *to)
 // Return whether no file has the name path, errno left as it was.
 _Bool _Sys_IsNameUnused(const char *path)
 {
-    _Sys_Stat info;
+    _Sys_x86_64_Linux_Stat info;
 
     return _Sys_InvokeLstat(path, &info) == -_SYS_ENOENT;
 }

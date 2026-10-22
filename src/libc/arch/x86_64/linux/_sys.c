@@ -56,7 +56,7 @@
 #define _SYS_X86_64_LINUX_NR_RT_SIGRETURN "15"
 
 // Check that struct stat is as large as the kernel's on x86-64.
-_Static_assert(sizeof(_Sys_Stat) == _SYS_X86_64_LINUX_STAT_SIZE, "_Sys_Stat should be the kernel's size");
+_Static_assert(sizeof(_Sys_x86_64_Linux_Stat) == _SYS_X86_64_LINUX_STAT_SIZE, "_Sys_x86_64_Linux_Stat should be the kernel's size");
 
 // Invoke a syscall by its number, with six arguments.
 __asm__(
@@ -99,7 +99,7 @@ long _Sys_InvokeClose(int fd)
 }
 
 // Invoke lstat to fill info with what the file at path is, a link's own.
-long _Sys_InvokeLstat(const char *path, _Sys_Stat *info)
+long _Sys_InvokeLstat(const char *path, _Sys_x86_64_Linux_Stat *info)
 {
     return _Sys_InvokeSyscall(_SYS_X86_64_LINUX_NR_LSTAT, (long) path, (long) info, 0, 0, 0, 0);
 }

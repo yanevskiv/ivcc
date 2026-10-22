@@ -234,7 +234,7 @@ long  _Sys_InvokeRead(int fd, void *buf, unsigned long len);
 long  _Sys_InvokeWrite(int fd, const void *buf, unsigned long len);
 long  _Sys_InvokeOpen(const char *path, int flags, int mode);
 long  _Sys_InvokeClose(int fd);
-long  _Sys_InvokeLstat(const char *path, _Sys_Stat *info);
+long  _Sys_InvokeLstat(const char *path, _Sys_x86_64_Linux_Stat *info);
 long  _Sys_InvokeLseek(int fd, long offset, int whence);
 void *_Sys_InvokeBrk(void *addr);
 long  _Sys_InvokeRtSigaction(int sig, void (*func)(int), unsigned long flags, unsigned long mask, void (**old)(int));
