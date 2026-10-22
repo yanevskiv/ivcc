@@ -1,5 +1,5 @@
 /*
- * C source file for exact values and long double fields.
+ * C source file for exact values and their one rounding.
  *
  * Copyright (C) 2026 Ivan Janevski
  *
@@ -29,6 +29,7 @@
 // Includes.
 #include <_fp.h>
 #include <_fpu.h>
+#include <_ldouble.h>
 #include <_str.h>
 
 // The bits of 2/pi past its point, 32 to a limb, the most significant first.
@@ -99,124 +100,6 @@ const unsigned int _Exact_TwoOverPi[_EXACT_TWO_OVER_PI_LIMBS] = {
     0x4D7E6F51U, 0x19A5ABF9U, 0xB5D6DF82U, 0x61DD9602U, 0x36169F3AU, 0xC4A1A283U, 0x6DED727AU, 0x8D39A9B8U,
     0x825C326BU, 0x5B2746EDU, 0x34007700U, 0xD255F4FCU, 0x4D590180U, 0x71E0E13FU, 0x89B295F3U
 };
-
-// Read a long double's significand.
-unsigned long long _Exact_ReadSignificand(long double x)
-{
-    unsigned long long sig;
-
-    _Str_CopyBytes(&sig, (unsigned char *) &x + _EXACT_LDOUBLE_SIGNIFICAND, sizeof(sig));
-    return sig;
-}
-
-// Read a long double's sign and biased exponent.
-unsigned int _Exact_ReadTop(long double x)
-{
-    unsigned short top;
-
-    _Str_CopyBytes(&top, (unsigned char *) &x + _EXACT_LDOUBLE_TOP, sizeof(top));
-    return top;
-}
-
-// Make a long double of its sign and biased exponent and its significand.
-long double _Exact_MakeLDouble(unsigned int top, unsigned long long sig)
-{
-    long double x = 0.0L;
-    unsigned long long low = sig;
-    unsigned short high = (unsigned short) top;
-
-    _Str_CopyBytes((unsigned char *) &x + _EXACT_LDOUBLE_SIGNIFICAND, &low, sizeof(low));
-    _Str_CopyBytes((unsigned char *) &x + _EXACT_LDOUBLE_TOP, &high, sizeof(high));
-    return x;
-}
-
-// Split a long double into its normalized significand and its exponent.
-unsigned long long _Exact_SplitLDouble(long double x, int *exp)
-{
-    unsigned long long sig = _Exact_ReadSignificand(x);
-    unsigned int biased = _Exact_ReadTop(x) & _EXACT_LDOUBLE_EXP_MAX;
-
-    *exp = biased == 0 ? _EXACT_LDOUBLE_EXP_LOW : (int) biased - _EXACT_LDOUBLE_BIAS;
-    for (; (sig & _EXACT_LDOUBLE_INT_BIT) == 0; sig <<= 1) {
-        (*exp)--;
-    }
-    return sig;
-}
-
-// Join a significand and an exponent into a long double.
-long double _Exact_JoinLDouble(int exp, unsigned long long sig)
-{
-    int shift;
-    unsigned long long bits = sig;
-
-    if (bits == 0) {
-        return 0.0L;
-    }
-    for (; (bits & _EXACT_LDOUBLE_INT_BIT) == 0; bits <<= 1) {
-        exp--;
-    }
-    if (exp >= _EXACT_LDOUBLE_EXP_LOW) {
-        return _Exact_MakeLDouble((unsigned int) (exp + _EXACT_LDOUBLE_BIAS), bits);
-    }
-    shift = _EXACT_LDOUBLE_EXP_LOW - exp;
-    return _Exact_MakeLDouble(0, shift > _EXACT_LDOUBLE_INT_SHIFT ? 0 : bits >> shift);
-}
-
-// Step a long double's magnitude to the next value up or down.
-long double _Exact_StepLDouble(long double x, _Exact_Step step)
-{
-    unsigned int top = _Exact_ReadTop(x);
-    unsigned long long sig = _Exact_ReadSignificand(x);
-
-    if (step == _EXACT_STEP_UP && sig == _EXACT_ALL_BITS) {
-        sig = _EXACT_LDOUBLE_INT_BIT;
-        top++;
-    } else if (step == _EXACT_STEP_UP) {
-        sig++;
-    } else if ((top & _EXACT_LDOUBLE_EXP_MAX) != 0 && sig == _EXACT_LDOUBLE_INT_BIT) {
-        top--;
-        sig = (top & _EXACT_LDOUBLE_EXP_MAX) == 0 ? _EXACT_LDOUBLE_FRAC_MASK : _EXACT_ALL_BITS;
-    } else {
-        sig--;
-    }
-    if ((top & _EXACT_LDOUBLE_EXP_MAX) == 0 && sig >= _EXACT_LDOUBLE_INT_BIT) {
-        top++;
-    }
-    return _Exact_MakeLDouble(top, sig);
-}
-
-// Return whether x's sign is negative.
-_Bool _Exact_IsNegative(long double x)
-{
-    return (_Exact_ReadTop(x) & _EXACT_TOP_SIGN) != 0;
-}
-
-// Return whether x is a NaN, the x87's refused encodings as glibc takes them.
-_Bool _Exact_IsNan(long double x)
-{
-    unsigned int exp = _Exact_ReadTop(x) & _EXACT_LDOUBLE_EXP_MAX;
-    unsigned long long sig = _Exact_ReadSignificand(x);
-
-    return exp != 0 && ((sig & _EXACT_LDOUBLE_INT_BIT) == 0 || (exp == _EXACT_LDOUBLE_EXP_MAX && (sig & _EXACT_LDOUBLE_FRAC_MASK) != 0));
-}
-
-// Return whether x is an infinity.
-_Bool _Exact_IsInf(long double x)
-{
-    return (_Exact_ReadTop(x) & _EXACT_LDOUBLE_EXP_MAX) == _EXACT_LDOUBLE_EXP_MAX && _Exact_ReadSignificand(x) == _EXACT_LDOUBLE_INT_BIT;
-}
-
-// Clear x's sign.
-long double _Exact_ClearSign(long double x)
-{
-    return _Exact_MakeLDouble(_Exact_ReadTop(x) & ~_EXACT_TOP_SIGN, _Exact_ReadSignificand(x));
-}
-
-// Copy y's sign to x.
-long double _Exact_CopySign(long double x, long double y)
-{
-    return _Exact_MakeLDouble((_Exact_ReadTop(x) & ~_EXACT_TOP_SIGN) | (_Exact_ReadTop(y) & _EXACT_TOP_SIGN), _Exact_ReadSignificand(x));
-}
 
 // Set w to a 64-bit value.
 void _Exact_SetWide(_Exact_Wide *w, unsigned long long low)
@@ -411,9 +294,9 @@ void _Exact_MakeValue(_Exact_Value *exact, long double x)
 {
     int exp;
 
-    _Exact_SetWide(&exact->ev_sig, _Exact_SplitLDouble(x, &exp));
-    exact->ev_unit = exp - _EXACT_LDOUBLE_INT_SHIFT;
-    exact->ev_negative = _Exact_IsNegative(x) != 0;
+    _Exact_SetWide(&exact->ev_sig, _Ldouble_SplitValue(x, &exp));
+    exact->ev_unit = exp - _LDOUBLE_SPLIT_SHIFT;
+    exact->ev_negative = _Ldouble_IsNegative(x);
     exact->ev_sticky = 0;
 }
 
@@ -534,8 +417,8 @@ unsigned long long _Exact_RoundBits(const _Exact_Value *exact, int keep, int *lo
         return kept;
     }
     kept++;
-    if (keep > 0 && (keep == _FP_LDOUBLE_MANT ? kept == 0 : kept >> keep != 0)) {
-        kept = _EXACT_LDOUBLE_INT_BIT >> (_FP_LDOUBLE_MANT - keep);
+    if (keep > 0 && (keep == _LDOUBLE_SPLIT_BITS ? kept == 0 : kept >> keep != 0)) {
+        kept = _LDOUBLE_SPLIT_TOP >> (_LDOUBLE_SPLIT_BITS - keep);
         (*low)++;
     }
     return kept;
@@ -570,9 +453,9 @@ long double _Exact_RoundValue(const _Exact_Value *exact, _Exact_Type type)
             max = _FP_DOUBLE_MAX;
         } break;
         default: {
-            digits = _FP_LDOUBLE_MANT;
-            min = _FP_LDOUBLE_MIN;
-            max = _FP_LDOUBLE_MAX;
+            digits = _LDOUBLE_MANT;
+            min = _LDOUBLE_EXP_MIN;
+            max = _LDOUBLE_EXP_MAX;
         } break;
     }
     if (top == _EXACT_WIDE_NONE) {
@@ -588,13 +471,13 @@ long double _Exact_RoundValue(const _Exact_Value *exact, _Exact_Type type)
     if (exp >= min && exact->ev_unit + low + keep - 1 > max) {
         infinite = mode == _FPU_TONEAREST || (mode == _FPU_UPWARD && ! exact->ev_negative) || (mode == _FPU_DOWNWARD && exact->ev_negative);
         _Fpu_RaiseFlags(_FPU_OVERFLOW | _FPU_INEXACT);
-        value = infinite ? _EXACT_INFINITY : _Exact_JoinLDouble(max, _EXACT_ALL_BITS << (_FP_LDOUBLE_MANT - digits));
+        value = infinite ? _EXACT_INFINITY : _Ldouble_JoinValue(max, _EXACT_ALL_BITS << (_LDOUBLE_SPLIT_BITS - digits));
         return exact->ev_negative ? -value : value;
     }
     if (inexact) {
         _Fpu_RaiseFlags(tiny ? _FPU_UNDERFLOW | _FPU_INEXACT : _FPU_INEXACT);
     }
-    value = _Exact_JoinLDouble(exact->ev_unit + low + _EXACT_LDOUBLE_INT_SHIFT, kept);
+    value = _Ldouble_JoinValue(exact->ev_unit + low + _LDOUBLE_SPLIT_SHIFT, kept);
     return exact->ev_negative ? -value : value;
 }
 
@@ -608,8 +491,8 @@ unsigned int _Exact_ReduceQuarters(_Exact_Value *f, long double x)
     _Exact_Wide part;
     _Exact_Wide chunk;
     unsigned int quadrant = 0;
-    unsigned long long sig = _Exact_SplitLDouble(x, &exp);
-    int unit = exp - _EXACT_LDOUBLE_INT_SHIFT;
+    unsigned long long sig = _Ldouble_SplitValue(x, &exp);
+    int unit = exp - _LDOUBLE_SPLIT_SHIFT;
 
     if (unit > _EXACT_QUADRANT_BITS) {
         first = (unit - _EXACT_QUADRANT_BITS) / _EXACT_LIMB_BITS;

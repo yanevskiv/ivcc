@@ -43,7 +43,7 @@ static void Test_PrecMathExp2(void)
     _TEST_FLOAT(__prec_math_exp2f(0.0f), 1.0f);
     _TEST_FLOAT(__prec_math_exp2(-inf), 0.0);
     _TEST_FLOAT(__prec_math_exp2l(inf), inf);
-    _TEST_TRUE(_Exact_IsNan(__prec_math_exp2(dnan)));
+    _TEST_TRUE(_Ldouble_IsNan(__prec_math_exp2(dnan)));
     _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
 
     _Err_Errno = 0;

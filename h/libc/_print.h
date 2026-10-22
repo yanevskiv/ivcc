@@ -43,10 +43,8 @@
 // The character a number's fraction begins after, in either locale.
 #define _PRINT_POINT '.'
 
-// A long double's bits, the exponent above its greatest and a double's least.
-#define _PRINT_LDOUBLE_MANT 64
-#define _PRINT_LDOUBLE_EXP  16384
-#define _PRINT_DOUBLE_MIN   (-1021)
+// A double's least exponent.
+#define _PRINT_DOUBLE_MIN (-1021)
 
 // A directive's flags: -, +, a space, # and 0.
 #define _PRINT_FLAG_LEFT  0x1

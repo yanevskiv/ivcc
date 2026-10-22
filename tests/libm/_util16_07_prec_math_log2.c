@@ -45,7 +45,7 @@ static void Test_PrecMathLog2(void)
     _TEST_FLOAT(__prec_math_log2l(0x1p-16445L), -16445.0L);
     _Fpu_ClearFlags(_FPU_EXCEPTS);
     _TEST_FLOAT(__prec_math_log2(inf), inf);
-    _TEST_TRUE(_Exact_IsNan(__prec_math_log2(dnan)));
+    _TEST_TRUE(_Ldouble_IsNan(__prec_math_log2(dnan)));
     _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
 
     _Err_Errno = 0;
@@ -54,7 +54,7 @@ static void Test_PrecMathLog2(void)
     _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_DIVBYZERO);
     _Fpu_ClearFlags(_FPU_EXCEPTS);
     _Err_Errno = 0;
-    _TEST_TRUE(_Exact_IsNan(__prec_math_log2l(-2.0L)));
+    _TEST_TRUE(_Ldouble_IsNan(__prec_math_log2l(-2.0L)));
     _TEST_INT(_Err_Errno, _SYS_EDOM);
     _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INVALID);
     _Fpu_ClearFlags(_FPU_EXCEPTS);

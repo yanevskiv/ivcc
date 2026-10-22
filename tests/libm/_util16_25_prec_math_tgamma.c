@@ -31,7 +31,7 @@ static void Test_PrecMathTgamma(void)
 
     _Fpu_ClearFlags(_FPU_EXCEPTS);
     _TEST_FLOAT(__prec_math_tgamma(inf), inf);
-    _TEST_TRUE(_Exact_IsNan(__prec_math_tgamma(dnan)));
+    _TEST_TRUE(_Ldouble_IsNan(__prec_math_tgamma(dnan)));
     _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), 0);
 
     _Err_Errno = 0;
@@ -41,8 +41,8 @@ static void Test_PrecMathTgamma(void)
     _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_DIVBYZERO);
     _Fpu_ClearFlags(_FPU_EXCEPTS);
     _Err_Errno = 0;
-    _TEST_TRUE(_Exact_IsNan(__prec_math_tgamma(-1.0)));
-    _TEST_TRUE(_Exact_IsNan(__prec_math_tgammal(-inf)));
+    _TEST_TRUE(_Ldouble_IsNan(__prec_math_tgamma(-1.0)));
+    _TEST_TRUE(_Ldouble_IsNan(__prec_math_tgammal(-inf)));
     _TEST_INT(_Err_Errno, _SYS_EDOM);
     _TEST_INT(_Fpu_TestFlags(_FPU_EXCEPTS), _FPU_INVALID);
     _Fpu_ClearFlags(_FPU_EXCEPTS);

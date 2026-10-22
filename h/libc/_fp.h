@@ -55,10 +55,9 @@
 #define _FP_REST_HALF  2
 #define _FP_REST_ABOVE 3
 
-// The sign bits of a float, a double and a long double's exponent word.
-#define _FP_FLOAT_SIGN   0x80000000U
-#define _FP_DOUBLE_SIGN  0x8000000000000000ULL
-#define _FP_LDOUBLE_SIGN 0x8000U
+// The sign bits of a float and a double.
+#define _FP_FLOAT_SIGN  0x80000000U
+#define _FP_DOUBLE_SIGN 0x8000000000000000ULL
 
 // The greatest payload a NaN's parentheses give.
 #define _FP_PAYLOAD_MAX (~0ULL)
@@ -75,11 +74,6 @@
 #define _FP_DOUBLE_MANT 53
 #define _FP_DOUBLE_MIN  (-1022)
 #define _FP_DOUBLE_MAX  1023
-
-// A long double's mantissa bits and exponents, one below C's.
-#define _FP_LDOUBLE_MANT 64
-#define _FP_LDOUBLE_MIN  (-16382)
-#define _FP_LDOUBLE_MAX  16383
 
 // The characters a text to convert is made of.
 typedef enum _Fp_Text _Fp_Text;

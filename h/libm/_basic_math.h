@@ -27,18 +27,15 @@
 #ifndef _BASIC_MATH_H
 #define _BASIC_MATH_H
 
-// Exact values and long double fields.
+// Exact values and their one rounding.
 #include <_exact.h>
 
-// The byte of each floating type that holds its sign, in its top bit.
-#define _BASIC_MATH_FLOAT_SIGN_BYTE   3
-#define _BASIC_MATH_DOUBLE_SIGN_BYTE  7
-#define _BASIC_MATH_LDOUBLE_SIGN_BYTE 9
+// A long double's format and its fields.
+#include <_ldouble.h>
 
-// The bits of a sign byte but its sign, its sign bit, and its sign's place.
-#define _BASIC_MATH_SIGN_CLEAR 0x7F
-#define _BASIC_MATH_SIGN_BIT   0x80
-#define _BASIC_MATH_SIGN_SHIFT 7
+// The sign bits of a float and a double.
+#define _BASIC_MATH_FLOAT_SIGN  0x80000000U
+#define _BASIC_MATH_DOUBLE_SIGN 0x8000000000000000ULL
 
 // A float's exponent's place, its largest value, and its fraction's mask.
 #define _BASIC_MATH_FLOAT_EXP_SHIFT 23
@@ -51,24 +48,23 @@
 #define _BASIC_MATH_DOUBLE_FRAC_MASK 0xFFFFFFFFFFFFFULL
 
 // The bits of each format's quiet NaN without a payload.
-#define _BASIC_MATH_FLOAT_QUIET   0x7FC00000U
-#define _BASIC_MATH_DOUBLE_QUIET  0x7FF8000000000000ULL
-#define _BASIC_MATH_LDOUBLE_QUIET 0xC000000000000000ULL
+#define _BASIC_MATH_FLOAT_QUIET  0x7FC00000U
+#define _BASIC_MATH_DOUBLE_QUIET 0x7FF8000000000000ULL
 
 // The least subnormal of each format.
 #define _BASIC_MATH_FLOAT_TINY   0x1p-149f
 #define _BASIC_MATH_DOUBLE_TINY  0x1p-1074
-#define _BASIC_MATH_LDOUBLE_TINY 0x1p-16445L
+#define _BASIC_MATH_LDOUBLE_TINY _LDOUBLE_TRUE_MIN
 
 // The least magnitude of a long double that is always an integer.
-#define _BASIC_MATH_LDOUBLE_INTEGRAL 0x1p63L
+#define _BASIC_MATH_LDOUBLE_INTEGRAL _LDOUBLE_INTEGRAL
 
 // The distance from an integer at which round goes away from zero.
 #define _BASIC_MATH_HALF 0.5L
 
 // A long double's normal exponents and the steps scalbn scales by.
-#define _BASIC_MATH_LDOUBLE_EXP_LOW    (-16382)
-#define _BASIC_MATH_LDOUBLE_EXP_HIGH   16383
+#define _BASIC_MATH_LDOUBLE_EXP_LOW    _LDOUBLE_EXP_MIN
+#define _BASIC_MATH_LDOUBLE_EXP_HIGH   _LDOUBLE_EXP_MAX
 #define _BASIC_MATH_LDOUBLE_STEP_DOWN  16318
 #define _BASIC_MATH_LDOUBLE_SCALE_UP   0x1p16383L
 #define _BASIC_MATH_LDOUBLE_SCALE_DOWN 0x1p-16318L
@@ -108,7 +104,7 @@
 #define _BASIC_MATH_LOG10E   0xd.e5bd8a937287195p-5L
 #define _BASIC_MATH_SQRT_TWO 0xb.504f333f9de6484p-3L
 
-// The value of a long double significand's lowest bit, its integer bit 1.
+// The value of a split significand's lowest bit, its top bit 1.
 #define _BASIC_MATH_LDOUBLE_UNIT 0x1p-63L
 
 // 2 to 32 plus 1, which splits a long double into two halves of 32 bits.
@@ -253,7 +249,7 @@
 // The least normal value of each type.
 #define _BASIC_MATH_FLT_MIN  0x1p-126f
 #define _BASIC_MATH_DBL_MIN  0x1p-1022
-#define _BASIC_MATH_LDBL_MIN 0x1p-16382L
+#define _BASIC_MATH_LDBL_MIN _LDOUBLE_MIN
 
 // A value's class and sign by its type, and the tests of its class.
 #define _BASIC_MATH_CLASSIFY(x)                                      \

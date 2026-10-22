@@ -1,5 +1,5 @@
 /*
- * C header file for exact values and long double fields.
+ * C header file for exact values and their one rounding.
  *
  * Copyright (C) 2026 Ivan Janevski
  *
@@ -25,21 +25,6 @@
 
 #ifndef _EXACT_H
 #define _EXACT_H
-
-// A long double's significand's byte, sign and exponent's byte, integer bit.
-#define _EXACT_LDOUBLE_SIGNIFICAND 0
-#define _EXACT_LDOUBLE_TOP         8
-#define _EXACT_LDOUBLE_INT_SHIFT   63
-
-// A long double's integer bit, fraction, bias, largest and least exponents.
-#define _EXACT_LDOUBLE_INT_BIT   0x8000000000000000ULL
-#define _EXACT_LDOUBLE_FRAC_MASK 0x7FFFFFFFFFFFFFFFULL
-#define _EXACT_LDOUBLE_BIAS      16383
-#define _EXACT_LDOUBLE_EXP_MAX   0x7FFFU
-#define _EXACT_LDOUBLE_EXP_LOW   (-16382)
-
-// The sign bit of a long double's top 16 bits.
-#define _EXACT_TOP_SIGN 0x8000U
 
 // Every bit of 64, and a long double's positive infinity.
 #define _EXACT_ALL_BITS (~0ULL)
@@ -68,19 +53,12 @@
 #define _EXACT_QUADRANT_BITS 2
 #define _EXACT_QUADRANT_MASK 3U
 
-// Which way a step moves a long double's magnitude.
-typedef enum _Exact_Step _Exact_Step;
-enum _Exact_Step {
-    _EXACT_STEP_UP,  // away from zero
-    _EXACT_STEP_DOWN // toward zero
-};
-
 // Which type a value is rounded to.
 typedef enum _Exact_Type _Exact_Type;
 enum _Exact_Type {
     _EXACT_TYPE_FLOAT,  // float's 24 bits
     _EXACT_TYPE_DOUBLE, // double's 53 bits
-    _EXACT_TYPE_LDOUBLE // long double's 64 bits
+    _EXACT_TYPE_LDOUBLE // long double's bits
 };
 
 // Which root is taken, by its degree.
@@ -107,19 +85,6 @@ struct _Exact_Value {
 
 // The bits of 2/pi past its point, 32 to a limb, the most significant first.
 extern const unsigned int _Exact_TwoOverPi[_EXACT_TWO_OVER_PI_LIMBS];
-
-// A long double's fields, significand and exponent, sign and class.
-unsigned long long _Exact_ReadSignificand(long double x);
-unsigned int       _Exact_ReadTop(long double x);
-long double        _Exact_MakeLDouble(unsigned int top, unsigned long long sig);
-unsigned long long _Exact_SplitLDouble(long double x, int *exp);
-long double        _Exact_JoinLDouble(int exp, unsigned long long sig);
-long double        _Exact_StepLDouble(long double x, _Exact_Step step);
-_Bool              _Exact_IsNegative(long double x);
-_Bool              _Exact_IsNan(long double x);
-_Bool              _Exact_IsInf(long double x);
-long double        _Exact_ClearSign(long double x);
-long double        _Exact_CopySign(long double x, long double y);
 
 // A wide integer's arithmetic.
 void               _Exact_SetWide(_Exact_Wide *w, unsigned long long low);

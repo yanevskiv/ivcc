@@ -32,6 +32,9 @@
 // The system call that writes the report.
 #include <_sys.h>
 
+// A long double's format and its fields.
+#include <_ldouble.h>
+
 // The status so far.
 int _Test_Result = _TEST_PASSED;
 
@@ -84,18 +87,26 @@ void _Test_ShowUint(unsigned long value)
     _Test_Write(ptr);
 }
 
-// Show a floating value as _TEST_FLOAT reports it, its bytes as one hex number.
+// Show the low digits of a value in hex.
+void _Test_ShowHex(unsigned long long value, unsigned int digits)
+{
+    while (digits > 0) {
+        digits--;
+        _Test_WriteChar(_TEST_HEX_DIGITS[(value >> (digits * _TEST_HEX_BITS)) & _TEST_HEX_MASK]);
+    }
+}
+
+// Show a floating value as _TEST_FLOAT reports it, its fields as hex.
 void _Test_ShowFloat(long double value)
 {
-    unsigned long k = _TEST_FLOAT_SIZE;
-    const unsigned char *bytes = (const unsigned char *) &value;
+    unsigned long long top = _Ldouble_ReadExponent(value);
 
-    _Test_Write(_ERR_TEST_HEX);
-    while (k > 0) {
-        k--;
-        _Test_WriteChar(_TEST_HEX_DIGITS[bytes[k] >> _TEST_HEX_BITS]);
-        _Test_WriteChar(_TEST_HEX_DIGITS[bytes[k] & _TEST_HEX_MASK]);
+    if (_Ldouble_IsNegative(value)) {
+        top |= 1ULL << _LDOUBLE_EXP_BITS;
     }
+    _Test_Write(_ERR_TEST_HEX);
+    _Test_ShowHex(top, (_LDOUBLE_EXP_BITS + _TEST_HEX_BITS) / _TEST_HEX_BITS);
+    _Test_ShowHex(_Ldouble_ReadSignificand(value), (_LDOUBLE_MANT + _TEST_HEX_BITS - 1) / _TEST_HEX_BITS);
 }
 
 // Show a string as _TEST_STR reports it, a string literal or none.
@@ -188,17 +199,12 @@ _Bool _Test_Uint(unsigned long got, unsigned long expected, const char *expr, co
 // Check that a floating value has the bytes expected, or neither is a number.
 _Bool _Test_Float(long double got, long double expected, const char *expr, const char *file, unsigned int line, const char *func)
 {
-    unsigned long k = 0;
-    const unsigned char *got_bytes = (const unsigned char *) &got;
-    const unsigned char *expected_bytes = (const unsigned char *) &expected;
+    _Bool same = _Ldouble_IsNegative(got) == _Ldouble_IsNegative(expected) && _Ldouble_ReadExponent(got) == _Ldouble_ReadExponent(expected) && _Ldouble_ReadSignificand(got) == _Ldouble_ReadSignificand(expected);
 
     if (got != got && expected != expected) {
-        k = _TEST_FLOAT_SIZE;
+        same = 1;
     }
-    while (k < _TEST_FLOAT_SIZE && got_bytes[k] == expected_bytes[k]) {
-        k++;
-    }
-    if (k < _TEST_FLOAT_SIZE) {
+    if (! same) {
         _Test_Fail(expr, file, line, func);
         _Test_Write(_ERR_TEST_EXPR);
         _Test_ShowFloat(got);
@@ -206,7 +212,7 @@ _Bool _Test_Float(long double got, long double expected, const char *expr, const
         _Test_ShowFloat(expected);
         _Test_Write(_ERR_TEST_EXPECTED);
     }
-    return k == _TEST_FLOAT_SIZE;
+    return same;
 }
 
 // Check that a string is the one expected, or both none, and report another.

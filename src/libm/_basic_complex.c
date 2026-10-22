@@ -302,7 +302,7 @@ long double _Complex _Basic_Complex_RoundLDouble(long double x, long double y)
 // Make a quiet NaN of no payload and a clear sign.
 long double _Basic_Complex_MakeNan(void)
 {
-    return _Exact_MakeLDouble(_EXACT_LDOUBLE_EXP_MAX, _BASIC_MATH_LDOUBLE_QUIET);
+    return _Ldouble_MakeNan(0);
 }
 
 // Square x into a high and a low part, or zero where x is below least.

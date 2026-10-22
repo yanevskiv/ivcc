@@ -42,6 +42,9 @@
 // The rounding direction a value is converted in.
 #include <_fpu.h>
 
+// A long double's format and its fields.
+#include <_ldouble.h>
+
 // The format of float, its exponents one below C's.
 const _Fp_Format _Fp_FloatFormat = {
     .ff_mant     = _FP_FLOAT_MANT,
@@ -58,11 +61,11 @@ const _Fp_Format _Fp_DoubleFormat = {
     .ff_explicit = 0
 };
 
-// The format of long double, its exponents one below C's, its leading bit kept.
+// The format of long double, its exponents one below C's, its lead bit given.
 const _Fp_Format _Fp_LongDoubleFormat = {
-    .ff_mant     = _FP_LDOUBLE_MANT,
-    .ff_min      = _FP_LDOUBLE_MIN,
-    .ff_max      = _FP_LDOUBLE_MAX,
+    .ff_mant     = _LDOUBLE_MANT,
+    .ff_min      = _LDOUBLE_EXP_MIN,
+    .ff_max      = _LDOUBLE_EXP_MAX,
     .ff_explicit = 1
 };
 
@@ -565,15 +568,7 @@ double _Fp_ToDouble(const void *str, _Fp_Text text, unsigned long *end)
 long double _Fp_ToLongDouble(const void *str, _Fp_Text text, unsigned long *end)
 {
     _Fp_Real real;
-    unsigned short top;
-    long double value = 0;
 
     *end = _Fp_ToReal(str, text, &_Fp_LongDoubleFormat, &real);
-    top = (unsigned short) real.fr_exp;
-    if (real.fr_negative) {
-        top |= _FP_LDOUBLE_SIGN;
-    }
-    _Str_CopyBytes(&value, &real.fr_mant, sizeof(real.fr_mant));
-    _Str_CopyBytes((char *) &value + sizeof(real.fr_mant), &top, sizeof(top));
-    return value;
+    return _Ldouble_MakeValue(real.fr_negative, real.fr_exp, real.fr_mant);
 }

@@ -23,8 +23,6 @@ static void Test_PrintLimits(void)
     _Static_assert(_PRINT_INT_MAX == INT_MAX && _PRINT_INT_MIN == INT_MIN, "_print's int limits should be limits.h's");
     _Static_assert(_PRINT_SIZE_MAX == SIZE_MAX, "_PRINT_SIZE_MAX should be SIZE_MAX");
     _Static_assert(_PRINT_BYTES_MAX == MB_LEN_MAX, "_PRINT_BYTES_MAX should be MB_LEN_MAX");
-    _Static_assert(_PRINT_LDOUBLE_MANT == LDBL_MANT_DIG, "_PRINT_LDOUBLE_MANT should be LDBL_MANT_DIG");
-    _Static_assert(_PRINT_LDOUBLE_EXP == LDBL_MAX_EXP, "_PRINT_LDOUBLE_EXP should be LDBL_MAX_EXP");
     _Static_assert(_PRINT_DOUBLE_MIN == DBL_MIN_EXP, "_PRINT_DOUBLE_MIN should be DBL_MIN_EXP");
     _Static_assert(sizeof(size_t) == sizeof(ptrdiff_t) && sizeof(long) == sizeof(ptrdiff_t), "%z and %t should be one width");
     _Static_assert(sizeof(uintmax_t) * CHAR_BIT <= _PRINT_DIGITS_MAX * 3, "an integer's octal digits should fit their array");

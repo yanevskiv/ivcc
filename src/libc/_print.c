@@ -50,6 +50,9 @@
 // The rounding direction a value is written in.
 #include <_fpu.h>
 
+// A long double's format and its fields.
+#include <_ldouble.h>
+
 // The conversions, a letter that means two things by its length being two.
 const _Print_Rule _Print_Rules[_PRINT_RULES] = {
     {'d', _PRINT_LENGTHS_INTEGER, _PRINT_KIND_INTEGER,     _PRINT_ARG_SIGNED,      _PRINT_BASE_DECIMAL, _PRINT_STYLE_NONE,        _PRINT_CASE_LOWER},
@@ -448,24 +451,19 @@ unsigned long _Print_ToDigits(char *end, _Print_UintmaxType value, int base, con
 // Unpack a floating value into a sign and its bits by a power of two.
 _Print_Real _Print_ToParts(long double value, _Print_Sign *sign, unsigned long long *mant, int *exp)
 {
-    unsigned short top;
-    unsigned int biased;
-    _Print_Real kind = _PRINT_REAL_FINITE;
-    unsigned int ones = (unsigned int) _PRINT_LDOUBLE_EXP * 2 - 1;
-    unsigned long long lead = 1ULL << (_PRINT_LDOUBLE_MANT - 1);
+    unsigned int biased = _Ldouble_ReadExponent(value);
+    _Ldouble_Class kind = _Ldouble_ReadClass(value);
 
-    _Str_CopyBytes(mant, &value, sizeof(*mant));
-    _Str_CopyBytes(&top, (char *) &value + sizeof(*mant), sizeof(top));
-    biased = top & ones;
-    *exp = (int) (biased != 0 ? biased : 1) - (_PRINT_LDOUBLE_EXP - 1) - (_PRINT_LDOUBLE_MANT - 1);
-    *sign = top > ones ? _PRINT_SIGN_MINUS : _PRINT_SIGN_PLUS;
-    if (biased == ones) {
-        kind = (*mant & (lead - 1)) != 0 ? _PRINT_REAL_NAN : _PRINT_REAL_INFINITE;
+    *mant = _Ldouble_ReadSignificand(value);
+    *exp = (int) (biased != 0 ? biased : 1) - _LDOUBLE_EXP_MAX - (_LDOUBLE_MANT - 1);
+    *sign = _Ldouble_IsNegative(value) ? _PRINT_SIGN_MINUS : _PRINT_SIGN_PLUS;
+    if (kind == _LDOUBLE_CLASS_NAN) {
+        return _PRINT_REAL_NAN;
     }
-    if (biased != 0 && ! (*mant & lead)) {
-        kind = _PRINT_REAL_NAN;
+    if (kind == _LDOUBLE_CLASS_INFINITE) {
+        return _PRINT_REAL_INFINITE;
     }
-    return kind;
+    return _PRINT_REAL_FINITE;
 }
 
 // Write a floating value's sign, what it is and its every decimal digit.
@@ -1002,9 +1000,9 @@ void _Print_WriteHexReal(_Print_Sink *sink, const _Print_Directive *dir)
         return;
     }
     if (dir->pd_length == _PRINT_LENGTH_LDOUBLE) {
-        exp = mant != 0 ? exp + _PRINT_LDOUBLE_MANT - _PRINT_HEX_BITS : 0;
+        exp = mant != 0 ? exp + _LDOUBLE_MANT - _PRINT_HEX_BITS : 0;
     } else {
-        exp = mant != 0 ? exp + _PRINT_LDOUBLE_MANT - 1 : 0;
+        exp = mant != 0 ? exp + _LDOUBLE_MANT - 1 : 0;
         under = exp < _PRINT_DOUBLE_MIN - 1 ? _PRINT_DOUBLE_MIN - 1 - exp : 0;
         mant = mant >> (_PRINT_HEX_BITS - 1) >> under;
         exp += under;

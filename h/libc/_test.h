@@ -54,9 +54,6 @@
 #define _TEST_HEX_MASK   15
 #define _TEST_HEX_DIGITS "0123456789abcdef"
 
-// The bytes of a long double that hold its value: the x87's ten of sixteen.
-#define _TEST_FLOAT_SIZE 10
-
 // Check a condition, a value, a string or an object where the test stands.
 #define _TEST_TRUE(cond)               _Test_True((cond) != 0, #cond, __FILE__, __LINE__, __func__)
 #define _TEST_INT(got, expected)       _Test_Int((got), (expected), #got, __FILE__, __LINE__, __func__)
@@ -76,6 +73,7 @@ void          _Test_WriteChar(char ch);
 // Operands
 void _Test_ShowInt(long value);
 void _Test_ShowUint(unsigned long value);
+void _Test_ShowHex(unsigned long long value, unsigned int digits);
 void _Test_ShowFloat(long double value);
 void _Test_ShowStr(const char *str);
 void _Test_ShowMem(const void *obj, unsigned long size);

@@ -38,11 +38,11 @@
 #define _BASIC_COMPLEX_DBL_BIG_EPS 0x1.fffffffffffffp+970
 
 // The bounds a long double's division scales its operands by, as libgcc's.
-#define _BASIC_COMPLEX_LDBL_BIG     0xf.fffffffffffffffp+16379L
-#define _BASIC_COMPLEX_LDBL_MIN     0x1p-16382L
-#define _BASIC_COMPLEX_LDBL_EPS     0x1p-63L
-#define _BASIC_COMPLEX_LDBL_SCALE   0x1p63L
-#define _BASIC_COMPLEX_LDBL_BIG_EPS 0xf.fffffffffffffffp+16316L
+#define _BASIC_COMPLEX_LDBL_BIG     (_LDOUBLE_MAX / 2)
+#define _BASIC_COMPLEX_LDBL_MIN     _LDOUBLE_MIN
+#define _BASIC_COMPLEX_LDBL_EPS     _LDOUBLE_EPSILON
+#define _BASIC_COMPLEX_LDBL_SCALE   (1 / _LDOUBLE_EPSILON)
+#define _BASIC_COMPLEX_LDBL_BIG_EPS (_LDOUBLE_MAX / 2 * _LDOUBLE_EPSILON)
 
 // The factor that halves the operands of a division near the largest value.
 #define _BASIC_COMPLEX_HALF 0.5

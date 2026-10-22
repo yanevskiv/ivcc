@@ -222,37 +222,45 @@ int _Basic_Math_ClassifyDouble(double x)
 // Classify x as a long double, the x87's refused encodings as glibc does.
 int _Basic_Math_ClassifyLDouble(long double x)
 {
-    unsigned long long sig;
-    unsigned short top;
-    _Str_CopyBytes(&sig, (unsigned char *) &x + _EXACT_LDOUBLE_SIGNIFICAND, sizeof(sig));
-    _Str_CopyBytes(&top, (unsigned char *) &x + _EXACT_LDOUBLE_TOP, sizeof(top));
-    unsigned int exp = top & _EXACT_LDOUBLE_EXP_MAX;
-
-    if (exp == 0) {
-        return sig >> _EXACT_LDOUBLE_INT_SHIFT ? _BASIC_MATH_FP_NORMAL : _Basic_Math_ClassifyFields(exp, _EXACT_LDOUBLE_EXP_MAX, sig);
+    switch (_Ldouble_ReadClass(x)) {
+        case _LDOUBLE_CLASS_ZERO: {
+            return _BASIC_MATH_FP_ZERO;
+        } break;
+        case _LDOUBLE_CLASS_SUBNORMAL: {
+            return _BASIC_MATH_FP_SUBNORMAL;
+        } break;
+        case _LDOUBLE_CLASS_INFINITE: {
+            return _BASIC_MATH_FP_INFINITE;
+        } break;
+        case _LDOUBLE_CLASS_NAN: {
+            return _BASIC_MATH_FP_NAN;
+        } break;
+        default: {
+            return _BASIC_MATH_FP_NORMAL;
+        } break;
     }
-    if (! (sig >> _EXACT_LDOUBLE_INT_SHIFT)) {
-        return _BASIC_MATH_FP_NAN;
-    }
-    return _Basic_Math_ClassifyFields(exp, _EXACT_LDOUBLE_EXP_MAX, sig & _EXACT_LDOUBLE_FRAC_MASK);
 }
 
 // Return 1 if x's sign is negative, else 0.
 int _Basic_Math_ReadSignFloat(float x)
 {
-    return ((unsigned char *) &x)[_BASIC_MATH_FLOAT_SIGN_BYTE] >> _BASIC_MATH_SIGN_SHIFT;
+    unsigned int bits;
+    _Str_CopyBytes(&bits, &x, sizeof(bits));
+    return (bits & _BASIC_MATH_FLOAT_SIGN) != 0;
 }
 
 // Return 1 if x's sign is negative, else 0.
 int _Basic_Math_ReadSignDouble(double x)
 {
-    return ((unsigned char *) &x)[_BASIC_MATH_DOUBLE_SIGN_BYTE] >> _BASIC_MATH_SIGN_SHIFT;
+    unsigned long long bits;
+    _Str_CopyBytes(&bits, &x, sizeof(bits));
+    return (bits & _BASIC_MATH_DOUBLE_SIGN) != 0;
 }
 
 // Return 1 if x's sign is negative, else 0.
 int _Basic_Math_ReadSignLDouble(long double x)
 {
-    return ((unsigned char *) &x)[_BASIC_MATH_LDOUBLE_SIGN_BYTE] >> _BASIC_MATH_SIGN_SHIFT;
+    return _Ldouble_IsNegative(x);
 }
 
 // Return x < y, compared only once known to be ordered.
@@ -291,7 +299,7 @@ long double _Basic_Math_ScaleLDouble(long double x, int n)
         n += _BASIC_MATH_LDOUBLE_STEP_DOWN;
     }
     n = n > _BASIC_MATH_LDOUBLE_EXP_HIGH ? _BASIC_MATH_LDOUBLE_EXP_HIGH : n < _BASIC_MATH_LDOUBLE_EXP_LOW ? _BASIC_MATH_LDOUBLE_EXP_LOW : n;
-    return x * _Exact_MakeLDouble((unsigned int) (n + _EXACT_LDOUBLE_BIAS), _EXACT_LDOUBLE_INT_BIT);
+    return x * _Ldouble_JoinValue(n, _LDOUBLE_SPLIT_TOP);
 }
 
 // Clamp a long exponent to an int.
@@ -308,8 +316,8 @@ long double _Basic_Math_TakeRemainder(long double x, long double y, _Basic_Math_
     unsigned int q = 0;
     unsigned long long carry = 0;
     long double sign = x;
-    unsigned long long rest = _Exact_SplitLDouble(x, &ex);
-    unsigned long long div = _Exact_SplitLDouble(y, &ey);
+    unsigned long long rest = _Ldouble_SplitValue(x, &ex);
+    unsigned long long div = _Ldouble_SplitValue(y, &ey);
 
     for (int shift = ex - ey; shift >= 0; shift--) {
         if (carry != 0 || rest >= div) {
@@ -317,7 +325,7 @@ long double _Basic_Math_TakeRemainder(long double x, long double y, _Basic_Math_
             q++;
         }
         if (shift > 0) {
-            carry = rest & _EXACT_LDOUBLE_INT_BIT;
+            carry = rest & _LDOUBLE_SPLIT_TOP;
             rest <<= 1;
             q <<= 1;
         }
@@ -332,7 +340,7 @@ long double _Basic_Math_TakeRemainder(long double x, long double y, _Basic_Math_
         q = _BASIC_MATH_QUOTIENT_ODD;
     }
     *quo = q;
-    return __basic_math_copysignl(_Exact_JoinLDouble(ex < ey ? ex : ey, rest), sign);
+    return __basic_math_copysignl(_Ldouble_JoinValue(ex < ey ? ex : ey, rest), sign);
 }
 
 // Read nan's payload from tagp as strtod reads one from "NAN(tagp)".
@@ -519,7 +527,7 @@ int _Basic_Math_SplitFraction(long double x, long double *m)
 {
     int e;
 
-    *m = _Exact_SplitLDouble(x, &e) * _BASIC_MATH_LDOUBLE_UNIT;
+    *m = _Ldouble_SplitValue(x, &e) * _BASIC_MATH_LDOUBLE_UNIT;
     if (*m > _BASIC_MATH_SQRT_TWO) {
         *m *= _BASIC_MATH_HALF;
         e++;
@@ -716,13 +724,13 @@ long double _Basic_Math_TakeLogParts(long double x, long double *low)
 _Basic_Math_Parity _Basic_Math_ReadParity(long double y)
 {
     int exp;
-    unsigned long long sig = _Exact_SplitLDouble(y, &exp);
-    int point = _EXACT_LDOUBLE_INT_SHIFT - exp;
+    unsigned long long sig = _Ldouble_SplitValue(y, &exp);
+    int point = _LDOUBLE_SPLIT_SHIFT - exp;
 
     if (point < 0) {
         return _BASIC_MATH_PARITY_EVEN;
     }
-    if (point > _EXACT_LDOUBLE_INT_SHIFT || (sig & ~(_EXACT_ALL_BITS << point)) != 0) {
+    if (point > _LDOUBLE_SPLIT_SHIFT || (sig & ~(_EXACT_ALL_BITS << point)) != 0) {
         return _BASIC_MATH_PARITY_NONE;
     }
     return (sig >> point & _EXACT_LOW_BIT) != 0 ? _BASIC_MATH_PARITY_ODD : _BASIC_MATH_PARITY_EVEN;
@@ -790,7 +798,7 @@ long double _Basic_Math_IterateRoot(long double x)
     if (x == 0) {
         return 0;
     }
-    m = _Exact_SplitLDouble(x, &e) * _BASIC_MATH_LDOUBLE_UNIT;
+    m = _Ldouble_SplitValue(x, &e) * _BASIC_MATH_LDOUBLE_UNIT;
     if (e % 2 != 0) {
         m *= 2;
         e--;
@@ -1739,9 +1747,9 @@ long double __basic_math_frexpl(long double value, int *exp)
     if (! _BASIC_MATH_IS_FINITE(value) || value == 0) {
         return value + value;
     }
-    sig = _Exact_SplitLDouble(value, &power);
+    sig = _Ldouble_SplitValue(value, &power);
     *exp = power - _BASIC_MATH_FRACTION_EXP;
-    return __basic_math_copysignl(_Exact_JoinLDouble(_BASIC_MATH_FRACTION_EXP, sig), value);
+    return __basic_math_copysignl(_Ldouble_JoinValue(_BASIC_MATH_FRACTION_EXP, sig), value);
 }
 
 // Extract x's exponent as an int.
@@ -1767,7 +1775,7 @@ int __basic_math_ilogbl(long double x)
         _Fpu_RaiseFlags(_FPU_INVALID);
         return class == _BASIC_MATH_FP_INFINITE ? _BASIC_MATH_INT_MAX : class == _BASIC_MATH_FP_ZERO ? _BASIC_MATH_FP_ILOGB0 : _BASIC_MATH_FP_ILOGBNAN;
     }
-    _Exact_SplitLDouble(x, &exp);
+    _Ldouble_SplitValue(x, &exp);
     return exp;
 }
 
@@ -1888,7 +1896,7 @@ long double __basic_math_logbl(long double x)
         _Fpu_RaiseFlags(_FPU_DIVBYZERO);
         return -_EXACT_INFINITY;
     }
-    _Exact_SplitLDouble(x, &exp);
+    _Ldouble_SplitValue(x, &exp);
     return exp;
 }
 
@@ -1988,22 +1996,29 @@ long double __basic_math_cbrtl(long double x)
 // Clear the sign of x.
 double __basic_math_fabs(double x)
 {
-    ((unsigned char *) &x)[_BASIC_MATH_DOUBLE_SIGN_BYTE] &= _BASIC_MATH_SIGN_CLEAR;
+    unsigned long long bits;
+
+    _Str_CopyBytes(&bits, &x, sizeof(bits));
+    bits &= ~_BASIC_MATH_DOUBLE_SIGN;
+    _Str_CopyBytes(&x, &bits, sizeof(x));
     return x;
 }
 
 // Clear the sign of x.
 float __basic_math_fabsf(float x)
 {
-    ((unsigned char *) &x)[_BASIC_MATH_FLOAT_SIGN_BYTE] &= _BASIC_MATH_SIGN_CLEAR;
+    unsigned int bits;
+
+    _Str_CopyBytes(&bits, &x, sizeof(bits));
+    bits &= ~_BASIC_MATH_FLOAT_SIGN;
+    _Str_CopyBytes(&x, &bits, sizeof(x));
     return x;
 }
 
 // Clear the sign of x.
 long double __basic_math_fabsl(long double x)
 {
-    ((unsigned char *) &x)[_BASIC_MATH_LDOUBLE_SIGN_BYTE] &= _BASIC_MATH_SIGN_CLEAR;
-    return x;
+    return _Ldouble_ClearSign(x);
 }
 
 // Take the square root of the sum of the squares of x and y.
@@ -2341,14 +2356,14 @@ long double __basic_math_truncl(long double x)
     if (! _BASIC_MATH_IS_FINITE(x) || x == 0) {
         return x + x;
     }
-    sig = _Exact_SplitLDouble(x, &exp);
-    if (exp >= _EXACT_LDOUBLE_INT_SHIFT) {
+    sig = _Ldouble_SplitValue(x, &exp);
+    if (exp >= _LDOUBLE_SPLIT_SHIFT) {
         return x;
     }
     if (exp < 0) {
         return __basic_math_copysignl(0, x);
     }
-    return __basic_math_copysignl(_Exact_JoinLDouble(exp, sig & _EXACT_ALL_BITS << (_EXACT_LDOUBLE_INT_SHIFT - exp)), x);
+    return __basic_math_copysignl(_Ldouble_JoinValue(exp, sig & _EXACT_ALL_BITS << (_LDOUBLE_SPLIT_SHIFT - exp)), x);
 }
 
 // Take the remainder of x by y toward zero.
@@ -2437,25 +2452,33 @@ long double __basic_math_remquol(long double x, long double y, int *quo)
 // Give x the sign of y.
 double __basic_math_copysign(double x, double y)
 {
-    ((unsigned char *) &x)[_BASIC_MATH_DOUBLE_SIGN_BYTE] &= _BASIC_MATH_SIGN_CLEAR;
-    ((unsigned char *) &x)[_BASIC_MATH_DOUBLE_SIGN_BYTE] |= ((unsigned char *) &y)[_BASIC_MATH_DOUBLE_SIGN_BYTE] & _BASIC_MATH_SIGN_BIT;
+    unsigned long long bits;
+    unsigned long long sign;
+
+    _Str_CopyBytes(&bits, &x, sizeof(bits));
+    _Str_CopyBytes(&sign, &y, sizeof(sign));
+    bits = (bits & ~_BASIC_MATH_DOUBLE_SIGN) | (sign & _BASIC_MATH_DOUBLE_SIGN);
+    _Str_CopyBytes(&x, &bits, sizeof(x));
     return x;
 }
 
 // Give x the sign of y.
 float __basic_math_copysignf(float x, float y)
 {
-    ((unsigned char *) &x)[_BASIC_MATH_FLOAT_SIGN_BYTE] &= _BASIC_MATH_SIGN_CLEAR;
-    ((unsigned char *) &x)[_BASIC_MATH_FLOAT_SIGN_BYTE] |= ((unsigned char *) &y)[_BASIC_MATH_FLOAT_SIGN_BYTE] & _BASIC_MATH_SIGN_BIT;
+    unsigned int bits;
+    unsigned int sign;
+
+    _Str_CopyBytes(&bits, &x, sizeof(bits));
+    _Str_CopyBytes(&sign, &y, sizeof(sign));
+    bits = (bits & ~_BASIC_MATH_FLOAT_SIGN) | (sign & _BASIC_MATH_FLOAT_SIGN);
+    _Str_CopyBytes(&x, &bits, sizeof(x));
     return x;
 }
 
 // Give x the sign of y.
 long double __basic_math_copysignl(long double x, long double y)
 {
-    ((unsigned char *) &x)[_BASIC_MATH_LDOUBLE_SIGN_BYTE] &= _BASIC_MATH_SIGN_CLEAR;
-    ((unsigned char *) &x)[_BASIC_MATH_LDOUBLE_SIGN_BYTE] |= ((unsigned char *) &y)[_BASIC_MATH_LDOUBLE_SIGN_BYTE] & _BASIC_MATH_SIGN_BIT;
-    return x;
+    return _Ldouble_CopySign(x, y);
 }
 
 // Make a quiet NaN of tagp's payload.
@@ -2481,7 +2504,7 @@ float __basic_math_nanf(const char *tagp)
 // Make a quiet NaN of tagp's payload.
 long double __basic_math_nanl(const char *tagp)
 {
-    return _Exact_MakeLDouble(_EXACT_LDOUBLE_EXP_MAX, _BASIC_MATH_LDOUBLE_QUIET | (_Basic_Math_ReadPayload(tagp) & _EXACT_LDOUBLE_FRAC_MASK));
+    return _Ldouble_MakeNan(_Basic_Math_ReadPayload(tagp));
 }
 
 // Step x to the next value toward y.
@@ -2570,7 +2593,7 @@ long double __basic_math_nexttowardl(long double x, long double y)
     if (x == 0) {
         next = y < 0 ? -_BASIC_MATH_LDOUBLE_TINY : _BASIC_MATH_LDOUBLE_TINY;
     } else {
-        next = _Exact_StepLDouble(x, (x < y) == (x > 0) ? _EXACT_STEP_UP : _EXACT_STEP_DOWN);
+        next = _Ldouble_StepValue(x, (x < y) == (x > 0) ? _LDOUBLE_STEP_UP : _LDOUBLE_STEP_DOWN);
     }
     _Basic_Math_CheckNext(x, _BASIC_MATH_CLASSIFY(next));
     return next;
